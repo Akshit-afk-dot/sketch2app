@@ -10,7 +10,7 @@ Newest phase at the top of "Phase log".
 | P0 Recon | done (2026-10-10) |
 | P1 Spec, renderer, exporter | done (2026-10-10) |
 | P2 Walking skeleton | code done, APK builds; on-device run pending (needs device) |
-| P3 Data pipeline | code done + tested; full dataset build was running at handoff |
+| P3 Data pipeline | dataset built (42,265 samples); data report pending |
 | P4 Recognizer | model/train/decode/metrics/ONNX export written; training not started |
 | P5 Collect mode | pending |
 | P6 Layout LLM | pending |
@@ -154,7 +154,8 @@ Syntax highlighting: `flutter_highlight` is unmaintained (2021, Dart < 3), so th
 - RICO -> specs: 42,313 of 66,261 screens kept (drops: overlay 10,552; too few elements 7,702; non-Latin 1,980; too many 1,979; empty 1,616; landscape 119); 0 schema-invalid. XY-cut layout recovery + sanitize pass.
 - Synthetic sketcher (legend-faithful, smooth pen noise, Hershey text, multi-screen arrows), by-app splits (val 830 apps / test 753 apps), shards + eval exports. 77 Python tests pass.
 - Reproduce: `python -m s2a.data.download all && python -m s2a.data.rico_convert && python -m s2a.data.build_dataset --workers 6 && python -m s2a.data.report`
-- Next: confirm build finished (`D:/sketch2app-data/build_dataset.log`), run `python -m s2a.data.report`, eyeball docs/figures/synthetic_samples.png.
+- Full build done (2026-10-10): train 33,560 samples / 6,279 apps, val 4,440 / 830 apps, test 4,265 / 753 apps (48 of 42,313 failed layout). Multi-screen: train 5,311 two-screen + 4,763 three-screen. Strokes per sample median 94, p90 ~271, max 1,086. Size on D: train 1.1 GB, val 142 MB, test 137 MB, eval exports 231 MB (1,000 val + 1,000 test).
+- Next: `python -m s2a.data.report` (writes docs/data_report.md + figures).
 
 ### P4 Recognizer — in progress
 
