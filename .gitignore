@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.venv/
+
+# Heavy artefacts live outside the repo (see S2A_DATA_ROOT in CLAUDE.md)
+artifacts/
+*.onnx.data
+*.safetensors
+*.litertlm
+*.gguf
+*.pt
+*.ckpt
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+*.iml
+.idea/
+app/android/local.properties
+app/android/.gradle/
+app/android/app/debug/
+app/android/app/release/
+app/android/key.properties
+
+# Exported-project scratch output from tests
+app/test/_out/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
