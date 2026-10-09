@@ -1,0 +1,88 @@
+{
+ "source": "../spec/examples",
+ "summary": {
+  "projects": 11,
+  "analyze_pass": 11,
+  "test_pass": 11,
+  "flutter": "3.44.0"
+ },
+ "rows": [
+  {
+   "spec": "01_login",
+   "valid": true,
+   "pub_get_ok": true,
+   "analyze_ok": true,
+   "test_ok": true
+  },
+  {
+   "spec": "02_signup",
+   "valid": true,
+   "pub_get_ok": true,
+   "analyze_ok": true,
+   "test_ok": true
+  },
+  {
+   "spec": "03_list",
+   "valid": true,
+   "pub_get_ok": true,
+   "analyze_ok": true,
+   "test_ok": true
+  },
+  {
+   "spec": "04_grid",
+   "valid": true,
+   "pub_get_ok": true,
+   "analyze_ok": true,
+   "test_ok": true
+  },
+  {
+   "spec": "05_profile",
+   "valid": true,
+   "pub_get_ok": true,
+   "analyze_ok": true,
+   "test_ok": true
+  },
+  {
+   "spec": "06_settings",
+   "valid": true,
+   "pub_get_ok": true,
+   "analyze_ok": true,
+   "test_ok": true
+  },
+  {
+   "spec": "07_chat",
+   "valid": true,
+   "pub_get_ok": true,
+   "analyze_ok": true,
+   "test_ok": true
+  },
+  {
+   "spec": "08_detail",
+   "valid": true,
+   "pub_get_ok": true,
+   "analyze_ok": true,
+   "test_ok": true
+  },
+  {
+   "spec": "09_form",
+   "valid": true,
+   "pub_get_ok": true,
+   "analyze_ok": true,
+   "test_ok": true
+  },
+  {
+   "spec": "10_login_list_nav",
+   "valid": true,
+   "pub_get_ok": true,
+   "analyze_ok": true,
+   "test_ok": true
+  },
+  {
+   "spec": "11_shop_3screen",
+   "valid": true,
+   "pub_get_ok": true,
+   "analyze_ok": true,
+   "test_ok": true
+  }
+ ]
+}

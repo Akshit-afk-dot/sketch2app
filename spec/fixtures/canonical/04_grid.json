@@ -1,0 +1,1 @@
+{"v":1,"screens":[{"id":"gallery","title":"Gallery","appbar":{"t":"appbar","title":"Gallery"},"body":{"t":"grid","cols":3,"n":12,"item":{"t":"card","c":[{"t":"img","h":12},{"t":"text","v":"Photo","s":"caption"}]}},"bottomnav":{"t":"bottomnav","items":[{"icon":"home","label":"Home"},{"icon":"search","label":"Search"},{"icon":"person","label":"Profile"}]}}]}

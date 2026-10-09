@@ -1,0 +1,10 @@
+{"v": 1, "screens": [
+  {"id": "login", "title": "Login", "body": {"t": "col", "c": [
+    {"t": "img", "h": 20},
+    {"t": "text", "v": "Welcome back", "s": "h1"},
+    {"t": "input", "label": "Email"},
+    {"t": "input", "label": "Password", "secure": true},
+    {"t": "btn", "label": "Sign in"},
+    {"t": "text", "v": "Forgot password?", "s": "link"}
+  ]}}
+]}

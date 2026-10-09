@@ -1,0 +1,1 @@
+{"v": 1, "screens": [{"id": "a", "title": "A", "body": {"t": "list", "n": 3, "item": {"t": "card", "c": [{"t": "grid", "cols": 2, "n": 2, "item": {"t": "img", "h": 5}}]}}}]}

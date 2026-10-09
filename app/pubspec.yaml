@@ -1,0 +1,21 @@
+name: sketch2app
+description: "Sketch app screens, get a working Flutter app, fully offline."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.12.0
+  flutter: 3.44.0
+
+# Exact pins (see PROGRESS.md "Pinned dependency plan"); pubspec.lock is committed.
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: 6.0.0
+
+flutter:
+  uses-material-design: true

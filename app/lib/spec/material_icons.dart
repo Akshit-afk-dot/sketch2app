@@ -1,0 +1,47 @@
+/// Spec icon name -> Material `Icons.<id>` identifier.
+///
+/// Single source of truth: the exporter writes `Icons.<id>` into generated code, and tool/gen.dart
+/// generates the renderer's `IconData` table (lib/render/icons.g.dart) from this map.
+library;
+
+const Map<String, String> materialIconIds = {
+  'circle': 'circle_outlined',
+  'menu': 'menu',
+  'search': 'search',
+  'home': 'home_outlined',
+  'person': 'person_outline',
+  'settings': 'settings_outlined',
+  'add': 'add',
+  'back': 'arrow_back',
+  'forward': 'arrow_forward',
+  'close': 'close',
+  'more': 'more_vert',
+  'favorite': 'favorite_border',
+  'share': 'share',
+  'bell': 'notifications_none',
+  'chat': 'chat_bubble_outline',
+  'camera': 'photo_camera_outlined',
+  'cart': 'shopping_cart_outlined',
+  'star': 'star_border',
+  'edit': 'edit_outlined',
+  'delete': 'delete_outline',
+  'info': 'info_outline',
+  'mail': 'mail_outline',
+  'phone': 'phone_outlined',
+  'location': 'location_on_outlined',
+  'calendar': 'calendar_today_outlined',
+  'check': 'check',
+  'play': 'play_arrow',
+  'image': 'image_outlined',
+  'list': 'list',
+  'filter': 'filter_list',
+  'lock': 'lock_outline',
+  'logout': 'logout',
+  'send': 'send',
+  'mic': 'mic_none',
+  'download': 'download',
+  'refresh': 'refresh',
+  'map': 'map_outlined',
+  'music': 'music_note_outlined',
+  'help': 'help_outline',
+};

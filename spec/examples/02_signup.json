@@ -1,0 +1,11 @@
+{"v": 1, "screens": [
+  {"id": "signup", "title": "Create account", "appbar": {"t": "appbar", "title": "Create account"}, "body": {"t": "col", "c": [
+    {"t": "input", "label": "Full name"},
+    {"t": "input", "label": "Email"},
+    {"t": "input", "label": "Password", "secure": true},
+    {"t": "input", "label": "Confirm password", "secure": true},
+    {"t": "check", "label": "I agree to the terms"},
+    {"t": "btn", "label": "Sign up"},
+    {"t": "text", "v": "Already have an account? Log in", "s": "link"}
+  ]}}
+]}

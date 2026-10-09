@@ -1,0 +1,1 @@
+{"v":1,"screens":[{"id":"inbox","title":"Inbox","appbar":{"t":"appbar","title":"Inbox","icons":[{"t":"icon","name":"search"}]},"body":{"t":"list","n":8,"item":{"t":"row","c":[{"t":"avatar"},{"t":"col","c":[{"t":"text","v":"Sender name"},{"t":"text","v":"Subject line","s":"caption"}]}]}},"fab":{"t":"fab","icon":"edit"}}]}

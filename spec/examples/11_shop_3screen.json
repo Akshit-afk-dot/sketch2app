@@ -1,0 +1,18 @@
+{"v": 1, "screens": [
+  {"id": "shop", "title": "Shop", "appbar": {"t": "appbar", "title": "Shop", "icons": [{"t": "icon", "name": "search"}, {"t": "icon", "name": "cart", "go": "cart"}]},
+   "body": {"t": "grid", "cols": 2, "n": 6, "item": {"t": "card", "go": "detail", "c": [{"t": "img", "h": 15}, {"t": "text", "v": "Product"}, {"t": "text", "v": "$20", "s": "caption"}]}},
+   "bottomnav": {"t": "bottomnav", "items": [{"icon": "home", "label": "Shop", "go": "shop"}, {"icon": "cart", "label": "Cart", "go": "cart"}]}},
+  {"id": "detail", "title": "Detail", "appbar": {"t": "appbar", "title": "Detail"}, "body": {"t": "col", "c": [
+    {"t": "img", "h": 30},
+    {"t": "text", "v": "Product", "s": "h1"},
+    {"t": "para", "lines": 3},
+    {"t": "btn", "label": "Add to cart", "go": "cart"}
+  ]}},
+  {"id": "cart", "title": "Cart", "appbar": {"t": "appbar", "title": "Cart"}, "body": {"t": "col", "c": [
+    {"t": "list", "n": 3, "item": {"t": "row", "c": [{"t": "img", "h": 8}, {"t": "text", "v": "Product"}, {"t": "icon", "name": "delete"}]}},
+    {"t": "divider"},
+    {"t": "text", "v": "Total: $60", "s": "h2"},
+    {"t": "btn", "label": "Checkout"}
+  ]},
+   "fab": {"t": "fab", "icon": "add", "go": "shop"}}
+]}

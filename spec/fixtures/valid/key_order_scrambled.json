@@ -1,0 +1,6 @@
+{"screens": [
+  {"fab": {"go": "b", "icon": "add", "t": "fab"}, "body": {"c": [{"go": "b", "c": [{"v": "x", "t": "text"}], "t": "card"}], "t": "row"},
+   "bottomnav": {"items": [{"go": "b", "label": "B", "icon": "home"}, {"label": "A", "icon": "star"}], "t": "bottomnav"},
+   "title": "A", "appbar": {"icons": [{"go": "b", "name": "menu", "t": "icon"}], "title": "A", "t": "appbar"}, "id": "a"},
+  {"body": {"item": {"h": 10, "t": "img"}, "n": 4, "cols": 2, "t": "grid"}, "title": "B", "id": "b"}
+], "v": 1}

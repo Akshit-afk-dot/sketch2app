@@ -8,8 +8,8 @@ Newest phase at the top of "Phase log".
 | Phase | State |
 |---|---|
 | P0 Recon | done (2026-10-10) |
-| P1 Spec, renderer, exporter | in progress |
-| P2 Walking skeleton | pending |
+| P1 Spec, renderer, exporter | done (2026-10-10) |
+| P2 Walking skeleton | in progress |
 | P3 Data pipeline | pending |
 | P4 Recognizer | pending |
 | P5 Collect mode | pending |
@@ -142,6 +142,30 @@ Syntax highlighting: `flutter_highlight` is unmaintained (2021, Dart < 3), so th
 ---
 
 ## Phase log
+
+### P1 Spec, legend, renderer, exporter — done
+
+What exists:
+- `spec/schema/ui_spec.v1.schema.json` (refined format; changelog in DESIGN.md section 2).
+- 11 hand-written example apps in `spec/examples/` (login, signup, list, grid, profile, settings, chat, detail, form, 2-screen login->list, 3-screen shop).
+- Shared conformance fixtures `spec/fixtures/{valid,invalid,canonical}`: 3 valid edge cases, 18 invalid cases (one or more per error code), expected canonical strings.
+- Python: `s2a.spec` (validator = JSON Schema + semantic rules, canonical serializer, token counter). 63 pytest tests.
+- Dart: `app/lib/spec` (typed sealed model, validating parser, canonical serializer), `app/lib/render` (live preview), `app/lib/export` (pure-Dart exporter with const-aware code IR, Android template). 40 Dart tests incl. 11 goldens.
+
+Results (all from scripts, raw JSON in docs/results/):
+- Python and Dart canonical serializers are byte-identical on all 14 valid fixtures (incl. unicode, quotes, backslashes).
+- Spec size, 11 examples / 14 screens (`spec_tokens.json`): median **121.5** tokens/screen (Gemma 4 tokenizer), 121.0 (Qwen3.5); max 181. Pretty-printed JSON costs 2.5x more.
+- Exported projects (`export_check.json`): **11/11 pass `flutter analyze`** (flutter_lints 6 + prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_single_quotes) and **11/11 pass their generated `flutter test`**, Flutter 3.44.0. The first run found 6/11 failing (`const AppBar`: AppBar has no const constructor); fixed and covered by a regression test.
+
+Reproduce:
+```bash
+cd ml && $PY -m pytest -q && $PY -m ruff check s2a tests && $PY -m mypy s2a
+cd ml && S2A_DATA_ROOT=D:/sketch2app-data $PY -m s2a.spec.tokens
+cd ml && $PY -m s2a.spec.fixtures          # regenerate canonical fixtures after a spec change
+cd app && flutter analyze && flutter test   # add --update-goldens after an intended visual change
+cd app && dart run tool/gen.dart            # regenerate icons.g.dart / sketch_widgets_source.g.dart
+cd app && dart run tool/export_examples.dart --out D:/sketch2app-data/exports --test
+```
 
 ### P0 Recon — done
 

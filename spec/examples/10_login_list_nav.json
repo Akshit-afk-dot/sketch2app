@@ -1,0 +1,11 @@
+{"v": 1, "screens": [
+  {"id": "login", "title": "Login", "body": {"t": "col", "c": [
+    {"t": "img", "h": 25},
+    {"t": "input", "label": "Email"},
+    {"t": "input", "label": "Password", "secure": true},
+    {"t": "btn", "label": "Sign in", "go": "home"},
+    {"t": "text", "v": "Forgot password?", "s": "link"}
+  ]}},
+  {"id": "home", "title": "Home", "appbar": {"t": "appbar", "title": "Home"},
+   "body": {"t": "list", "n": 5, "item": {"t": "card", "c": [{"t": "img", "h": 15}, {"t": "text", "v": "Item"}]}}}
+]}

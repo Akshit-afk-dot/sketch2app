@@ -1,0 +1,187 @@
+{
+ "source": "spec/examples",
+ "rows": [
+  {
+   "example": "01_login",
+   "screens": 1,
+   "gemma-4-E2B-it/canonical": 92,
+   "gemma-4-E2B-it/pretty": 226,
+   "gemma-4-E2B-it/per_screen": [
+    92
+   ],
+   "qwen3.5-0.8B/canonical": 92,
+   "qwen3.5-0.8B/pretty": 226,
+   "qwen3.5-0.8B/per_screen": [
+    92
+   ]
+  },
+  {
+   "example": "02_signup",
+   "screens": 1,
+   "gemma-4-E2B-it/canonical": 122,
+   "gemma-4-E2B-it/pretty": 284,
+   "gemma-4-E2B-it/per_screen": [
+    122
+   ],
+   "qwen3.5-0.8B/canonical": 121,
+   "qwen3.5-0.8B/pretty": 284,
+   "qwen3.5-0.8B/per_screen": [
+    121
+   ]
+  },
+  {
+   "example": "03_list",
+   "screens": 1,
+   "gemma-4-E2B-it/canonical": 105,
+   "gemma-4-E2B-it/pretty": 268,
+   "gemma-4-E2B-it/per_screen": [
+    105
+   ],
+   "qwen3.5-0.8B/canonical": 106,
+   "qwen3.5-0.8B/pretty": 269,
+   "qwen3.5-0.8B/per_screen": [
+    106
+   ]
+  },
+  {
+   "example": "04_grid",
+   "screens": 1,
+   "gemma-4-E2B-it/canonical": 112,
+   "gemma-4-E2B-it/pretty": 275,
+   "gemma-4-E2B-it/per_screen": [
+    112
+   ],
+   "qwen3.5-0.8B/canonical": 111,
+   "qwen3.5-0.8B/pretty": 275,
+   "qwen3.5-0.8B/per_screen": [
+    111
+   ]
+  },
+  {
+   "example": "05_profile",
+   "screens": 1,
+   "gemma-4-E2B-it/canonical": 143,
+   "gemma-4-E2B-it/pretty": 368,
+   "gemma-4-E2B-it/per_screen": [
+    143
+   ],
+   "qwen3.5-0.8B/canonical": 144,
+   "qwen3.5-0.8B/pretty": 368,
+   "qwen3.5-0.8B/per_screen": [
+    144
+   ]
+  },
+  {
+   "example": "06_settings",
+   "screens": 1,
+   "gemma-4-E2B-it/canonical": 122,
+   "gemma-4-E2B-it/pretty": 310,
+   "gemma-4-E2B-it/per_screen": [
+    122
+   ],
+   "qwen3.5-0.8B/canonical": 122,
+   "qwen3.5-0.8B/pretty": 310,
+   "qwen3.5-0.8B/per_screen": [
+    122
+   ]
+  },
+  {
+   "example": "07_chat",
+   "screens": 1,
+   "gemma-4-E2B-it/canonical": 122,
+   "gemma-4-E2B-it/pretty": 325,
+   "gemma-4-E2B-it/per_screen": [
+    122
+   ],
+   "qwen3.5-0.8B/canonical": 121,
+   "qwen3.5-0.8B/pretty": 325,
+   "qwen3.5-0.8B/per_screen": [
+    121
+   ]
+  },
+  {
+   "example": "08_detail",
+   "screens": 1,
+   "gemma-4-E2B-it/canonical": 181,
+   "gemma-4-E2B-it/pretty": 458,
+   "gemma-4-E2B-it/per_screen": [
+    181
+   ],
+   "qwen3.5-0.8B/canonical": 183,
+   "qwen3.5-0.8B/pretty": 459,
+   "qwen3.5-0.8B/per_screen": [
+    183
+   ]
+  },
+  {
+   "example": "09_form",
+   "screens": 1,
+   "gemma-4-E2B-it/canonical": 121,
+   "gemma-4-E2B-it/pretty": 303,
+   "gemma-4-E2B-it/per_screen": [
+    121
+   ],
+   "qwen3.5-0.8B/canonical": 121,
+   "qwen3.5-0.8B/pretty": 303,
+   "qwen3.5-0.8B/per_screen": [
+    121
+   ]
+  },
+  {
+   "example": "10_login_list_nav",
+   "screens": 2,
+   "gemma-4-E2B-it/canonical": 141,
+   "gemma-4-E2B-it/pretty": 346,
+   "gemma-4-E2B-it/per_screen": [
+    82,
+    66
+   ],
+   "qwen3.5-0.8B/canonical": 139,
+   "qwen3.5-0.8B/pretty": 346,
+   "qwen3.5-0.8B/per_screen": [
+    82,
+    65
+   ]
+  },
+  {
+   "example": "11_shop_3screen",
+   "screens": 3,
+   "gemma-4-E2B-it/canonical": 342,
+   "gemma-4-E2B-it/pretty": 833,
+   "gemma-4-E2B-it/per_screen": [
+    148,
+    83,
+    125
+   ],
+   "qwen3.5-0.8B/canonical": 337,
+   "qwen3.5-0.8B/pretty": 833,
+   "qwen3.5-0.8B/per_screen": [
+    148,
+    82,
+    123
+   ]
+  }
+ ],
+ "summary": {
+  "gemma-4-E2B-it": {
+   "per_screen_canonical": {
+    "n": 14,
+    "median": 121.5,
+    "mean": 116.0,
+    "max": 181,
+    "min": 66
+   },
+   "pretty_over_canonical": 2.4995059535106545
+  },
+  "qwen3.5-0.8B": {
+   "per_screen_canonical": {
+    "n": 14,
+    "median": 121.0,
+    "mean": 115.78571428571429,
+    "max": 183,
+    "min": 65
+   },
+   "pretty_over_canonical": 2.5067890685316225
+  }
+ }
+}

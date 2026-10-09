@@ -1,0 +1,1 @@
+{"v":1,"screens":[{"id":"chat","title":"Chat","appbar":{"t":"appbar","title":"Alex","icons":[{"t":"icon","name":"phone"},{"t":"icon","name":"more"}]},"body":{"t":"col","c":[{"t":"list","n":6,"item":{"t":"row","c":[{"t":"avatar"},{"t":"card","c":[{"t":"text","v":"Message text"}]}]}},{"t":"row","c":[{"t":"input","label":"Type a message"},{"t":"icon","name":"send"}]}]}}]}

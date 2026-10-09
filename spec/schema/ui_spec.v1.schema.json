@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sketch2app.local/schema/ui_spec.v1.json",
+  "title": "Sketch2App UI spec v1",
+  "description": "Compact, closed-vocabulary description of a multi-screen app. Structural rules only; semantic rules (unique ids, navigation targets, nesting, depth) are checked by the validators in ml/s2a/spec and app/lib/spec.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "screens"],
+  "properties": {
+    "v": { "const": 1 },
+    "screens": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/screen" }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$" },
+    "label": { "type": "string", "minLength": 1, "maxLength": 80, "pattern": "^[^\\u0000-\\u001F]*$" },
+    "iconName": {
+      "enum": [
+        "circle", "menu", "search", "home", "person", "settings", "add", "back", "forward", "close",
+        "more", "favorite", "share", "bell", "chat", "camera", "cart", "star", "edit", "delete",
+        "info", "mail", "phone", "location", "calendar", "check", "play", "image", "list", "filter",
+        "lock", "logout", "send", "mic", "download", "refresh", "map", "music", "help"
+      ]
+    },
+    "screen": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "body"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 40, "pattern": "^[^\\u0000-\\u001F]*$" },
+        "appbar": { "$ref": "#/$defs/appbar" },
+        "body": { "$ref": "#/$defs/node" },
+        "bottomnav": { "$ref": "#/$defs/bottomnav" },
+        "fab": { "$ref": "#/$defs/fab" }
+      }
+    },
+    "appbar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["t", "title"],
+      "properties": {
+        "t": { "const": "appbar" },
+        "title": { "$ref": "#/$defs/label" },
+        "icons": { "type": "array", "minItems": 1, "maxItems": 4, "items": { "$ref": "#/$defs/icon" } }
+      }
+    },
+    "bottomnav": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["t", "items"],
+      "properties": {
+        "t": { "const": "bottomnav" },
+        "items": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["icon", "label"],
+            "properties": {
+              "icon": { "$ref": "#/$defs/iconName" },
+              "label": { "$ref": "#/$defs/label" },
+              "go": { "$ref": "#/$defs/id" }
+            }
+          }
+        }
+      }
+    },
+    "fab": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["t", "icon"],
+      "properties": {
+        "t": { "const": "fab" },
+        "icon": { "$ref": "#/$defs/iconName" },
+        "go": { "$ref": "#/$defs/id" }
+      }
+    },
+    "children": { "type": "array", "minItems": 1, "maxItems": 40, "items": { "$ref": "#/$defs/node" } },
+    "node": {
+      "oneOf": [
+        { "$ref": "#/$defs/col" }, { "$ref": "#/$defs/row" }, { "$ref": "#/$defs/card" },
+        { "$ref": "#/$defs/list" }, { "$ref": "#/$defs/grid" }, { "$ref": "#/$defs/text" },
+        { "$ref": "#/$defs/para" }, { "$ref": "#/$defs/btn" }, { "$ref": "#/$defs/input" },
+        { "$ref": "#/$defs/check" }, { "$ref": "#/$defs/radio" }, { "$ref": "#/$defs/switch" },
+        { "$ref": "#/$defs/img" }, { "$ref": "#/$defs/icon" }, { "$ref": "#/$defs/avatar" },
+        { "$ref": "#/$defs/divider" }, { "$ref": "#/$defs/spacer" }
+      ]
+    },
+    "col": {
+      "type": "object", "additionalProperties": false, "required": ["t", "c"],
+      "properties": { "t": { "const": "col" }, "c": { "$ref": "#/$defs/children" } }
+    },
+    "row": {
+      "type": "object", "additionalProperties": false, "required": ["t", "c"],
+      "properties": { "t": { "const": "row" }, "c": { "$ref": "#/$defs/children" } }
+    },
+    "card": {
+      "type": "object", "additionalProperties": false, "required": ["t", "c"],
+      "properties": { "t": { "const": "card" }, "go": { "$ref": "#/$defs/id" }, "c": { "$ref": "#/$defs/children" } }
+    },
+    "list": {
+      "type": "object", "additionalProperties": false, "required": ["t", "n", "item"],
+      "properties": {
+        "t": { "const": "list" },
+        "n": { "type": "integer", "minimum": 1, "maximum": 50 },
+        "item": { "$ref": "#/$defs/node" }
+      }
+    },
+    "grid": {
+      "type": "object", "additionalProperties": false, "required": ["t", "cols", "n", "item"],
+      "properties": {
+        "t": { "const": "grid" },
+        "cols": { "type": "integer", "minimum": 2, "maximum": 4 },
+        "n": { "type": "integer", "minimum": 1, "maximum": 60 },
+        "item": { "$ref": "#/$defs/node" }
+      }
+    },
+    "text": {
+      "type": "object", "additionalProperties": false, "required": ["t", "v"],
+      "properties": {
+        "t": { "const": "text" },
+        "v": { "$ref": "#/$defs/label" },
+        "s": { "enum": ["h1", "h2", "body", "caption", "link"] },
+        "go": { "$ref": "#/$defs/id" }
+      }
+    },
+    "para": {
+      "type": "object", "additionalProperties": false, "required": ["t", "lines"],
+      "properties": { "t": { "const": "para" }, "lines": { "type": "integer", "minimum": 1, "maximum": 12 } }
+    },
+    "btn": {
+      "type": "object", "additionalProperties": false, "required": ["t", "label"],
+      "properties": {
+        "t": { "const": "btn" },
+        "label": { "$ref": "#/$defs/label" },
+        "variant": { "enum": ["primary", "secondary", "text"] },
+        "go": { "$ref": "#/$defs/id" }
+      }
+    },
+    "input": {
+      "type": "object", "additionalProperties": false, "required": ["t", "label"],
+      "properties": {
+        "t": { "const": "input" },
+        "label": { "$ref": "#/$defs/label" },
+        "secure": { "type": "boolean" },
+        "multiline": { "type": "boolean" }
+      }
+    },
+    "check": {
+      "type": "object", "additionalProperties": false, "required": ["t", "label"],
+      "properties": { "t": { "const": "check" }, "label": { "$ref": "#/$defs/label" } }
+    },
+    "radio": {
+      "type": "object", "additionalProperties": false, "required": ["t", "options"],
+      "properties": {
+        "t": { "const": "radio" },
+        "options": { "type": "array", "minItems": 2, "maxItems": 6, "items": { "$ref": "#/$defs/label" } }
+      }
+    },
+    "switch": {
+      "type": "object", "additionalProperties": false, "required": ["t", "label"],
+      "properties": { "t": { "const": "switch" }, "label": { "$ref": "#/$defs/label" } }
+    },
+    "img": {
+      "type": "object", "additionalProperties": false, "required": ["t", "h"],
+      "properties": { "t": { "const": "img" }, "h": { "type": "integer", "minimum": 5, "maximum": 100 } }
+    },
+    "icon": {
+      "type": "object", "additionalProperties": false, "required": ["t", "name"],
+      "properties": { "t": { "const": "icon" }, "name": { "$ref": "#/$defs/iconName" }, "go": { "$ref": "#/$defs/id" } }
+    },
+    "avatar": {
+      "type": "object", "additionalProperties": false, "required": ["t"],
+      "properties": { "t": { "const": "avatar" }, "go": { "$ref": "#/$defs/id" } }
+    },
+    "divider": {
+      "type": "object", "additionalProperties": false, "required": ["t"],
+      "properties": { "t": { "const": "divider" } }
+    },
+    "spacer": {
+      "type": "object", "additionalProperties": false, "required": ["t"],
+      "properties": { "t": { "const": "spacer" } }
+    }
+  }
+}

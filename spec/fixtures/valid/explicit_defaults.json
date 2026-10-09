@@ -1,0 +1,6 @@
+{"v": 1, "screens": [{"id": "a", "title": "A", "body": {"t": "col", "c": [
+  {"t": "text", "v": "Hello", "s": "body"},
+  {"t": "btn", "label": "Go", "variant": "primary"},
+  {"t": "input", "label": "Name", "secure": false, "multiline": false},
+  {"t": "input", "label": "Bio", "secure": false, "multiline": true}
+]}}]}
