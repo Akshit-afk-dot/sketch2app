@@ -23,7 +23,8 @@ Offline Android (Flutter) app: sketch app screens with finger/stylus -> interact
 
 ## Conventions
 
-- Heavy artefacts never go in the repo or on C: (9.9 GB free). Use `S2A_DATA_ROOT` (this laptop: `D:/sketch2app-data`). Default when unset: `<repo>/artifacts` (gitignored).
+- Heavy artefacts never go in the repo or on C: (under 10 GB free). Use `S2A_DATA_ROOT` (this laptop: `D:/sketch2app-data`). Default when unset: `<repo>/artifacts` (gitignored).
+- **Never run `flutter build apk` inside the repo.** A release build put ~3 GB of Gradle caches and build output on C: and filled the drive (2026-10-10). Always use `scripts/build_apk.ps1`, which builds a mirror on D: with `GRADLE_USER_HOME` on D:.
 - Python: typed, small modules, docstrings that state *why*, fixed seeds, YAML configs, pytest. Lint: `ruff check`, `ruff format --check`, `mypy`.
 - Dart: `flutter analyze` must be clean; tests for spec parsing, renderer, exporter.
 - Spec changes: update `spec/schema`, both validators, both serializers, the conformance fixtures, and the changelog in DESIGN.md together.
@@ -43,6 +44,9 @@ $PY -m ruff check ml && $PY -m ruff format --check ml && $PY -m mypy ml/s2a
 # Flutter
 cd app && flutter pub get && flutter analyze && flutter test
 cd app && dart run tool/export_examples.dart   # exports spec/examples -> analyzes each
+
+# Android APK (builds on D:, never in the repo)
+powershell -ExecutionPolicy Bypass -File scripts/build_apk.ps1 -Mode release
 
 # adb is not on PATH on this laptop
 ADB="$LOCALAPPDATA/Android/sdk/platform-tools/adb.exe"

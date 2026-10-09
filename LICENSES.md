@@ -17,7 +17,12 @@ must ship with redistributed weights).
 
 | Dataset | Licence | Verified |
 |---|---|---|
-| RICO semantic annotations | pending (P3) | |
+| RICO semantic annotations (`semantic_annotations.zip`, `ui_details.csv`, `app_details.csv` from the official bucket `storage.googleapis.com/crowdstf-rico-uiuc-4540/rico_dataset_v0.1/`) | No open licence. Research terms in `interactionmining.org/archive/rico/copyright.txt`: no warranty; the researcher accepts responsibility and indemnifies the Rico team / University of Illinois; associates may be given access only if they agree to the same terms. Screenshots may contain copyrighted work (we do not download screenshots). | 2026-10-10, copyright.txt read directly |
+
+RICO consequences for this repo: raw RICO files and RICO-derived specs are stored only under `S2A_DATA_ROOT`, never
+committed; classmates reproduce by running the download script themselves (accepting the terms). Cite:
+Deka et al., "Rico: A Mobile App Dataset for Building Data-Driven Design Applications", UIST 2017; semantic
+annotations: Liu et al., "Learning Design Semantics for Mobile Apps", UIST 2018.
 | Hershey vector fonts | pending (P3) | |
 
 ## Libraries (direct dependencies)

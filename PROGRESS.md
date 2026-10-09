@@ -9,9 +9,9 @@ Newest phase at the top of "Phase log".
 |---|---|
 | P0 Recon | done (2026-10-10) |
 | P1 Spec, renderer, exporter | done (2026-10-10) |
-| P2 Walking skeleton | in progress |
-| P3 Data pipeline | pending |
-| P4 Recognizer | pending |
+| P2 Walking skeleton | code done, APK builds; on-device run pending (needs device) |
+| P3 Data pipeline | code done + tested; full dataset build was running at handoff |
+| P4 Recognizer | model/train/decode/metrics/ONNX export written; training not started |
 | P5 Collect mode | pending |
 | P6 Layout LLM | pending |
 | P7 Evaluation | pending |
@@ -143,6 +143,24 @@ Syntax highlighting: `flutter_highlight` is unmaintained (2021, Dart < 3), so th
 
 ## Phase log
 
+### P2 Walking skeleton (heuristic path) — code done, device test pending
+
+- Canvas (pen/finger, stylus-only mode, two-finger pan/zoom, eraser, undo/redo, multiple template frames), heuristic recognizer, ML Kit handwriting reader, heuristic layout builder, pipeline with per-stage timings and fallbacks, split view (>= 840 px) / tabs, live preview, code tab, zip export via share sheet, settings, cheat sheet, built-in sample sketches.
+- 85+ Dart tests pass (`flutter test`), analyzer clean. Release APK builds: `D:/sketch2app-data/apk/sketch2app-release.apk` (37.7 MB, arm64).
+- Lesson: building inside the repo filled C: (Gradle caches, ~3 GB) and failed. Builds now go through `scripts/build_apk.ps1` (mirror on D:, GRADLE_USER_HOME on D:, `kotlin.incremental=false` because project and Pub cache are on different drives).
+
+### P3 Data pipeline — code done, full build in progress
+
+- RICO -> specs: 42,313 of 66,261 screens kept (drops: overlay 10,552; too few elements 7,702; non-Latin 1,980; too many 1,979; empty 1,616; landscape 119); 0 schema-invalid. XY-cut layout recovery + sanitize pass.
+- Synthetic sketcher (legend-faithful, smooth pen noise, Hershey text, multi-screen arrows), by-app splits (val 830 apps / test 753 apps), shards + eval exports. 77 Python tests pass.
+- Reproduce: `python -m s2a.data.download all && python -m s2a.data.rico_convert && python -m s2a.data.build_dataset --workers 6 && python -m s2a.data.report`
+- Next: confirm build finished (`D:/sketch2app-data/build_dataset.log`), run `python -m s2a.data.report`, eyeball docs/figures/synthetic_samples.png.
+
+### P4 Recognizer — in progress
+
+- 1.98M-param stroke transformer (CNN stroke encoder + 4-layer transformer; heads: stroke class, element type, pairwise affinity -> average-linkage grouping). ONNX export verified on an untrained model: PyTorch vs ORT 1.28 max abs diff 2.6e-6, 8.0 MB, 15.7 ms laptop CPU.
+- Next: `python -m s2a.recognizer.data` (feature cache), `python -m s2a.recognizer.train --smoke`, then full training on the local RTX 3050 Ti; Dart port of features/decoder + parity fixtures; heuristic baseline eval via `dart run tool/batch.dart recognize`.
+
 ### P1 Spec, legend, renderer, exporter — done
 
 What exists:
@@ -188,4 +206,9 @@ uv pip install --python /d/sketch2app-data/venv/Scripts/python.exe -e "ml[dev]"
 
 ## Needs you
 
-(filled in as phases hit steps only you can do)
+1. **Device info** (brief left it as [FILL]): model, RAM, Android version of your tablet(s), and whether an Android smart board is available. LiteRT-LM (on-device LLM) needs Android 11+ (minSdk 30) and arm64.
+2. **Install and try the APK** (USB debugging on):
+   `"%LOCALAPPDATA%/Android/sdk/platform-tools/adb.exe" install -r D:/sketch2app-data/apk/sketch2app-release.apk`
+   Open the app with internet once and tap Download on the handwriting banner; then in airplane mode, menu > Sample: Login -> list > Convert > Preview, and try drawing. Report what breaks.
+3. **Disk**: C: has ~5 GB free. Recommended: move this repo out of OneDrive to D: (OneDrive syncs build files and locks Gradle caches).
+4. **RICO terms**: by our download you are the "Researcher" under RICO's research terms (LICENSES.md); fine for a college project, but don't publish RICO-derived data.

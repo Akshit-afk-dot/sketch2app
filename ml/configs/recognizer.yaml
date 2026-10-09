@@ -1,0 +1,27 @@
+# Stroke recognizer training. Fixed seed; every run writes its config next to its checkpoints.
+seed: 1234
+model:
+  d_model: 192
+  heads: 6
+  layers: 4
+  ffn: 768
+  dropout: 0.1
+  affinity_dim: 64
+train:
+  epochs: 12
+  batch_size: 32
+  lr: 6.0e-4
+  weight_decay: 0.05
+  warmup_steps: 500
+  max_strokes: 512          # longer sketches are skipped in training (inference handles any length)
+  amp: true                 # mixed precision (bf16 if supported, else fp16 with a grad scaler)
+  grad_clip: 1.0
+  workers: 0                # Windows: in-memory dataset, no worker processes needed
+loss:
+  cls: 1.0
+  type: 1.0
+  affinity: 2.0
+  affinity_pos_weight: 5.0  # same-group pairs are a few percent of all pairs
+eval:
+  val_limit: 1000           # samples decoded for the element-F1 checkpoint metric each epoch
+  threshold: 0.5            # average-linkage merge threshold

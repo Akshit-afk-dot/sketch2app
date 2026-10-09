@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sketch2app/spec/naming.dart';
 import 'package:sketch2app/spec/spec.dart';
 
 final specDir = Directory('../spec');
@@ -82,5 +83,18 @@ void main() {
       canonicalJson(r.spec!),
       '{"v":1,"screens":[{"id":"a","title":"A","body":{"t":"img","h":20}}]}',
     );
+  });
+
+  test('screen naming matches the shared fixture', () {
+    final fixture =
+        jsonDecode(
+              File('${specDir.path}/fixtures/naming.json').readAsStringSync(),
+            )
+            as Map<String, Object?>;
+    for (final c in fixture['cases']! as List<Object?>) {
+      final m = c! as Map<String, Object?>;
+      final titles = (m['titles']! as List<Object?>).cast<String?>();
+      expect(screenNames(titles).map((n) => n.id).toList(), m['ids']);
+    }
   });
 }

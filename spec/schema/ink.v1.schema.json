@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sketch2app.local/schema/ink.v1.json",
+  "title": "Sketch2App ink v1",
+  "description": "Raw canvas ink. Produced by the app's canvas and by the synthetic sketch generator. Coordinates are canvas logical pixels (y down); t is milliseconds since the document started. Frames are screen frames placed with the 'New screen' button; frames drawn by hand are ordinary strokes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "strokes"],
+  "properties": {
+    "v": { "const": 1 },
+    "strokes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "pts"],
+        "properties": {
+          "id": { "type": "integer", "minimum": 0 },
+          "tool": { "enum": ["pen", "touch", "mouse"] },
+          "pts": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "array",
+              "prefixItems": [{ "type": "number" }, { "type": "number" }, { "type": "integer", "minimum": 0 }],
+              "items": false,
+              "minItems": 3
+            }
+          }
+        }
+      }
+    },
+    "frames": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "box"],
+        "properties": { "id": { "type": "integer", "minimum": 0 }, "box": { "$ref": "#/$defs/box" } }
+      }
+    }
+  },
+  "$defs": {
+    "box": { "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }, { "type": "number", "minimum": 0 }, { "type": "number", "minimum": 0 }], "items": false, "minItems": 4 }
+  }
+}

@@ -66,3 +66,10 @@ def test_canonical_key_order() -> None:
     assert text.startswith('{"v":1,"screens":[{"id":"a","title":"A","appbar":{"t":"appbar","title":"A"')
     assert '"bottomnav":{"t":"bottomnav","items":[{"icon":"home","label":"B","go":"b"}' in text
     assert '{"t":"grid","cols":2,"n":4,"item":{"t":"img","h":10}}' in text
+
+
+def test_screen_naming_fixture() -> None:
+    from s2a.spec.naming import screen_names
+
+    for case in _load(SPEC_DIR / "fixtures" / "naming.json")["cases"]:
+        assert [sid for sid, _ in screen_names(case["titles"])] == case["ids"]

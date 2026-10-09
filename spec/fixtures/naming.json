@@ -1,0 +1,6 @@
+{"cases": [
+  {"titles": ["Login", null], "ids": ["login", "screen_2"]},
+  {"titles": ["My Orders", "My Orders", "My Orders"], "ids": ["my_orders", "my_orders_2", "my_orders_3"]},
+  {"titles": ["2-Step Verification", "!!!"], "ids": ["s_2_step_verification", "screen2"]},
+  {"titles": ["A very long screen title that keeps going on and on"], "ids": ["a_very_long_screen_title_tha"]}
+]}

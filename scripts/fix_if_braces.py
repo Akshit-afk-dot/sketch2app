@@ -24,7 +24,7 @@ def fix(path: Path, body_lines: list[int]) -> None:
             head -= 1
             indent = re.match(r"\s*", lines[head]).group(0)  # type: ignore[union-attr]
         end = i
-        while not lines[end].rstrip().endswith(";"):
+        while not re.sub(r"\s*//.*$", "", lines[end]).rstrip().endswith(";"):
             end += 1
         lines.insert(end + 1, indent + "}")
         lines[i - 1] = lines[i - 1].rstrip() + " {"

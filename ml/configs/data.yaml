@@ -1,0 +1,61 @@
+# Synthetic sketch generation. Ranges are [low, high] sampled uniformly per sample (pen, layout) or per
+# element (offsets). Every number here is a modelling assumption about how people sketch; the real
+# sketches from Collect mode (P5) are the check on them.
+seed: 1234
+
+canvas:
+  frame_width: [330, 400]        # px; the app's template frame is 360 wide
+  frame_aspect: [1.9, 2.2]       # height / width
+  frame_gap: [80, 160]           # px between frames of a multi-screen sample
+  drawn_frame_prob: 0.25         # frame drawn as a big rectangle instead of placed with "New screen"
+
+pen:
+  jitter_px: [0.3, 1.2]
+  wobble: [0.003, 0.015]
+  overshoot: [0.0, 0.12]
+  rounding: [0.0, 0.18]
+  closure_gap: [0.0, 0.04]
+  multi_stroke_rect: [0.05, 0.4]
+  retrace: [0.0, 0.12]
+  broken: [0.0, 0.06]
+  point_step_px: [1.5, 3.5]
+
+layout:
+  margin: [0.05, 0.09]           # fraction of frame width
+  gap: [0.012, 0.03]             # fraction of frame height between stacked elements
+  text_height: [0.020, 0.030]    # cap height, fraction of frame height
+  list_mark_prob: 0.65           # list drawn as one item + "xN"; otherwise 2-3 repeated items
+  input_underline_prob: 0.3      # input drawn as label + underline instead of label + box
+  center_heading_prob: 0.25
+  btn_full_width_prob: 0.6
+  nav_labels_prob: 0.5           # bottom-nav items get handwritten labels under their icons
+  min_scale: 0.65                # shrink everything down to this before dropping trailing elements
+
+transform:
+  rotation_deg: [-3.0, 3.0]      # whole frame
+  scale: [0.92, 1.08]
+  shear: [-0.04, 0.04]
+  element_offset: 0.012          # sloppy alignment: per-element shift, fraction of frame width
+
+order:
+  shuffled_prob: 0.2             # elements drawn in a random order instead of reading order
+  text_first_prob: 0.3           # write a label before drawing its outline
+
+timing:
+  speed_px_per_s: [250, 900]
+  stroke_gap_ms: [80, 500]
+  element_gap_ms: [300, 1500]
+
+text:
+  fonts: {futural: 0.5, scripts: 0.3, cursive: 0.2}
+  slant: [-0.15, 0.3]
+
+multiscreen:
+  share: 0.3                     # fraction of samples with 2-3 screens joined by arrows
+  max_screens: 3
+  links_per_screen: [1, 2]
+
+dataset:
+  shard_size: 500
+  split_percent: {train: 80, val: 10, test: 10}   # by hash of the app package: no app in two splits
+  eval_export: 1000              # ink JSON files per eval split for the Dart baselines

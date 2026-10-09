@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sketch2app.local/schema/elements.v1.json",
+  "title": "Sketch2App element list v1",
+  "description": "Output of stroke recognition + handwriting reading; input of the layout stage (heuristic builder or LLM). Boxes are canvas coordinates [x, y, w, h]. Each element owns the strokes drawn for it, including its handwritten text strokes (text_strokes is the subset sent to handwriting recognition). Containers (frame, card, appbar, bottomnav) own only their outline strokes; their children are separate elements found geometrically inside them.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "frames", "elements", "arrows"],
+  "properties": {
+    "v": { "const": 1 },
+    "frames": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "box"],
+        "properties": {
+          "id": { "type": "integer", "minimum": 0 },
+          "box": { "$ref": "#/$defs/box" },
+          "strokes": { "$ref": "#/$defs/ids" }
+        }
+      }
+    },
+    "elements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "type", "box"],
+        "properties": {
+          "id": { "type": "integer", "minimum": 0 },
+          "type": { "$ref": "#/$defs/elementType" },
+          "box": { "$ref": "#/$defs/box" },
+          "frame": { "type": "integer", "minimum": 0 },
+          "strokes": { "$ref": "#/$defs/ids" },
+          "text_strokes": { "$ref": "#/$defs/ids" },
+          "text": { "type": "string", "maxLength": 200 },
+          "score": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "arrows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "tail", "head"],
+        "properties": {
+          "id": { "type": "integer", "minimum": 0 },
+          "strokes": { "$ref": "#/$defs/ids" },
+          "tail": { "$ref": "#/$defs/point" },
+          "head": { "$ref": "#/$defs/point" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "elementType": {
+      "enum": ["btn", "input", "text", "heading", "para", "img", "icon", "menu", "avatar", "check", "radio",
+               "switch", "divider", "card", "appbar", "bottomnav", "fab", "listmark"]
+    },
+    "ids": { "type": "array", "items": { "type": "integer", "minimum": 0 } },
+    "point": { "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "items": false, "minItems": 2 },
+    "box": { "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }, { "type": "number", "minimum": 0 }, { "type": "number", "minimum": 0 }], "items": false, "minItems": 4 }
+  }
+}
