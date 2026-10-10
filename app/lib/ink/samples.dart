@@ -14,6 +14,8 @@ class SampleSketch {
 const sampleSketches = [
   SampleSketch('Login -> list (2 screens)', _loginList),
   SampleSketch('Settings', _settings),
+  SampleSketch('Shop (grid + bottom nav + FAB)', _shop),
+  SampleSketch('Profile', _profile),
 ];
 
 InkDocument _loginList() {
@@ -51,5 +53,46 @@ InkDocument _settings() {
     b.word(60, 282 + k * 40.0, 5);
   }
   b.button(30, 450, 300, 50, 6);
+  return b.doc;
+}
+
+InkDocument _shop() {
+  final b = SketchBuilder()..frame(0, 0, 360, 760);
+  b.word(120, 22, 4);
+  b.line(0, 64, 360, 64);
+  for (var c = 0; c < 2; c++) {
+    final x = 20 + c * 170.0;
+    b.rect(x, 90, 150, 170);
+    b.imageBox(x + 10, 100, 130, 100);
+    b.word(x + 10, 215, 5);
+  }
+  b.word(330, 170, 2, size: 14); // "x6"
+  b.ellipse(305, 600, 24, 24);
+  b.line(293, 600, 317, 600);
+  b.line(305, 588, 305, 612);
+  b.rect(0, 680, 360, 80);
+  for (final x in [60.0, 180.0, 300.0]) {
+    b.ellipse(x, 705, 11, 11);
+  }
+  return b.doc;
+}
+
+InkDocument _profile() {
+  final b = SketchBuilder()..frame(0, 0, 360, 760);
+  b.ellipse(180, 110, 50, 50);
+  b.ellipse(180, 98, 17, 17);
+  b.word(130, 175, 6);
+  b.line(130, 200, 236, 200);
+  b.wavy(40, 240, 280);
+  b.wavy(40, 262, 250);
+  b.button(30, 300, 140, 48, 6);
+  b.button(190, 300, 140, 48, 7);
+  b.line(20, 380, 340, 381);
+  for (var k = 0; k < 2; k++) {
+    final y = 410 + k * 60.0;
+    b.word(30, y, 8);
+    b.rect(260, y, 60, 26);
+    b.ellipse(275, y + 13, 9, 9);
+  }
   return b.doc;
 }

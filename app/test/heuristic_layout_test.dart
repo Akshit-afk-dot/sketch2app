@@ -4,6 +4,7 @@ import 'package:sketch2app/recognize/elements.dart';
 import 'package:sketch2app/recognize/heuristic_recognizer.dart';
 import 'package:sketch2app/spec/spec.dart';
 
+import 'package:sketch2app/ink/samples.dart';
 import 'package:sketch2app/ink/sketch_builder.dart';
 
 /// Stands in for ML Kit: each word's strokes map to the string the test "wrote".
@@ -123,4 +124,16 @@ void main() {
     );
     expect(parseSpec(spec.toJson()).isValid, isTrue);
   });
+
+  test(
+    'every bundled sample sketch converts to a valid spec with the rule-based pipeline',
+    () {
+      for (final sample in sampleSketches) {
+        final spec = const HeuristicLayoutBuilder().build(
+          const HeuristicRecognizer().recognize(sample.build()),
+        );
+        expect(parseSpec(spec.toJson()).issues, isEmpty, reason: sample.name);
+      }
+    },
+  );
 }
