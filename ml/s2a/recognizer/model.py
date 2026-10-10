@@ -22,13 +22,7 @@ import torch
 from torch import Tensor, nn
 
 from s2a.recognizer.features import GEOM_DIM, RESAMPLE
-
-STROKE_CLASSES = ("frame", "text", "shape", "arrow")
-ELEMENT_TYPES = (
-    "btn", "input", "text", "heading", "para", "img", "icon", "menu", "avatar", "check", "radio",
-    "switch", "divider", "card", "appbar", "bottomnav", "fab", "listmark",
-)  # fmt: skip
-NONE_TYPE = len(ELEMENT_TYPES)  # frame and arrow strokes have no element type
+from s2a.recognizer.labels import ELEMENT_TYPES, STROKE_CLASSES
 
 
 @dataclass(frozen=True)

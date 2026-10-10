@@ -12,7 +12,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any
 
-from s2a.recognizer.model import ELEMENT_TYPES, STROKE_CLASSES
+from s2a.recognizer.labels import ELEMENT_TYPES, STROKE_CLASSES
 
 
 def iou(a: list[float], b: list[float], pad: float = 2.0) -> float:

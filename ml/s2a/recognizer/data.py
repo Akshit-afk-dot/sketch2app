@@ -1,85 +1,15 @@
-"""Training data for the recognizer: shards -> cached feature arrays -> padded batches.
-
-Features are computed once per shard and cached as compressed .npz (float16 shapes), so epochs read
-arrays instead of re-resampling ink.
-
-    python -m s2a.recognizer.data            # build the cache for all splits
-"""
+"""Training batches for the recognizer from the feature cache (see cache.py)."""
 
 from __future__ import annotations
 
-import gzip
-import json
-import sys
-from concurrent.futures import ProcessPoolExecutor
-from pathlib import Path
 from typing import Any
 
 import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from s2a.data.build_dataset import SPLITS, out_root
-from s2a.recognizer.features import GEOM_DIM, RESAMPLE, ink_features
-from s2a.recognizer.model import ELEMENT_TYPES, NONE_TYPE, STROKE_CLASSES
-
-
-def cache_dir() -> Path:
-    return out_root() / "features"
-
-
-def sample_labels(rec: dict[str, Any]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """(stroke class idx, group idx, element type idx) per stroke."""
-    cls = np.array([STROKE_CLASSES.index(c) for c in rec["stroke_cls"]], np.int8)
-    group = np.array(rec["stroke_group"], np.int16)
-    types = np.array(
-        [
-            ELEMENT_TYPES.index(rec["groups"][g]["type"])
-            if rec["groups"][g]["kind"] == "element"
-            else NONE_TYPE
-            for g in rec["stroke_group"]
-        ],
-        np.int8,
-    )
-    return cls, group, types
-
-
-def _cache_shard(path: Path) -> str:
-    out = cache_dir() / path.parent.name / path.name.replace(".jsonl.gz", ".npz")
-    if out.exists():
-        return str(out)
-    shapes, geoms, cls, groups, types, offsets, ids = [], [], [], [], [], [0], []
-    with gzip.open(path, "rt", encoding="utf-8") as f:
-        for line in f:
-            rec = json.loads(line)
-            s, g = ink_features(rec["ink"])
-            c, gr, t = sample_labels(rec)
-            shapes.append(s.astype(np.float16))
-            geoms.append(g)
-            cls.append(c)
-            groups.append(gr)
-            types.append(t)
-            offsets.append(offsets[-1] + len(c))
-            ids.append(rec["id"])
-    out.parent.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(
-        out,
-        shape=np.concatenate(shapes),
-        geom=np.concatenate(geoms),
-        cls=np.concatenate(cls),
-        group=np.concatenate(groups),
-        type=np.concatenate(types),
-        offsets=np.array(offsets, np.int64),
-        ids=np.array(ids),
-    )
-    return str(out)
-
-
-def build_cache(workers: int = 8) -> None:
-    shards = [p for s in SPLITS for p in sorted((out_root() / s).glob("shard_*.jsonl.gz"))]
-    with ProcessPoolExecutor(max_workers=workers) as pool:
-        for done in pool.map(_cache_shard, shards):
-            print(done, flush=True)
+from s2a.recognizer.cache import cache_dir
+from s2a.recognizer.features import GEOM_DIM, RESAMPLE
 
 
 class StrokeDataset(Dataset[dict[str, Any]]):
@@ -88,22 +18,19 @@ class StrokeDataset(Dataset[dict[str, Any]]):
     def __init__(self, split: str, max_strokes: int = 512, limit: int = 0) -> None:
         self.items: list[dict[str, Any]] = []
         for path in sorted((cache_dir() / split).glob("shard_*.npz")):
-            z = np.load(path)
-            off = z["offsets"]
+            # Read each array once: indexing the NpzFile decompresses the whole array on every access.
+            with np.load(path) as z:
+                arrays = {k: z[k] for k in ("shape", "geom", "cls", "group", "type", "offsets", "ids")}
+            off = arrays["offsets"]
             for k in range(len(off) - 1):
                 a, b = int(off[k]), int(off[k + 1])
                 if b - a == 0 or b - a > max_strokes:
                     continue  # empty or exceptionally long sketches are skipped in training only
-                self.items.append(
-                    {
-                        "id": str(z["ids"][k]),
-                        "shape": z["shape"][a:b],
-                        "geom": z["geom"][a:b],
-                        "cls": z["cls"][a:b],
-                        "group": z["group"][a:b],
-                        "type": z["type"][a:b],
-                    }
-                )
+                item: dict[str, Any] = {
+                    key: arrays[key][a:b] for key in ("shape", "geom", "cls", "group", "type")
+                }
+                item["id"] = str(arrays["ids"][k])
+                self.items.append(item)
                 if limit and len(self.items) >= limit:
                     return
 
@@ -135,5 +62,24 @@ def collate(batch: list[dict[str, Any]]) -> dict[str, torch.Tensor]:
     return {"shape": shape, "geom": geom, "mask": mask, "cls": cls, "type": types, "group": group}
 
 
-if __name__ == "__main__":
-    build_cache(int(sys.argv[1]) if len(sys.argv) > 1 else 8)
+class BucketBatchSampler(torch.utils.data.Sampler[list[int]]):
+    """Batches of similar length (sketches range from ~10 to 500 strokes): shuffle, sort within chunks
+    of 50 batches, then shuffle the batches. Cuts padding, and with it GPU time, several-fold."""
+
+    def __init__(self, lengths: list[int], batch_size: int, seed: int) -> None:
+        self.lengths = lengths
+        self.batch_size = batch_size
+        self.rng = np.random.default_rng(seed)
+
+    def __iter__(self):  # type: ignore[no-untyped-def]
+        order = self.rng.permutation(len(self.lengths))
+        chunk = self.batch_size * 50
+        batches: list[list[int]] = []
+        for start in range(0, len(order), chunk):
+            part = sorted(order[start : start + chunk].tolist(), key=lambda i: self.lengths[i])
+            batches += [part[k : k + self.batch_size] for k in range(0, len(part), self.batch_size)]
+        self.rng.shuffle(batches)
+        return iter(batches)
+
+    def __len__(self) -> int:
+        return (len(self.lengths) + self.batch_size - 1) // self.batch_size

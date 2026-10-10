@@ -1,6 +1,7 @@
 """Evaluate a recognizer on the exported eval sketches; writes docs/results/recognizer_<name>_<split>.json.
 
     python -m s2a.recognizer.evaluate --method heuristic --split test     # the app's Dart rules
+    python -m s2a.recognizer.evaluate --method onnx --data real --split test  # held-out real sketches
     python -m s2a.recognizer.evaluate --method onnx --split test          # app/assets/models/recognizer.onnx
     python -m s2a.recognizer.evaluate --method torch --ckpt <run>/best.pt --split val
 
@@ -21,23 +22,27 @@ from typing import Any
 import numpy as np
 
 from s2a.data.build_dataset import out_root
+from s2a.data.collected import real_root
 from s2a.paths import REPO_ROOT
 from s2a.recognizer.decode import decode
 from s2a.recognizer.features import ink_features
+from s2a.recognizer.labels import STROKE_CLASSES
 from s2a.recognizer.metrics import DetectionStats, stroke_classes_from_elements
-from s2a.recognizer.model import STROKE_CLASSES
 
 RESULTS = REPO_ROOT / "docs" / "results"
 
 
-def _gold(split: str, stem: str) -> dict[str, Any]:
-    gold: dict[str, Any] = json.loads(
-        (out_root() / "eval" / split / "gold" / f"{stem}.json").read_text(encoding="utf-8")
-    )
+def eval_root(data: str) -> Path:
+    """Synthetic eval exports, or the held-out real sketches imported from Collect mode."""
+    return real_root() / "eval" if data == "real" else out_root() / "eval"
+
+
+def _gold(ink: Path) -> dict[str, Any]:
+    gold: dict[str, Any] = json.loads((ink.parent.parent / "gold" / ink.name).read_text(encoding="utf-8"))
     return gold
 
 
-def eval_heuristic(split: str, inks: list[Path]) -> tuple[DetectionStats, list[float]]:
+def eval_heuristic(inks: list[Path]) -> tuple[DetectionStats, list[float]]:
     with tempfile.TemporaryDirectory() as tmp:
         out = Path(tmp)
         subprocess.run(
@@ -51,7 +56,7 @@ def eval_heuristic(split: str, inks: list[Path]) -> tuple[DetectionStats, list[f
         ms = []
         for f in inks:
             pred = json.loads((out / f.name).read_text(encoding="utf-8"))
-            gold = _gold(split, f.stem)
+            gold = _gold(f)
             n = len(gold["stroke_cls"])
             stats.add(pred["elements"], gold["elements"]["elements"])
             stats.add_strokes(stroke_classes_from_elements(n, pred), gold["stroke_cls"])
@@ -60,7 +65,7 @@ def eval_heuristic(split: str, inks: list[Path]) -> tuple[DetectionStats, list[f
 
 
 def eval_model(
-    split: str, inks: list[Path], method: str, ckpt: Path | None, threshold: float
+    inks: list[Path], method: str, ckpt: Path | None, threshold: float
 ) -> tuple[DetectionStats, list[float]]:
     if method == "onnx":
         import onnxruntime as ort
@@ -88,7 +93,7 @@ def eval_model(
     stats, ms = DetectionStats(), []
     for f in inks:
         ink = json.loads(f.read_text(encoding="utf-8"))
-        gold = _gold(split, f.stem)
+        gold = _gold(f)
         t0 = time.perf_counter()
         shape, geom = ink_features(ink)
         c, t, a = run(shape, geom)
@@ -103,27 +108,30 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--method", choices=["heuristic", "onnx", "torch"], required=True)
     ap.add_argument("--split", default="test", choices=["val", "test"])
+    ap.add_argument("--data", default="synth", choices=["synth", "real"])
     ap.add_argument("--ckpt", type=Path)
     ap.add_argument("--name", help="result name (default: method)")
     ap.add_argument("--threshold", type=float, default=0.5)
     args = ap.parse_args()
-    inks = sorted(f for f in (out_root() / "eval" / args.split / "ink").glob("*.json"))
+    inks = sorted(f for f in (eval_root(args.data) / args.split / "ink").glob("*.json"))
     inks = [f for f in inks if json.loads(f.read_text(encoding="utf-8"))["strokes"]]
     if args.method == "heuristic":
-        stats, ms = eval_heuristic(args.split, inks)
+        stats, ms = eval_heuristic(inks)
     else:
-        stats, ms = eval_model(args.split, inks, args.method, args.ckpt, args.threshold)
+        stats, ms = eval_model(inks, args.method, args.ckpt, args.threshold)
     summary = stats.summary()
     summary["meta"] = {
         "method": args.method,
         "split": args.split,
+        "data": args.data,
         "sketches": len(inks),
         "checkpoint": str(args.ckpt) if args.ckpt else None,
         "laptop_ms_per_sketch": {"median": float(np.median(ms)), "p90": float(np.percentile(ms, 90))},
         "date": time.strftime("%Y-%m-%d"),
     }
     RESULTS.mkdir(parents=True, exist_ok=True)
-    path = RESULTS / f"recognizer_{args.name or args.method}_{args.split}.json"
+    suffix = args.split if args.data == "synth" else f"real_{args.split}"
+    path = RESULTS / f"recognizer_{args.name or args.method}_{suffix}.json"
     path.write_text(json.dumps(summary, indent=1), encoding="utf-8")
     keys = ("detection_any_type", "detection_typed", "stroke_accuracy", "meta")
     print(json.dumps({k: summary[k] for k in keys}, indent=1))

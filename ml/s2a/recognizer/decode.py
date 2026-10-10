@@ -12,7 +12,7 @@ from typing import Any
 
 import numpy as np
 
-from s2a.recognizer.model import ELEMENT_TYPES, NONE_TYPE, STROKE_CLASSES
+from s2a.recognizer.labels import ELEMENT_TYPES, NONE_TYPE, STROKE_CLASSES
 
 FRAME, TEXT, SHAPE, ARROW = (STROKE_CLASSES.index(c) for c in ("frame", "text", "shape", "arrow"))
 

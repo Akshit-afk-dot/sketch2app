@@ -6,6 +6,7 @@ the title, deduplicated with _2, _3. Checked against spec/fixtures/naming.json b
 """
 
 import re
+from typing import Any
 
 DEFAULT_NAV_LABELS = ("Home", "Search", "Profile", "Settings", "More")
 
@@ -31,3 +32,16 @@ def screen_names(titles: list[str | None]) -> list[tuple[str, str]]:
         used.add(sid)
         out.append((sid, title[:40]))
     return out
+
+
+def screen_title(screen: dict[str, Any]) -> str | None:
+    """The title the naming rule uses: app-bar title, else the first heading (h1/h2) in reading order."""
+    if "appbar" in screen:
+        return str(screen["appbar"]["title"])
+    stack = [screen["body"]]
+    while stack:
+        n = stack.pop(0)
+        if n["t"] == "text" and n.get("s") in ("h1", "h2"):
+            return str(n["v"])
+        stack.extend(n.get("c", []) + ([n["item"]] if "item" in n else []))
+    return None

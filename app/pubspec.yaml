@@ -28,3 +28,4 @@ flutter:
   assets:
     - assets/models/
     - assets/selftest/
+    - assets/collect/

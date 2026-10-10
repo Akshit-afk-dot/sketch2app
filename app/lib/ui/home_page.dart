@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../collect/collect_page.dart';
 import '../export/project.dart';
 import '../export/zip.dart';
 import '../handwriting/handwriting.dart';
@@ -227,6 +228,12 @@ class _HomePageState extends State<HomePage> {
             controller.clear();
           case 'removeFrame':
             controller.removeLastFrame();
+          case 'collect':
+            unawaited(
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const CollectPage()),
+              ),
+            );
           case 'settings':
             unawaited(
               Navigator.of(context).push(
@@ -254,6 +261,10 @@ class _HomePageState extends State<HomePage> {
         for (final s in sampleSketches)
           PopupMenuItem(value: s.name, child: Text('Sample: ${s.name}')),
         const PopupMenuDivider(),
+        const PopupMenuItem(
+          value: 'collect',
+          child: Text('Collect data (study mode)'),
+        ),
         const PopupMenuItem(value: 'settings', child: Text('Settings')),
       ],
     ),

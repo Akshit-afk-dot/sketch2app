@@ -184,7 +184,9 @@ def test_synthetic_sample_invariants(stem: str) -> None:
 def test_augmentation_inserts_legend_elements_and_stays_valid() -> None:
     from s2a.data.augment import augment_screen, label_pool
 
-    specs = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((SPEC_DIR / "examples").glob("*.json"))]
+    specs = [
+        json.loads(p.read_text(encoding="utf-8")) for p in sorted((SPEC_DIR / "examples").glob("*.json"))
+    ]
     pool = label_pool(specs)
     assert "Sign in" in pool and len(pool) >= 8
     rates = {"divider": 1.0, "bottomnav": 1.0, "fab": 1.0, "radio": 1.0, "switch": 1.0, "grid": 1.0}
@@ -196,3 +198,31 @@ def test_augmentation_inserts_legend_elements_and_stays_valid() -> None:
         text = canonical_json(out)
         for needle in ('"t":"radio"', '"t":"switch"', '"t":"bottomnav"', '"t":"fab"'):
             assert needle in text
+
+
+@needs_fonts
+def test_collected_import_validates_and_splits_by_participant(tmp_path: Any, monkeypatch: Any) -> None:
+    from s2a.data import collected
+    from s2a.data.synth import make_sample
+
+    monkeypatch.setattr(collected, "real_root", lambda: tmp_path / "real")
+    cfg = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
+    spec = json.loads((SPEC_DIR / "examples" / "01_login.json").read_text(encoding="utf-8"))
+    s = make_sample(np.random.default_rng(1), cfg, [spec])
+    assert s is not None
+    src = tmp_path / "export"
+    fields = ("ink", "stroke_cls", "stroke_group", "groups", "elements", "spec")
+    src.mkdir()
+    for pid in ("p01", "p02", "p03", "p04", "p05", "p06"):
+        rec = {"id": f"{pid}_t1", "participant": pid, "task": "t1", **{k: getattr(s, k) for k in fields}}
+        (src / f"{pid}.json").write_text(json.dumps(rec), encoding="utf-8")
+    bad = {"id": "broken", "participant": "p01", "task": "t1"}
+    (src / "broken.json").write_text(json.dumps(bad), encoding="utf-8")
+    report = collected.import_records(src)
+    assert report["rejected"] == 1
+    assert report.get("train", 0) + report.get("test", 0) == 6
+    splits = json.loads((tmp_path / "real" / "splits.json").read_text(encoding="utf-8"))
+    assert set(splits) == {"p01", "p02", "p03", "p04", "p05", "p06"}
+    # A participant's split is frozen: importing again keeps everyone where they were.
+    collected.import_records(src)
+    assert json.loads((tmp_path / "real" / "splits.json").read_text(encoding="utf-8")) == splits

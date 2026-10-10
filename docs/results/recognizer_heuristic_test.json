@@ -1,0 +1,225 @@
+{
+ "elements_gold": 20272,
+ "elements_pred": 27366,
+ "detection_any_type": {
+  "precision": 0.5769202660235329,
+  "recall": 0.7788082083662194,
+  "f1": 0.6628321927872706
+ },
+ "detection_typed": {
+  "precision": 0.42366440108163417,
+  "recall": 0.571921862667719,
+  "f1": 0.4867542717998237
+ },
+ "stroke_accuracy": 0.8499856524056133,
+ "per_type": {
+  "btn": {
+   "matched_gold": 943,
+   "type_accuracy": 0.39766702014846234
+  },
+  "input": {
+   "matched_gold": 292,
+   "type_accuracy": 0.3561643835616438
+  },
+  "text": {
+   "matched_gold": 5022,
+   "type_accuracy": 0.9091995221027479
+  },
+  "heading": {
+   "matched_gold": 573,
+   "type_accuracy": 0.4851657940663176
+  },
+  "para": {
+   "matched_gold": 724,
+   "type_accuracy": 0.9392265193370166
+  },
+  "img": {
+   "matched_gold": 2705,
+   "type_accuracy": 0.5948243992606285
+  },
+  "icon": {
+   "matched_gold": 2207,
+   "type_accuracy": 0.6991391028545537
+  },
+  "menu": {
+   "matched_gold": 165,
+   "type_accuracy": 1.0
+  },
+  "avatar": {
+   "matched_gold": 457,
+   "type_accuracy": 0.8468271334792122
+  },
+  "check": {
+   "matched_gold": 143,
+   "type_accuracy": 0.43356643356643354
+  },
+  "radio": {
+   "matched_gold": 374,
+   "type_accuracy": 0.9331550802139037
+  },
+  "switch": {
+   "matched_gold": 269,
+   "type_accuracy": 0.9925650557620818
+  },
+  "divider": {
+   "matched_gold": 432,
+   "type_accuracy": 0.9351851851851852
+  },
+  "card": {
+   "matched_gold": 293,
+   "type_accuracy": 0.6143344709897611
+  },
+  "appbar": {
+   "matched_gold": 629,
+   "type_accuracy": 0.6248012718600954
+  },
+  "bottomnav": {
+   "matched_gold": 133,
+   "type_accuracy": 0.5488721804511278
+  },
+  "fab": {
+   "matched_gold": 173,
+   "type_accuracy": 0.9190751445086706
+  },
+  "listmark": {
+   "matched_gold": 254,
+   "type_accuracy": 0.0
+  }
+ },
+ "confusion": {
+  "appbar->appbar": 393,
+  "appbar->card": 11,
+  "appbar->heading": 2,
+  "appbar->icon": 104,
+  "appbar->input": 3,
+  "appbar->switch": 79,
+  "appbar->text": 37,
+  "avatar->avatar": 387,
+  "avatar->fab": 2,
+  "avatar->icon": 65,
+  "avatar->text": 3,
+  "bottomnav->bottomnav": 73,
+  "bottomnav->card": 11,
+  "bottomnav->divider": 1,
+  "bottomnav->icon": 4,
+  "bottomnav->switch": 31,
+  "bottomnav->text": 13,
+  "btn->appbar": 1,
+  "btn->bottomnav": 3,
+  "btn->btn": 375,
+  "btn->card": 95,
+  "btn->divider": 2,
+  "btn->fab": 6,
+  "btn->heading": 25,
+  "btn->icon": 170,
+  "btn->img": 15,
+  "btn->input": 32,
+  "btn->radio": 2,
+  "btn->switch": 67,
+  "btn->text": 150,
+  "card->appbar": 1,
+  "card->avatar": 8,
+  "card->btn": 3,
+  "card->card": 180,
+  "card->icon": 7,
+  "card->img": 16,
+  "card->input": 1,
+  "card->switch": 13,
+  "card->text": 64,
+  "check->check": 62,
+  "check->heading": 1,
+  "check->radio": 46,
+  "check->text": 34,
+  "divider->appbar": 14,
+  "divider->bottomnav": 8,
+  "divider->divider": 404,
+  "divider->input": 6,
+  "fab->avatar": 2,
+  "fab->fab": 159,
+  "fab->icon": 3,
+  "fab->text": 9,
+  "heading->appbar": 6,
+  "heading->check": 2,
+  "heading->heading": 278,
+  "heading->icon": 19,
+  "heading->input": 137,
+  "heading->menu": 2,
+  "heading->radio": 10,
+  "heading->text": 119,
+  "icon->btn": 10,
+  "icon->check": 2,
+  "icon->fab": 1,
+  "icon->icon": 1543,
+  "icon->input": 274,
+  "icon->radio": 5,
+  "icon->text": 372,
+  "img->appbar": 19,
+  "img->bottomnav": 5,
+  "img->card": 121,
+  "img->divider": 28,
+  "img->fab": 10,
+  "img->heading": 10,
+  "img->icon": 332,
+  "img->img": 1609,
+  "img->input": 38,
+  "img->radio": 1,
+  "img->text": 532,
+  "input->appbar": 3,
+  "input->btn": 7,
+  "input->heading": 2,
+  "input->icon": 137,
+  "input->img": 4,
+  "input->input": 104,
+  "input->text": 35,
+  "listmark->check": 1,
+  "listmark->icon": 8,
+  "listmark->text": 245,
+  "menu->menu": 165,
+  "para->para": 680,
+  "para->text": 44,
+  "radio->radio": 349,
+  "radio->text": 25,
+  "switch->input": 1,
+  "switch->switch": 267,
+  "switch->text": 1,
+  "text->appbar": 1,
+  "text->btn": 1,
+  "text->check": 32,
+  "text->heading": 10,
+  "text->icon": 124,
+  "text->input": 21,
+  "text->menu": 2,
+  "text->para": 1,
+  "text->radio": 264,
+  "text->text": 4566
+ },
+ "stroke_confusion": {
+  "arrow->arrow": 1975,
+  "arrow->frame": 144,
+  "arrow->shape": 12,
+  "arrow->text": 85,
+  "frame->arrow": 1,
+  "frame->frame": 344,
+  "frame->shape": 55,
+  "frame->text": 134,
+  "shape->arrow": 247,
+  "shape->frame": 1239,
+  "shape->shape": 17493,
+  "shape->text": 6266,
+  "text->arrow": 82,
+  "text->frame": 5452,
+  "text->shape": 8240,
+  "text->text": 104597
+ },
+ "meta": {
+  "method": "heuristic",
+  "split": "test",
+  "sketches": 1000,
+  "checkpoint": null,
+  "laptop_ms_per_sketch": {
+   "median": 2.518,
+   "p90": 7.7781
+  },
+  "date": "2026-10-10"
+ }
+}

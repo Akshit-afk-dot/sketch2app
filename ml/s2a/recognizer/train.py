@@ -25,11 +25,12 @@ from torch.utils.data import DataLoader
 
 from s2a.data.build_dataset import out_root
 from s2a.paths import REPO_ROOT, data_root
-from s2a.recognizer.data import StrokeDataset, collate
+from s2a.recognizer.data import BucketBatchSampler, StrokeDataset, collate
 from s2a.recognizer.decode import decode
 from s2a.recognizer.features import ink_features
+from s2a.recognizer.labels import STROKE_CLASSES
 from s2a.recognizer.metrics import DetectionStats
-from s2a.recognizer.model import STROKE_CLASSES, RecognizerConfig, StrokeRecognizer, count_parameters
+from s2a.recognizer.model import RecognizerConfig, StrokeRecognizer, count_parameters
 
 CONFIG = REPO_ROOT / "ml" / "configs" / "recognizer.yaml"
 
@@ -114,9 +115,8 @@ def main() -> None:
     (run_dir / "config.yaml").write_text(yaml.safe_dump(cfg), encoding="utf-8")
 
     train = StrokeDataset("train", tcfg["max_strokes"], limit=256 if args.smoke else 0)
-    loader = DataLoader(
-        train, batch_size=tcfg["batch_size"], shuffle=True, collate_fn=collate, num_workers=tcfg["workers"]
-    )
+    sampler = BucketBatchSampler([len(x["cls"]) for x in train.items], tcfg["batch_size"], cfg["seed"])
+    loader = DataLoader(train, batch_sampler=sampler, collate_fn=collate, num_workers=tcfg["workers"])
     model = StrokeRecognizer(RecognizerConfig(**cfg["model"])).to(device)
     print(f"train samples {len(train)}, params {count_parameters(model):,}, device {device}", flush=True)
 

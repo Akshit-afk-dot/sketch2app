@@ -19,7 +19,7 @@ from s2a.data.hershey import write_text
 from s2a.data.sketch_layout import Item, layout_screen
 from s2a.data.strokes import Pen, PenStyle
 from s2a.spec import canonicalize, validate
-from s2a.spec.naming import screen_names
+from s2a.spec.naming import screen_names, screen_title
 
 Node = dict[str, Any]
 STROKE_CLASSES = ("frame", "text", "shape", "arrow")
@@ -56,21 +56,9 @@ class Sample:
 # --------------------------------------------------------------------------- naming and links
 
 
-def _title(screen: Node) -> str | None:
-    if "appbar" in screen:
-        return str(screen["appbar"]["title"])
-    stack = [screen["body"]]
-    while stack:
-        n = stack.pop(0)
-        if n["t"] == "text" and n.get("s") in ("h1", "h2"):
-            return str(n["v"])
-        stack.extend(n.get("c", []) + ([n["item"]] if "item" in n else []))
-    return None
-
-
 def _rename(screens: list[Node]) -> dict[str, str]:
     """Apply the shared naming rule; returns old id -> new id for rewriting links."""
-    names = screen_names([_title(s) for s in screens])
+    names = screen_names([screen_title(s) for s in screens])
     mapping = {}
     for s, (sid, title) in zip(screens, names, strict=True):
         mapping[s["id"]] = sid

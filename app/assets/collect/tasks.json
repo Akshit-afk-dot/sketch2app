@@ -1,0 +1,2650 @@
+{
+ "v": 1,
+ "tasks": [
+  {
+   "id": "ex_01_login",
+   "source": "example",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "login",
+      "title": "Login",
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "img",
+         "h": 20
+        },
+        {
+         "t": "text",
+         "v": "Welcome back",
+         "s": "h1"
+        },
+        {
+         "t": "input",
+         "label": "Email"
+        },
+        {
+         "t": "input",
+         "label": "Password",
+         "secure": true
+        },
+        {
+         "t": "btn",
+         "label": "Sign in"
+        },
+        {
+         "t": "text",
+         "v": "Forgot password?",
+         "s": "link"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "ex_02_signup",
+   "source": "example",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "signup",
+      "title": "Create account",
+      "appbar": {
+       "t": "appbar",
+       "title": "Create account"
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "input",
+         "label": "Full name"
+        },
+        {
+         "t": "input",
+         "label": "Email"
+        },
+        {
+         "t": "input",
+         "label": "Password",
+         "secure": true
+        },
+        {
+         "t": "input",
+         "label": "Confirm password",
+         "secure": true
+        },
+        {
+         "t": "check",
+         "label": "I agree to"
+        },
+        {
+         "t": "btn",
+         "label": "Sign up"
+        },
+        {
+         "t": "text",
+         "v": "Already have an",
+         "s": "link"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "ex_03_list",
+   "source": "example",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "inbox",
+      "title": "Inbox",
+      "appbar": {
+       "t": "appbar",
+       "title": "Inbox",
+       "icons": [
+        {
+         "t": "icon",
+         "name": "circle"
+        }
+       ]
+      },
+      "body": {
+       "t": "list",
+       "n": 6,
+       "item": {
+        "t": "row",
+        "c": [
+         {
+          "t": "avatar"
+         },
+         {
+          "t": "col",
+          "c": [
+           {
+            "t": "text",
+            "v": "Sender name"
+           },
+           {
+            "t": "text",
+            "v": "Subject line",
+            "s": "caption"
+           }
+          ]
+         }
+        ]
+       }
+      },
+      "fab": {
+       "t": "fab",
+       "icon": "add"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "ex_04_grid",
+   "source": "example",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "gallery",
+      "title": "Gallery",
+      "appbar": {
+       "t": "appbar",
+       "title": "Gallery"
+      },
+      "body": {
+       "t": "grid",
+       "cols": 3,
+       "n": 6,
+       "item": {
+        "t": "card",
+        "c": [
+         {
+          "t": "img",
+          "h": 12
+         },
+         {
+          "t": "text",
+          "v": "Photo",
+          "s": "caption"
+         }
+        ]
+       }
+      },
+      "bottomnav": {
+       "t": "bottomnav",
+       "items": [
+        {
+         "icon": "circle",
+         "label": "Home"
+        },
+        {
+         "icon": "circle",
+         "label": "Search"
+        },
+        {
+         "icon": "circle",
+         "label": "Profile"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "ex_05_profile",
+   "source": "example",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "profile",
+      "title": "Profile",
+      "appbar": {
+       "t": "appbar",
+       "title": "Profile",
+       "icons": [
+        {
+         "t": "icon",
+         "name": "circle"
+        }
+       ]
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "avatar"
+        },
+        {
+         "t": "text",
+         "v": "Jane Doe",
+         "s": "h2"
+        },
+        {
+         "t": "text",
+         "v": "Product designer",
+         "s": "caption"
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "btn",
+           "label": "Follow"
+          },
+          {
+           "t": "btn",
+           "label": "Message",
+           "variant": "secondary"
+          }
+         ]
+        },
+        {
+         "t": "divider"
+        },
+        {
+         "t": "para",
+         "lines": 3
+        },
+        {
+         "t": "grid",
+         "cols": 3,
+         "n": 6,
+         "item": {
+          "t": "img",
+          "h": 10
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "ex_06_settings",
+   "source": "example",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "settings",
+      "title": "Settings",
+      "appbar": {
+       "t": "appbar",
+       "title": "Settings"
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "text",
+         "v": "Account",
+         "s": "h2"
+        },
+        {
+         "t": "switch",
+         "label": "Notifications"
+        },
+        {
+         "t": "switch",
+         "label": "Dark mode"
+        },
+        {
+         "t": "divider"
+        },
+        {
+         "t": "text",
+         "v": "Privacy",
+         "s": "h2"
+        },
+        {
+         "t": "check",
+         "label": "Share usage data"
+        },
+        {
+         "t": "radio",
+         "options": [
+          "Public",
+          "Friends",
+          "Only me"
+         ]
+        },
+        {
+         "t": "btn",
+         "label": "Log out",
+         "variant": "text"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "ex_07_chat",
+   "source": "example",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "chat",
+      "title": "Chat",
+      "appbar": {
+       "t": "appbar",
+       "title": "Alex",
+       "icons": [
+        {
+         "t": "icon",
+         "name": "circle"
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        }
+       ]
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "list",
+         "n": 6,
+         "item": {
+          "t": "row",
+          "c": [
+           {
+            "t": "avatar"
+           },
+           {
+            "t": "card",
+            "c": [
+             {
+              "t": "text",
+              "v": "Message text"
+             }
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "input",
+           "label": "Type a message"
+          },
+          {
+           "t": "icon",
+           "name": "circle"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "ex_08_detail",
+   "source": "example",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "product",
+      "title": "Product",
+      "appbar": {
+       "t": "appbar",
+       "title": "Product",
+       "icons": [
+        {
+         "t": "icon",
+         "name": "circle"
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        }
+       ]
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "img",
+         "h": 35
+        },
+        {
+         "t": "text",
+         "v": "Wireless headphones",
+         "s": "h1"
+        },
+        {
+         "t": "text",
+         "v": "$49.99",
+         "s": "h2"
+        },
+        {
+         "t": "para",
+         "lines": 4
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "btn",
+           "label": "Add to cart"
+          },
+          {
+           "t": "icon",
+           "name": "circle"
+          }
+         ]
+        },
+        {
+         "t": "divider"
+        },
+        {
+         "t": "text",
+         "v": "Reviews",
+         "s": "h2"
+        },
+        {
+         "t": "list",
+         "n": 3,
+         "item": {
+          "t": "row",
+          "c": [
+           {
+            "t": "avatar"
+           },
+           {
+            "t": "text",
+            "v": "Great sound quality"
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "ex_09_form",
+   "source": "example",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "booking",
+      "title": "Book appointment",
+      "appbar": {
+       "t": "appbar",
+       "title": "Book appointment"
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "input",
+         "label": "Full name"
+        },
+        {
+         "t": "input",
+         "label": "Phone"
+        },
+        {
+         "t": "input",
+         "label": "Notes",
+         "multiline": true
+        },
+        {
+         "t": "text",
+         "v": "Preferred time",
+         "s": "h2"
+        },
+        {
+         "t": "radio",
+         "options": [
+          "Morning",
+          "Afternoon",
+          "Evening"
+         ]
+        },
+        {
+         "t": "check",
+         "label": "Send me a"
+        },
+        {
+         "t": "spacer"
+        },
+        {
+         "t": "btn",
+         "label": "Submit"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "ex_10_login_list_nav",
+   "source": "example",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "login",
+      "title": "Login",
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "img",
+         "h": 25
+        },
+        {
+         "t": "input",
+         "label": "Email"
+        },
+        {
+         "t": "input",
+         "label": "Password",
+         "secure": true
+        },
+        {
+         "t": "btn",
+         "label": "Sign in",
+         "go": "home"
+        },
+        {
+         "t": "text",
+         "v": "Forgot password?",
+         "s": "link"
+        }
+       ]
+      }
+     },
+     {
+      "id": "home",
+      "title": "Home",
+      "appbar": {
+       "t": "appbar",
+       "title": "Home"
+      },
+      "body": {
+       "t": "list",
+       "n": 5,
+       "item": {
+        "t": "card",
+        "c": [
+         {
+          "t": "img",
+          "h": 15
+         },
+         {
+          "t": "text",
+          "v": "Item"
+         }
+        ]
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "ex_11_shop_3screen",
+   "source": "example",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "shop",
+      "title": "Shop",
+      "appbar": {
+       "t": "appbar",
+       "title": "Shop",
+       "icons": [
+        {
+         "t": "icon",
+         "name": "circle"
+        },
+        {
+         "t": "icon",
+         "name": "circle",
+         "go": "cart"
+        }
+       ]
+      },
+      "body": {
+       "t": "grid",
+       "cols": 2,
+       "n": 6,
+       "item": {
+        "t": "card",
+        "go": "detail",
+        "c": [
+         {
+          "t": "img",
+          "h": 15
+         },
+         {
+          "t": "text",
+          "v": "Product"
+         },
+         {
+          "t": "text",
+          "v": "$20",
+          "s": "caption"
+         }
+        ]
+       }
+      },
+      "bottomnav": {
+       "t": "bottomnav",
+       "items": [
+        {
+         "icon": "circle",
+         "label": "Shop",
+         "go": "shop"
+        },
+        {
+         "icon": "circle",
+         "label": "Cart",
+         "go": "cart"
+        }
+       ]
+      }
+     },
+     {
+      "id": "detail",
+      "title": "Detail",
+      "appbar": {
+       "t": "appbar",
+       "title": "Detail"
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "img",
+         "h": 30
+        },
+        {
+         "t": "text",
+         "v": "Product",
+         "s": "h1"
+        },
+        {
+         "t": "para",
+         "lines": 3
+        },
+        {
+         "t": "btn",
+         "label": "Add to cart",
+         "go": "cart"
+        }
+       ]
+      }
+     },
+     {
+      "id": "cart",
+      "title": "Cart",
+      "appbar": {
+       "t": "appbar",
+       "title": "Cart"
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "list",
+         "n": 3,
+         "item": {
+          "t": "row",
+          "c": [
+           {
+            "t": "img",
+            "h": 8
+           },
+           {
+            "t": "text",
+            "v": "Product"
+           },
+           {
+            "t": "icon",
+            "name": "circle"
+           }
+          ]
+         }
+        },
+        {
+         "t": "divider"
+        },
+        {
+         "t": "text",
+         "v": "Total: $60",
+         "s": "h2"
+        },
+        {
+         "t": "btn",
+         "label": "Checkout"
+        }
+       ]
+      },
+      "fab": {
+       "t": "fab",
+       "icon": "add",
+       "go": "shop"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_21215",
+   "source": "rico:com.webdeveloperlv.interiordesign",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "screen_1",
+      "title": "Screen 1",
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "img",
+         "h": 7
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "img",
+           "h": 9
+          },
+          {
+           "t": "text",
+           "v": "9/183"
+          },
+          {
+           "t": "img",
+           "h": 9
+          },
+          {
+           "t": "icon",
+           "name": "circle"
+          }
+         ]
+        },
+        {
+         "t": "text",
+         "v": "Bedroom Design"
+        },
+        {
+         "t": "img",
+         "h": 17
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_59796",
+   "source": "rico:com.Creata.socialnetworkingall",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "screen_1",
+      "title": "Screen 1",
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "icon",
+           "name": "circle"
+          },
+          {
+           "t": "icon",
+           "name": "circle"
+          },
+          {
+           "t": "text",
+           "v": "Social Networking Al"
+          },
+          {
+           "t": "icon",
+           "name": "circle"
+          }
+         ]
+        },
+        {
+         "t": "img",
+         "h": 80
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "icon",
+           "name": "circle"
+          },
+          {
+           "t": "icon",
+           "name": "circle"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_13904",
+   "source": "rico:forqan.tech.families1",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "screen_1",
+      "title": "Screen 1",
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "icon",
+         "name": "circle"
+        },
+        {
+         "t": "img",
+         "h": 17
+        },
+        {
+         "t": "img",
+         "h": 17
+        },
+        {
+         "t": "img",
+         "h": 17
+        },
+        {
+         "t": "img",
+         "h": 17
+        },
+        {
+         "t": "img",
+         "h": 17
+        },
+        {
+         "t": "img",
+         "h": 17
+        },
+        {
+         "t": "list",
+         "n": 3,
+         "item": {
+          "t": "row",
+          "c": [
+           {
+            "t": "img",
+            "h": 19
+           },
+           {
+            "t": "img",
+            "h": 19
+           },
+           {
+            "t": "img",
+            "h": 19
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_1034",
+   "source": "rico:com.koam.android.weather",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "screen_1",
+      "title": "Screen 1",
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "img",
+         "h": 7
+        },
+        {
+         "t": "text",
+         "v": "Help"
+        },
+        {
+         "t": "img",
+         "h": 5
+        },
+        {
+         "t": "text",
+         "v": "View Knowledge Base",
+         "s": "link"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_13883",
+   "source": "rico:com.discipleskies.android.polarisnavigation",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "screen_1",
+      "title": "Screen 1",
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "text",
+         "v": "Africa"
+        },
+        {
+         "t": "text",
+         "v": "Asia"
+        },
+        {
+         "t": "text",
+         "v": "Australia-Oceania"
+        },
+        {
+         "t": "text",
+         "v": "Canada"
+        },
+        {
+         "t": "text",
+         "v": "Caribbean"
+        },
+        {
+         "t": "text",
+         "v": "Central America +"
+        },
+        {
+         "t": "text",
+         "v": "Europe"
+        },
+        {
+         "t": "text",
+         "v": "South America"
+        },
+        {
+         "t": "text",
+         "v": "USA"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_10964",
+   "source": "rico:com.eyeexamtest.eyetests",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "breathing_awareness",
+      "title": "Breathing Awareness",
+      "appbar": {
+       "t": "appbar",
+       "title": "Breathing Awareness"
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "card",
+         "c": [
+          {
+           "t": "row",
+           "c": [
+            {
+             "t": "avatar"
+            },
+            {
+             "t": "col",
+             "c": [
+              {
+               "t": "text",
+               "v": "Breathing Seasoned",
+               "s": "h2"
+              },
+              {
+               "t": "avatar"
+              },
+              {
+               "t": "avatar"
+              }
+             ]
+            },
+            {
+             "t": "icon",
+             "name": "circle"
+            }
+           ]
+          },
+          {
+           "t": "icon",
+           "name": "circle"
+          },
+          {
+           "t": "para",
+           "lines": 4
+          }
+         ]
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "btn",
+           "label": "finish"
+          },
+          {
+           "t": "btn",
+           "label": "next"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_25500",
+   "source": "rico:com.uwe.myoxygen",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "self_help",
+      "title": "Self-help",
+      "appbar": {
+       "t": "appbar",
+       "title": "Self-help"
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "list",
+         "n": 3,
+         "item": {
+          "t": "row",
+          "c": [
+           {
+            "t": "btn",
+            "label": "Information about an"
+           },
+           {
+            "t": "btn",
+            "label": "Thinking and anxiety"
+           }
+          ]
+         }
+        },
+        {
+         "t": "text",
+         "v": "Today's Reflection"
+        },
+        {
+         "t": "para",
+         "lines": 2
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_62958",
+   "source": "rico:com.chatforkik",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "screen_1",
+      "title": "Screen 1",
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "img",
+         "h": 12
+        },
+        {
+         "t": "text",
+         "v": "New?"
+        },
+        {
+         "t": "btn",
+         "label": "NEW ACCOUNT"
+        },
+        {
+         "t": "text",
+         "v": "Already have an"
+        },
+        {
+         "t": "btn",
+         "label": "LOG IN"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_47663",
+   "source": "rico:com.crone.skinsforminecraftpepro",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "what_does_the",
+      "title": "What does the",
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "icon",
+           "name": "circle"
+          },
+          {
+           "t": "col",
+           "c": [
+            {
+             "t": "text",
+             "v": "Owl"
+            },
+            {
+             "t": "text",
+             "v": "Animals"
+            }
+           ]
+          },
+          {
+           "t": "icon",
+           "name": "circle"
+          }
+         ]
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        },
+        {
+         "t": "text",
+         "v": "What does the",
+         "s": "h1"
+        },
+        {
+         "t": "btn",
+         "label": "DOWNLOAD"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_44227",
+   "source": "rico:com.dietcoacher.sos",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "handle_food_cravings",
+      "title": "Handle Food Cravings",
+      "appbar": {
+       "t": "appbar",
+       "title": "Handle Food Cravings",
+       "icons": [
+        {
+         "t": "icon",
+         "name": "circle"
+        }
+       ]
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "para",
+         "lines": 3
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        },
+        {
+         "t": "img",
+         "h": 6
+        },
+        {
+         "t": "img",
+         "h": 22
+        },
+        {
+         "t": "img",
+         "h": 22
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_10145",
+   "source": "rico:us.mathlab.android",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "terms_of_service",
+      "title": "Terms of Service",
+      "appbar": {
+       "t": "appbar",
+       "title": "Terms of Service"
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "list",
+         "n": 2,
+         "item": {
+          "t": "row",
+          "c": [
+           {
+            "t": "icon",
+            "name": "circle"
+           },
+           {
+            "t": "para",
+            "lines": 2
+           }
+          ]
+         }
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "btn",
+           "label": "Back"
+          },
+          {
+           "t": "btn",
+           "label": "OK"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_37245",
+   "source": "rico:com.zumobi.msnbc",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "screen",
+      "title": "Screen",
+      "appbar": {
+       "t": "appbar",
+       "title": "Screen",
+       "icons": [
+        {
+         "t": "icon",
+         "name": "menu"
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        }
+       ]
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "text",
+           "v": "IN-DEPTH",
+           "s": "link"
+          },
+          {
+           "t": "text",
+           "v": "SECTIONS",
+           "s": "link"
+          },
+          {
+           "t": "text",
+           "v": "SHOWS",
+           "s": "link"
+          }
+         ]
+        },
+        {
+         "t": "col",
+         "c": [
+          {
+           "t": "img",
+           "h": 37
+          },
+          {
+           "t": "text",
+           "v": "BREAKING",
+           "s": "caption"
+          },
+          {
+           "t": "text",
+           "v": "U.S. NEWS",
+           "s": "caption"
+          },
+          {
+           "t": "para",
+           "lines": 2
+          }
+         ]
+        },
+        {
+         "t": "list",
+         "n": 2,
+         "item": {
+          "t": "row",
+          "c": [
+           {
+            "t": "col",
+            "c": [
+             {
+              "t": "text",
+              "v": "EXCLUSIVE",
+              "s": "caption"
+             },
+             {
+              "t": "para",
+              "lines": 2
+             }
+            ]
+           },
+           {
+            "t": "img",
+            "h": 17
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_57414",
+   "source": "rico:ua.insomnia.kenya.newsi",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "screen_1",
+      "title": "Screen 1",
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "img",
+         "h": 6
+        },
+        {
+         "t": "para",
+         "lines": 2
+        },
+        {
+         "t": "text",
+         "v": "NOTIFICATIONS SETTIN"
+        },
+        {
+         "t": "list",
+         "n": 2,
+         "item": {
+          "t": "row",
+          "c": [
+           {
+            "t": "text",
+            "v": "Enable sound"
+           },
+           {
+            "t": "input",
+            "label": "Btn sound"
+           }
+          ]
+         }
+        },
+        {
+         "t": "text",
+         "v": "You can manage",
+         "s": "caption"
+        },
+        {
+         "t": "btn",
+         "label": "Let's start"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_49217",
+   "source": "rico:com.intuit.ems.iopm",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "payroll",
+      "title": "Payroll",
+      "appbar": {
+       "t": "appbar",
+       "title": "Payroll"
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "text",
+           "v": "PAY DATE"
+          },
+          {
+           "t": "text",
+           "v": "PAY PERIOD"
+          }
+         ]
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "text",
+           "v": "Mar 31, 2017",
+           "s": "link"
+          },
+          {
+           "t": "text",
+           "v": "Mar 25 -",
+           "s": "link"
+          }
+         ]
+        },
+        {
+         "t": "list",
+         "n": 6,
+         "item": {
+          "t": "row",
+          "c": [
+           {
+            "t": "avatar"
+           },
+           {
+            "t": "col",
+            "c": [
+             {
+              "t": "text",
+              "v": "Fasoli, Jon"
+             },
+             {
+              "t": "text",
+              "v": "Paper Check"
+             }
+            ]
+           },
+           {
+            "t": "text",
+            "v": "$0"
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_3206",
+   "source": "rico:com.google.android.talk",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "hangouts",
+      "title": "Hangouts",
+      "appbar": {
+       "t": "appbar",
+       "title": "Hangouts",
+       "icons": [
+        {
+         "t": "icon",
+         "name": "menu"
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        }
+       ]
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "text",
+         "v": "You're using an"
+        },
+        {
+         "t": "para",
+         "lines": 2
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "text",
+           "v": "No thanks",
+           "s": "link"
+          },
+          {
+           "t": "text",
+           "v": "Update",
+           "s": "link"
+          }
+         ]
+        },
+        {
+         "t": "img",
+         "h": 33
+        },
+        {
+         "t": "para",
+         "lines": 2
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_36134",
+   "source": "rico:com.glassy.pro",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "friends",
+      "title": "Friends",
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "icon",
+           "name": "menu"
+          },
+          {
+           "t": "text",
+           "v": "Friends",
+           "s": "h1"
+          }
+         ]
+        },
+        {
+         "t": "input",
+         "label": "Friends search"
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "icon",
+           "name": "circle"
+          },
+          {
+           "t": "col",
+           "c": [
+            {
+             "t": "text",
+             "v": "No friends yet!"
+            },
+            {
+             "t": "para",
+             "lines": 2
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_49932",
+   "source": "rico:com.huntstand.core",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "screen_1",
+      "title": "Screen 1",
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "img",
+         "h": 26
+        },
+        {
+         "t": "input",
+         "label": "appcrawler1@gmail.co"
+        },
+        {
+         "t": "input",
+         "label": "Crowd3116",
+         "secure": true
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "btn",
+           "label": "Sign Up"
+          },
+          {
+           "t": "btn",
+           "label": "Login"
+          }
+         ]
+        },
+        {
+         "t": "btn",
+         "label": "Forgot password?"
+        },
+        {
+         "t": "btn",
+         "label": "Skip"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_36123",
+   "source": "rico:com.glassy.pro",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "screen_1",
+      "title": "Screen 1",
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "img",
+         "h": 11
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "avatar"
+          },
+          {
+           "t": "input",
+           "label": "First name"
+          }
+         ]
+        },
+        {
+         "t": "list",
+         "n": 2,
+         "item": {
+          "t": "row",
+          "c": [
+           {
+            "t": "icon",
+            "name": "circle"
+           },
+           {
+            "t": "input",
+            "label": "Signup email"
+           }
+          ]
+         }
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "btn",
+           "label": "Back"
+          },
+          {
+           "t": "btn",
+           "label": "Sign Up"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_20864",
+   "source": "rico:com.noknok",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "screen",
+      "title": "Screen",
+      "appbar": {
+       "t": "appbar",
+       "title": "Screen"
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "text",
+         "v": "What's your phone",
+         "s": "h2"
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "input",
+           "label": "Country code"
+          },
+          {
+           "t": "input",
+           "label": "Phone number"
+          }
+         ]
+        },
+        {
+         "t": "para",
+         "lines": 1
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "input",
+           "label": "Check box"
+          },
+          {
+           "t": "text",
+           "v": "I accept the"
+          },
+          {
+           "t": "text",
+           "v": "Terms of use",
+           "s": "link"
+          },
+          {
+           "t": "text",
+           "v": "&"
+          }
+         ]
+        },
+        {
+         "t": "text",
+         "v": "Privacy policy",
+         "s": "link"
+        },
+        {
+         "t": "text",
+         "v": "CONTINUE",
+         "s": "link"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_61971",
+   "source": "rico:com.riliclabs.countriesbeen",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "countries_been",
+      "title": "Countries Been",
+      "appbar": {
+       "t": "appbar",
+       "title": "Countries Been",
+       "icons": [
+        {
+         "t": "icon",
+         "name": "menu"
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        }
+       ]
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "img",
+         "h": 28
+        },
+        {
+         "t": "text",
+         "v": "New States available",
+         "s": "link"
+        },
+        {
+         "t": "text",
+         "v": "Open Globe",
+         "s": "caption"
+        },
+        {
+         "t": "text",
+         "v": "World",
+         "s": "link"
+        },
+        {
+         "t": "list",
+         "n": 3,
+         "item": {
+          "t": "row",
+          "c": [
+           {
+            "t": "icon",
+            "name": "circle"
+           },
+           {
+            "t": "text",
+            "v": "Been"
+           },
+           {
+            "t": "text",
+            "v": "0 (0%)"
+           }
+          ]
+         }
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "icon",
+           "name": "circle"
+          },
+          {
+           "t": "text",
+           "v": "Explore"
+          }
+         ]
+        },
+        {
+         "t": "img",
+         "h": 7
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_52276",
+   "source": "rico:com.clorox.freshstep.android.pawpoints",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "shelters",
+      "title": "Shelters",
+      "appbar": {
+       "t": "appbar",
+       "title": "Shelters",
+       "icons": [
+        {
+         "t": "icon",
+         "name": "menu"
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        }
+       ]
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "img",
+         "h": 31
+        },
+        {
+         "t": "text",
+         "v": "A Forever Home",
+         "s": "caption"
+        },
+        {
+         "t": "text",
+         "v": "*ASPCA",
+         "s": "caption"
+        },
+        {
+         "t": "text",
+         "v": "Preferred Shelter",
+         "s": "caption"
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "img",
+           "h": 13
+          },
+          {
+           "t": "text",
+           "v": "10 PAW POINTS®",
+           "s": "h1"
+          }
+         ]
+        },
+        {
+         "t": "text",
+         "v": "Choose your Preferre",
+         "s": "h2"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_47948",
+   "source": "rico:com.cbs.sportsapp.android.psu",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "screen",
+      "title": "Screen",
+      "appbar": {
+       "t": "appbar",
+       "title": "Screen",
+       "icons": [
+        {
+         "t": "icon",
+         "name": "menu"
+        }
+       ]
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "card",
+         "c": [
+          {
+           "t": "img",
+           "h": 30
+          },
+          {
+           "t": "text",
+           "v": "Pittsburgh"
+          },
+          {
+           "t": "row",
+           "c": [
+            {
+             "t": "text",
+             "v": "Baseball"
+            },
+            {
+             "t": "text",
+             "v": "04/04/2017 | 6:00"
+            }
+           ]
+          },
+          {
+           "t": "row",
+           "c": [
+            {
+             "t": "text",
+             "v": "FREE"
+            },
+            {
+             "t": "icon",
+             "name": "circle"
+            },
+            {
+             "t": "text",
+             "v": "LISTEN"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_24042",
+   "source": "rico:br.com.icarros.androidapp",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "models",
+      "title": "Models",
+      "appbar": {
+       "t": "appbar",
+       "title": "Models",
+       "icons": [
+        {
+         "t": "icon",
+         "name": "circle"
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        }
+       ]
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "text",
+         "v": "Sedã",
+         "s": "h2"
+        },
+        {
+         "t": "card",
+         "c": [
+          {
+           "t": "img",
+           "h": 34
+          },
+          {
+           "t": "text",
+           "v": "Honda Civic"
+          },
+          {
+           "t": "row",
+           "c": [
+            {
+             "t": "text",
+             "v": "R$ 87,900.00 until"
+            },
+            {
+             "t": "text",
+             "v": "4 trims"
+            }
+           ]
+          },
+          {
+           "t": "text",
+           "v": "9.1"
+          }
+         ]
+        },
+        {
+         "t": "card",
+         "c": [
+          {
+           "t": "img",
+           "h": 29
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_54028",
+   "source": "rico:com.newstab",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "screen",
+      "title": "Screen",
+      "appbar": {
+       "t": "appbar",
+       "title": "Screen",
+       "icons": [
+        {
+         "t": "icon",
+         "name": "menu"
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        },
+        {
+         "t": "icon",
+         "name": "circle"
+        }
+       ]
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "img",
+         "h": 42
+        },
+        {
+         "t": "img",
+         "h": 42
+        },
+        {
+         "t": "img",
+         "h": 12
+        },
+        {
+         "t": "col",
+         "c": [
+          {
+           "t": "row",
+           "c": [
+            {
+             "t": "col",
+             "c": [
+              {
+               "t": "text",
+               "v": "\"Best of\" Feeds"
+              },
+              {
+               "t": "text",
+               "v": "By Google News",
+               "s": "caption"
+              }
+             ]
+            },
+            {
+             "t": "icon",
+             "name": "circle"
+            }
+           ]
+          },
+          {
+           "t": "para",
+           "lines": 6
+          },
+          {
+           "t": "row",
+           "c": [
+            {
+             "t": "btn",
+             "label": "Show Me"
+            },
+            {
+             "t": "btn",
+             "label": "Got It"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "t": "card",
+         "c": [
+          {
+           "t": "para",
+           "lines": 2
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_47038",
+   "source": "rico:com.privatediarywithlock_activity",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "s_26_4_2017",
+      "title": "26-4-2017",
+      "appbar": {
+       "t": "appbar",
+       "title": "26-4-2017",
+       "icons": [
+        {
+         "t": "icon",
+         "name": "circle"
+        }
+       ]
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "input",
+         "label": "Edited private",
+         "multiline": true
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "icon",
+           "name": "circle"
+          },
+          {
+           "t": "icon",
+           "name": "circle"
+          },
+          {
+           "t": "icon",
+           "name": "circle"
+          },
+          {
+           "t": "icon",
+           "name": "circle"
+          },
+          {
+           "t": "icon",
+           "name": "circle"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_50476",
+   "source": "rico:com.talabat",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "reviews",
+      "title": "Reviews",
+      "appbar": {
+       "t": "appbar",
+       "title": "Reviews"
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "card",
+         "c": [
+          {
+           "t": "text",
+           "v": "Saeed Almalek"
+          },
+          {
+           "t": "text",
+           "v": "04 December 2016"
+          }
+         ]
+        },
+        {
+         "t": "card",
+         "c": [
+          {
+           "t": "text",
+           "v": "Rebecka Lindström"
+          },
+          {
+           "t": "text",
+           "v": "28 November 2016"
+          },
+          {
+           "t": "para",
+           "lines": 4
+          }
+         ]
+        },
+        {
+         "t": "card",
+         "c": [
+          {
+           "t": "text",
+           "v": "24 November 2016"
+          }
+         ]
+        },
+        {
+         "t": "card",
+         "c": [
+          {
+           "t": "text",
+           "v": "Mai Fouad"
+          },
+          {
+           "t": "text",
+           "v": "24 November 2016",
+           "s": "caption"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_34765",
+   "source": "rico:com.mentormate.android.inboxdollars",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "sign_up",
+      "title": "Sign Up",
+      "appbar": {
+       "t": "appbar",
+       "title": "Sign Up"
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "img",
+         "h": 9
+        },
+        {
+         "t": "input",
+         "label": "In btn"
+        },
+        {
+         "t": "input",
+         "label": "In btn"
+        },
+        {
+         "t": "text",
+         "v": "or Sign Up",
+         "s": "link"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_7788",
+   "source": "rico:com.vent",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "screen",
+      "title": "Screen",
+      "appbar": {
+       "t": "appbar",
+       "title": "Screen"
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "para",
+         "lines": 1
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "text",
+           "v": "I love God,",
+           "s": "h2"
+          },
+          {
+           "t": "col",
+           "c": [
+            {
+             "t": "avatar"
+            },
+            {
+             "t": "icon",
+             "name": "circle"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "t": "para",
+         "lines": 2
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_20022",
+   "source": "rico:com.localweatherfree.android",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "screen_1",
+      "title": "Screen 1",
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "icon",
+           "name": "circle"
+          },
+          {
+           "t": "text",
+           "v": "City"
+          }
+         ]
+        },
+        {
+         "t": "img",
+         "h": 7
+        },
+        {
+         "t": "row",
+         "c": [
+          {
+           "t": "input",
+           "label": "Addcity"
+          },
+          {
+           "t": "btn",
+           "label": "Add"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rico_10222",
+   "source": "rico:com.tracfone.total.myaccount",
+   "spec": {
+    "v": 1,
+    "screens": [
+     {
+      "id": "turn_on_wifi",
+      "title": "Turn on WiFi",
+      "appbar": {
+       "t": "appbar",
+       "title": "Turn on WiFi"
+      },
+      "body": {
+       "t": "col",
+       "c": [
+        {
+         "t": "para",
+         "lines": 5
+        },
+        {
+         "t": "list",
+         "n": 3,
+         "item": {
+          "t": "row",
+          "c": [
+           {
+            "t": "input",
+            "label": "Cb wifi"
+           },
+           {
+            "t": "col",
+            "c": [
+             {
+              "t": "text",
+              "v": "MAXIMIZE WIFI MANAGE"
+             },
+             {
+              "t": "para",
+              "lines": 2
+             }
+            ]
+           }
+          ]
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  }
+ ]
+}
