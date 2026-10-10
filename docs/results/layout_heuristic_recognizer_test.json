@@ -1,0 +1,19 @@
+{
+ "json_valid": 1.0,
+ "schema_valid": 1.0,
+ "tree_similarity": 0.8014208852074005,
+ "type_f1": 0.8650784921786951,
+ "link_f1": 0.6872739712394885,
+ "n_link_f1": 290,
+ "label_accuracy": 0.9727238216696722,
+ "screens_correct": 0.981,
+ "meta": {
+  "method": "heuristic",
+  "name": "heuristic",
+  "input": "recognizer",
+  "split": "test",
+  "samples": 1000,
+  "ms_per_sample_median": 0.307,
+  "date": "2026-10-10"
+ }
+}

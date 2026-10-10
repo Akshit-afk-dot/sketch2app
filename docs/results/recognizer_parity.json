@@ -1,0 +1,7 @@
+{
+ "max_abs_diff": 9.918212890625e-05,
+ "ort_version": "1.28.0",
+ "laptop_cpu_ms_median": 14.201300000422634,
+ "size_mb": 8.05,
+ "checkpoint": "D:\\sketch2app-data\\runs\\recognizer\\v1\\best.pt"
+}

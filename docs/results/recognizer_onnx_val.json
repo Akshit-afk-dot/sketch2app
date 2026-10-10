@@ -1,0 +1,156 @@
+{
+ "elements_gold": 19962,
+ "elements_pred": 19750,
+ "detection_any_type": {
+  "precision": 0.9917974683544304,
+  "recall": 0.9812644023644925,
+  "f1": 0.9865028203062046
+ },
+ "detection_typed": {
+  "precision": 0.9889620253164557,
+  "recall": 0.9784590722372508,
+  "f1": 0.9836825141015311
+ },
+ "stroke_accuracy": 0.9996974536857881,
+ "per_type": {
+  "btn": {
+   "matched_gold": 895,
+   "type_accuracy": 0.9988826815642458
+  },
+  "input": {
+   "matched_gold": 495,
+   "type_accuracy": 0.997979797979798
+  },
+  "text": {
+   "matched_gold": 6539,
+   "type_accuracy": 0.9989294999235357
+  },
+  "heading": {
+   "matched_gold": 644,
+   "type_accuracy": 0.9968944099378882
+  },
+  "para": {
+   "matched_gold": 865,
+   "type_accuracy": 0.9976878612716763
+  },
+  "img": {
+   "matched_gold": 2293,
+   "type_accuracy": 0.9991277802006105
+  },
+  "icon": {
+   "matched_gold": 3501,
+   "type_accuracy": 0.9997143673236218
+  },
+  "menu": {
+   "matched_gold": 336,
+   "type_accuracy": 1.0
+  },
+  "avatar": {
+   "matched_gold": 507,
+   "type_accuracy": 1.0
+  },
+  "check": {
+   "matched_gold": 114,
+   "type_accuracy": 1.0
+  },
+  "radio": {
+   "matched_gold": 444,
+   "type_accuracy": 1.0
+  },
+  "switch": {
+   "matched_gold": 315,
+   "type_accuracy": 1.0
+  },
+  "divider": {
+   "matched_gold": 582,
+   "type_accuracy": 0.9914089347079038
+  },
+  "card": {
+   "matched_gold": 391,
+   "type_accuracy": 0.9181585677749361
+  },
+  "appbar": {
+   "matched_gold": 889,
+   "type_accuracy": 1.0
+  },
+  "bottomnav": {
+   "matched_gold": 171,
+   "type_accuracy": 0.9941520467836257
+  },
+  "fab": {
+   "matched_gold": 202,
+   "type_accuracy": 0.995049504950495
+  },
+  "listmark": {
+   "matched_gold": 405,
+   "type_accuracy": 0.9975308641975309
+  }
+ },
+ "confusion": {
+  "appbar->appbar": 889,
+  "avatar->avatar": 507,
+  "bottomnav->bottomnav": 170,
+  "bottomnav->divider": 1,
+  "btn->appbar": 1,
+  "btn->btn": 894,
+  "card->appbar": 2,
+  "card->btn": 6,
+  "card->card": 359,
+  "card->img": 23,
+  "card->input": 1,
+  "check->check": 114,
+  "divider->bottomnav": 2,
+  "divider->divider": 577,
+  "divider->input": 2,
+  "divider->text": 1,
+  "fab->fab": 201,
+  "fab->img": 1,
+  "heading->heading": 642,
+  "heading->text": 2,
+  "icon->icon": 3500,
+  "icon->img": 1,
+  "img->card": 1,
+  "img->img": 2291,
+  "img->para": 1,
+  "input->input": 494,
+  "input->text": 1,
+  "listmark->listmark": 404,
+  "listmark->text": 1,
+  "menu->menu": 336,
+  "para->card": 1,
+  "para->listmark": 1,
+  "para->para": 863,
+  "radio->radio": 444,
+  "switch->switch": 315,
+  "text->btn": 1,
+  "text->heading": 1,
+  "text->input": 1,
+  "text->listmark": 3,
+  "text->para": 1,
+  "text->text": 6532
+ },
+ "stroke_confusion": {
+  "arrow->arrow": 2362,
+  "arrow->text": 4,
+  "frame->frame": 508,
+  "frame->shape": 2,
+  "shape->arrow": 4,
+  "shape->frame": 11,
+  "shape->shape": 23567,
+  "shape->text": 19,
+  "text->shape": 3,
+  "text->text": 115647
+ },
+ "meta": {
+  "method": "onnx",
+  "split": "val",
+  "data": "synth",
+  "sketches": 1000,
+  "checkpoint": null,
+  "laptop_ms_per_sketch": {
+   "median": 48.923300000751624,
+   "p90": 184.65289999949167
+  },
+  "date": "2026-10-10"
+ }
+}

@@ -97,7 +97,10 @@ def parity(model: StrokeRecognizer, path: Path, inks: list[dict[str, Any]]) -> d
 
 
 def write_fixtures(model: StrokeRecognizer, inks: list[tuple[str, dict[str, Any]]]) -> None:
+    # Fixtures belong to one exported model, so stale ones from an earlier export must not survive.
     FIXTURES.mkdir(parents=True, exist_ok=True)
+    for old in FIXTURES.glob("*.json"):
+        old.unlink()
     for name, ink in inks:
         shape, geom = ink_features(ink)
         with torch.no_grad():

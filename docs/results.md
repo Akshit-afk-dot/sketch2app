@@ -13,7 +13,7 @@ Detection: a predicted element matches a gold element at IoU >= 0.5. *Any-type F
 | Method | Any-type F1 | Typed P | Typed R | Typed F1 | Stroke acc. | Laptop ms/sketch |
 |---|---:|---:|---:|---:|---:|---:|
 | Rule-based (baseline) | 0.663 | 0.424 | 0.572 | **0.487** | 0.850 | 2.5 |
-| Learned (ONNX, ships in app) | pending | | | | | |
+| Learned (ONNX, ships in app) | 0.983 | 0.986 | 0.974 | **0.980** | 1.000 | 48.7 |
 | Learned + real-data fine-tune | pending | | | | | |
 
 ### Real sketches (held-out participants)
@@ -24,7 +24,9 @@ Detection: a predicted element matches a gold element at IoU >= 0.5. *Any-type F
 | Learned (ONNX, ships in app) | pending | | | | | |
 | Learned + real-data fine-tune | pending | | | | | |
 
-Export and parity: pending
+![per-type accuracy](figures/recognizer_per_type.png)
+
+Export and parity: ONNX 8.05 MB; PyTorch vs ONNX Runtime 1.28.0 max |diff| 9.9e-05; laptop CPU 14.2 ms/sketch (Dart feature/decoder parity: app/test/recognizer_parity_test.dart).
 
 ## 2. Layout (element list -> UI spec)
 
@@ -44,7 +46,7 @@ only over samples whose gold spec has navigation links.
 
 | Method | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Rule-based builder (baseline) | pending | | | | | | |
+| Rule-based builder (baseline) | 1.000 | 1.000 | **0.801** | 0.865 | 0.687 | 0.973 | 0.3 |
 | Gemma 4 E2B base, 3-shot | pending | | | | | | |
 | Gemma 4 E2B + LoRA | pending | | | | | | |
 | Qwen3.5-0.8B + LoRA | pending | | | | | | |
