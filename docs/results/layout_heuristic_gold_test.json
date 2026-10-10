@@ -1,0 +1,19 @@
+{
+ "json_valid": 1.0,
+ "schema_valid": 1.0,
+ "tree_similarity": 0.8158781508513383,
+ "type_f1": 0.8727119772253924,
+ "link_f1": 0.9340364233467683,
+ "n_link_f1": 290,
+ "label_accuracy": 0.9945199772147151,
+ "screens_correct": 1.0,
+ "meta": {
+  "method": "heuristic",
+  "name": "heuristic",
+  "input": "gold",
+  "split": "test",
+  "samples": 1000,
+  "ms_per_sample_median": 0.393,
+  "date": "2026-10-10"
+ }
+}

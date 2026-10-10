@@ -73,3 +73,13 @@ def test_screen_naming_fixture() -> None:
 
     for case in _load(SPEC_DIR / "fixtures" / "naming.json")["cases"]:
         assert [sid for sid, _ in screen_names(case["titles"])] == case["ids"]
+
+
+@pytest.mark.parametrize(
+    "path", sorted((SPEC_DIR / "fixtures" / "prompt").glob("*.json")), ids=lambda p: p.name
+)
+def test_prompt_format_matches_fixture(path: Path) -> None:
+    from s2a.layout.prompt import build_prompt
+
+    fixture = _load(path)
+    assert build_prompt(fixture["elements"]) == fixture["prompt"]
