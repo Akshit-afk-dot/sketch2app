@@ -44,7 +44,11 @@ def summarize(values: list[int]) -> dict[str, float]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--extra-dart", type=Path, help="dir of exported projects (<stem>/lib/**.dart)")
+    parser.add_argument(
+        "--extra-dart",
+        type=Path,
+        help="dir of exported projects; counts screens + main.dart (not the shared widgets)",
+    )
     args = parser.parse_args()
     toks = load_tokenizers()
     rows = []
@@ -60,6 +64,7 @@ def main() -> None:
                 dart = "".join(
                     p.read_text(encoding="utf-8")
                     for p in sorted((args.extra_dart / path.stem / "lib").rglob("*.dart"))
+                    if p.name != "sketch_widgets.dart"  # shared library: written once, not generated per app
                 )
                 row[f"{name}/dart"] = count(tok, dart)
         rows.append(row)

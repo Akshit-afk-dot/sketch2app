@@ -8,6 +8,8 @@ import 'package:share_plus/share_plus.dart';
 import '../collect/collect_page.dart';
 import '../export/project.dart';
 import '../export/zip.dart';
+import '../layout/llm_layout.dart';
+import '../layout/on_device_llm.dart';
 import '../handwriting/handwriting.dart';
 import '../ink/samples.dart';
 import '../pipeline/pipeline.dart';
@@ -39,6 +41,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final controller = SketchController();
   final _onnx = OnnxStrokeRecognizer();
+  final _deviceLlm = LlmLayoutEngine(
+    OnDeviceTextGenerator(),
+  ); // keeps the loaded model between converts
   PipelineResult? _result;
   Map<String, String>? _files;
   String _file = 'lib/main.dart';
@@ -105,6 +110,15 @@ class _HomePageState extends State<HomePage> {
             ? _onnx
             : const HeuristicStrokeRecognizer(),
         handwriting: widget.handwriting,
+        layout: switch (settings.layoutMode) {
+          'lan' => LlmLayoutEngine(LanTextGenerator(settings.lanUrl)),
+          'device' => _deviceLlm,
+          _ => const HeuristicLayoutEngine(),
+        },
+        // The first on-device call also loads the model from storage.
+        layoutTimeout: Duration(
+          seconds: settings.layoutMode == 'device' ? 90 : 30,
+        ),
       );
       final result = await pipeline.run(controller.doc);
       controller.setOverlay(result.elements);

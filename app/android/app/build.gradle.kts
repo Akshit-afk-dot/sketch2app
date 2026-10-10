@@ -19,7 +19,8 @@ android {
         applicationId = "dev.sketch2app.sketch2app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // Android 11+: LiteRT-LM (on-device layout model) requires API 30.
+        minSdk = 30
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

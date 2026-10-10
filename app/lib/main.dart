@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_edge_ai/flutter_edge_ai.dart';
+import 'package:flutter_edge_ai_litertlm/flutter_edge_ai_litertlm.dart';
 
 import 'handwriting/handwriting.dart';
 import 'ui/app_settings.dart';
@@ -9,6 +11,10 @@ import 'ui/home_page.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final settings = await AppSettings.load();
+  if (Platform.isAndroid) {
+    // LiteRT-LM runs the on-device layout model; registering it costs nothing until a model is loaded.
+    await FlutterEdgeAi.initialize(inferenceEngines: const [LiteRtLmEngine()]);
+  }
   // ML Kit exists only on Android/iOS; elsewhere the pipeline runs with generic labels.
   final HandwritingReader handwriting = Platform.isAndroid || Platform.isIOS
       ? MlKitHandwritingReader()

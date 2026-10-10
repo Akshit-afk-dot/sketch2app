@@ -126,7 +126,70 @@ Unlinked buttons stay enabled (`() {}`) so the preview feels like a real app.
   Flutter path Google's LiteRT-LM docs point to. Requires Android minSdk 30 and arm64-v8a.
 - **Fine-tuning: Unsloth + TRL** (documented Gemma 4 E2B support, fits a free T4 with QLoRA).
 
-## 7. Rejected alternatives (running list)
+## 7. Recognition (P2-P4)
+
+**Rule-based recognizer** (`app/lib/recognize/heuristic_recognizer.dart`): each legend line is one rule
+over per-stroke features (closedness, area ratio, straightness, y-turns, RDP corners), all relative to the
+frame width so zoom does not matter. Key feature: enclosed area / bbox area is pi/4 for *any* ellipse and
+~1 for a rectangle, an aspect-invariant circle-vs-box test. It is the fallback and the baseline.
+
+**Learned recognizer** (`ml/s2a/recognizer/`, 1.98M parameters, 8 MB ONNX):
+- *Why strokes, not pixels:* ink arrives already segmented, ordered and timed. A sequence of ~100 strokes
+  is cheaper than a CNN on a megapixel canvas and keeps information an image loses (an outline is one fast
+  closed stroke; letters are many small strokes close in time).
+- *Per-stroke encoder:* 32 arc-length-resampled points (shape relative to the stroke's own box + direction)
+  through a 1D CNN, plus 16 geometric/timing features. *Context:* 4-layer pre-norm transformer over strokes
+  with 2D sinusoidal position (stroke centre/size) and drawing-order encodings: a stroke's meaning depends on
+  its neighbours (text inside a box -> button; an X inside -> image).
+- *Heads:* stroke class (frame/text/shape/arrow), element type per stroke (pooled per group), and a
+  pairwise affinity q_i . k_j ("same element?"). The number of elements is unknown, so grouping is
+  framed as pair classification + **average-linkage clustering** (resists chaining, unlike connected
+  components). Element boxes are the union of grouped strokes: exact, so no box regression head.
+- *Training:* AdamW + warmup/cosine, bf16 autocast, length-bucketed batches; model selection on typed
+  element F1 of decoded val sketches (the reported metric, not the loss).
+- *Runtime:* ONNX Runtime 1.28 (same version in Python and in the Android plugin). Features and decoder are
+  Dart ports tested against Python fixtures; an in-app self-test compares on-device ORT outputs with PyTorch.
+
+## 8. Data (P3)
+
+- **RICO -> spec:** recursive **XY-cut** (classic document layout analysis) recovers nested rows/columns
+  from component bounds; greedy row grouping flattened thumbnail+title+description into one row.
+  A final `sanitize` pass makes every tree schema-valid. 42,313 of 66,261 screens kept.
+- **Our own layout, not the app's pixels:** the sketcher lays out each spec with sampled sizes/gaps, so the
+  sketch always matches its gold spec; whatever had to change (truncated labels, dropped overflow, a list
+  drawn as 2 repeats instead of "xN") changes the gold too.
+- **Legend-coverage augmentation:** RICO has *no* divider label and 115 bottom navs in 42k screens; we insert
+  dividers, bottom navs, FABs, radio and switch rows (labels from the corpus) so every legend item is
+  learnable. Recorded in configs/data.yaml and the data report.
+- **Splits by app** (hash of the package name): no app in two splits, so layouts cannot leak.
+- **Human-like noise:** correlated pen jitter (smoothed, not white noise), corner overshoot/rounding,
+  multi-stroke and re-traced outlines, broken strokes, per-frame rotation/scale/shear, sloppy per-element
+  offsets, shuffled drawing order, realistic timing; Hershey single-stroke fonts for text.
+
+## 9. Layout model (P6)
+
+- **Prompt format** (`prompt.py` / `prompt.dart`, shared fixtures): integer-percent coordinates per frame,
+  reading order, short ids; arrows resolved geometrically to "element k -> screen n" before the model sees
+  them (geometry is not the LLM's job). ~8 tokens per element.
+- **Training inputs are noisy on purpose:** the trained recognizer's measured errors on val (per-type miss
+  rate, type confusions, false positives, box jitter) are replayed on gold element lists, plus handwriting
+  typos; 20% stay clean. Otherwise the model never learns to recover from real recognizer output.
+- **Inference policy** (`llm_layout.dart`), identical for LAN and on-device: generate at T=0.3 -> validate
+  -> repair (strip prose, close truncated JSON, drop unknown keys/types, one-option radio -> checkbox,
+  drop dangling links) -> retry at T=0 (greedy) -> the pipeline falls back to the rule-based builder.
+- **LAN server** only hosts the model; with llama.cpp the output is grammar-constrained to the spec's JSON
+  Schema, so syntax errors and unknown node types cannot occur.
+- **On-device:** fine-tuned model -> merged -> `litert-torch export_hf` -> `.litertlm`, run by LiteRT-LM via
+  `flutter_edge_ai` (Android 11+, arm64). Not bundled in the APK (GBs); pushed once with adb.
+
+## 10. Collect mode (P5)
+
+Participants draw one *part* of one element per step (outline, then label) and tap Next, so every stroke's
+element and role are labelled exactly with no manual annotation. Records use the synthetic sample format.
+Targets come from test-split apps. Real data is split **by participant** (frozen, ~40% held out), so the
+real test set never shares a drawing style with fine-tuning data.
+
+## 11. Rejected alternatives (running list)
 
 | Alternative | Why not |
 |---|---|
@@ -135,3 +198,10 @@ Unlinked buttons stay enabled (`() {}`) so the preview feels like a real app.
 | Image-based recognizer (CNN on a rendered sketch) | Strokes carry order, timing and grouping for free and are tiny; P4 will justify in detail. |
 | `GridView` for grids | Forces a fixed cell aspect ratio, so card content overflows; `GridOf` sizes rows to content. |
 | Copying PNG launcher icons into exports | Binary files in an otherwise text-only template; a vector drawable works from API 21. |
+| LiteRT (TFLite) for the recognizer | litert-torch export is Linux-only; ONNX exports on Windows, keeps a dynamic stroke axis, and avoids a second LiteRT runtime next to LiteRT-LM. |
+| Box-regression head | Element boxes are exactly the union of the grouped strokes. |
+| Connected components for grouping | One confident wrong edge merges two elements; average linkage does not chain. |
+| Greedy row grouping for RICO | Flattened nested layouts; XY-cut recovers the hierarchy. |
+| Using RICO pixel bounds for sketches | Sketch and simplified spec would disagree; our own layout keeps them consistent. |
+| Training the LLM on clean element lists | The model would never see recognizer errors; measured noise is replayed instead. |
+| Icon identity in the spec (search, cart...) | The legend has no way to draw which icon; gold uses generic `circle` (menu and fab excepted). |

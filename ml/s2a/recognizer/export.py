@@ -152,6 +152,8 @@ def main() -> None:
     write_fixtures(model, sorted(inks, key=lambda ni: len(ni[1]["strokes"]))[: args.fixtures])
     print(json.dumps(report, indent=1))
     (path.with_suffix(".parity.json")).write_text(json.dumps(report, indent=1), encoding="utf-8")
+    results = REPO_ROOT / "docs" / "results" / "recognizer_parity.json"  # committed copy for docs/results.md
+    results.write_text(json.dumps(report, indent=1), encoding="utf-8")
 
 
 if __name__ == "__main__":
