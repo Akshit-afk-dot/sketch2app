@@ -2,6 +2,7 @@
 // `flutter test`) on each one. Writes ../docs/results/export_check.json (pass rates for docs/results.md).
 //
 //   dart run tool/export_examples.dart --out D:/sketch2app-data/exports [--specs ../spec/examples] [--test]
+//                                      [--report ../docs/results/export_check.json]
 import 'dart:convert';
 import 'dart:io';
 
@@ -24,6 +25,7 @@ Future<void> main(List<String> argv) async {
   final specsDir = Directory(opt('--specs', '../spec/examples'));
   final outDir = Directory(opt('--out', 'test/_out/exports'));
   final runTests = argv.contains('--test');
+  final reportPath = opt('--report', '../docs/results/export_check.json');
   final specs =
       specsDir
           .listSync()
@@ -95,8 +97,7 @@ Future<void> main(List<String> argv) async {
         ? (jsonDecode('${version.stdout}') as Map)['frameworkVersion']
         : 'unknown',
   };
-  final report = File('../docs/results/export_check.json')
-    ..createSync(recursive: true);
+  final report = File(reportPath)..createSync(recursive: true);
   report.writeAsStringSync(
     const JsonEncoder.withIndent(
       ' ',
