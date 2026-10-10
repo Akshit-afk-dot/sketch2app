@@ -51,9 +51,9 @@ Apps are assigned to train/val/test by a hash of the package name, so no app app
 
 | Split | Apps | Specs | Samples | 1 screen | 2 screens | 3 screens | Failed | Strokes/sample (median, p90) |
 |---|---:|---:|---:|---:|---:|---:|---:|---|
-| train | 6,279 | 33,600 | 33,560 | 23,486 | 5,311 | 4,763 | 40 | 94, 271 |
-| val | 830 | 4,448 | 4,440 | 3,156 | 691 | 593 | 8 | 94, 278 |
-| test | 753 | 4,265 | 4,265 | 3,065 | 616 | 584 | 0 | 98, 269 |
+| train | 6,279 | 33,600 | 33,561 | 23,486 | 5,312 | 4,763 | 39 | 106, 299 |
+| val | 830 | 4,448 | 4,440 | 3,156 | 691 | 593 | 8 | 106, 309 |
+| test | 753 | 4,265 | 4,265 | 3,065 | 616 | 584 | 0 | 107, 307 |
 
 ## 3. Synthetic sketches
 
@@ -78,30 +78,37 @@ Every sample is laid out by our own randomised layout (not the app's pixels) and
 | canvas.drawn_frame_prob | 0.25 |
 | layout.list_mark_prob | 0.65 |
 | multiscreen.share | 0.3 |
+| augment.divider | 0.35 |
+| augment.bottomnav | 0.12 |
+| augment.fab | 0.1 |
+| augment.radio | 0.1 |
+| augment.switch | 0.1 |
+| augment.grid | 0.3 |
 
 Element types in the train split:
 
 | Element | Count |
 |---|---:|
-| text | 211,345 |
-| icon | 94,338 |
-| img | 86,780 |
-| para | 30,184 |
-| btn | 29,236 |
-| appbar | 26,855 |
-| heading | 21,367 |
-| input | 15,302 |
-| avatar | 13,859 |
-| listmark | 11,913 |
-| card | 10,167 |
-| menu | 9,192 |
-| check | 5,845 |
-| switch | 1,636 |
-| radio | 1,509 |
-| fab | 1,354 |
-| bottomnav | 147 |
+| text | 222,073 |
+| icon | 117,164 |
+| img | 86,289 |
+| para | 30,001 |
+| btn | 29,063 |
+| appbar | 26,859 |
+| heading | 21,301 |
+| divider | 20,607 |
+| radio | 15,599 |
+| input | 15,234 |
+| avatar | 13,767 |
+| listmark | 11,874 |
+| switch | 10,917 |
+| card | 10,325 |
+| menu | 9,178 |
+| fab | 6,152 |
+| bottomnav | 5,935 |
+| check | 5,798 |
 
-Stroke classes in the first train shard (65,914 strokes): text 81.4%, shape 16.4%, arrow 1.7%, frame 0.5%.
+Stroke classes in the first train shard (73,390 strokes): text 81.0%, shape 16.9%, arrow 1.7%, frame 0.3%.
 
 Random training samples (shape strokes black, handwriting blue, arrows red, drawn frames grey):
 

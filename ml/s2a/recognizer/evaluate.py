@@ -21,8 +21,7 @@ from typing import Any
 
 import numpy as np
 
-from s2a.data.build_dataset import out_root
-from s2a.data.collected import real_root
+from s2a.data.collected import eval_root
 from s2a.paths import REPO_ROOT
 from s2a.recognizer.decode import decode
 from s2a.recognizer.features import ink_features
@@ -30,11 +29,6 @@ from s2a.recognizer.labels import STROKE_CLASSES
 from s2a.recognizer.metrics import DetectionStats, stroke_classes_from_elements
 
 RESULTS = REPO_ROOT / "docs" / "results"
-
-
-def eval_root(data: str) -> Path:
-    """Synthetic eval exports, or the held-out real sketches imported from Collect mode."""
-    return real_root() / "eval" if data == "real" else out_root() / "eval"
 
 
 def _gold(ink: Path) -> dict[str, Any]:

@@ -68,16 +68,29 @@ $PY -m s2a.recognizer.train --name v1                     # ~45 min on an RTX 30
 $PY -m s2a.recognizer.export --ckpt $S2A_DATA_ROOT/runs/recognizer/v1/best.pt   # ONNX + parity + fixtures
 $PY -m s2a.recognizer.evaluate --method heuristic --split test
 $PY -m s2a.recognizer.evaluate --method onnx --split test
-$PY -m s2a.layout.recognized --split val && $PY -m s2a.layout.noise measure --pred $S2A_DATA_ROOT/synth/v1/eval/val/recognized
+$PY -m s2a.layout.recognized --split val && $PY -m s2a.layout.noise measure   # recognizer error rates
 $PY -m s2a.layout.recognized --split test
 $PY -m s2a.layout.sft_data            # SFT data + bundle for the notebook
 $PY -m s2a.layout.evaluate --method heuristic --input gold --split test
-# Layout model: run notebooks/layout_sft.ipynb on Colab/Kaggle with the bundle, then score its predictions:
-$PY -m s2a.layout.evaluate --method predictions --pred <predictions_finetuned_gold.jsonl> --name finetuned_gemma
+$PY -m s2a.layout.evaluate --method heuristic --input recognizer --split test
+# Layout model: notebooks/layout_sft.ipynb on Colab/Kaggle with the bundle, or locally on a 4 GB GPU:
+$PY -m s2a.layout.train_local --name qwen35-0.8b-lora-v1 --examples 4000 --epochs 2   # ~6 h on an RTX 3050 Ti
+$PY -m s2a.layout.evaluate --method predictions --input gold --name finetuned_qwen \
+    --pred $S2A_DATA_ROOT/runs/layout/qwen35-0.8b-lora-v1/predictions_gold.jsonl     # and --input recognizer
+$PY -m s2a.e2e --n 200 --analyze 20   # ink -> recognizer -> layout -> render -> export -> flutter analyze
 $PY -m s2a.results                    # docs/results.md
 ```
 
-Collected real sketches (Collect mode > Export) are imported with `python -m s2a.data.collected import <zip>`.
+### Real sketches (Collect mode)
+
+```bash
+$PY -m s2a.data.collected import <export.zip>      # validates, splits by participant (frozen, ~40% held out)
+$PY -m s2a.recognizer.evaluate --method onnx --data real --split test
+$PY -m s2a.layout.recognized --data real --split train && $PY -m s2a.layout.recognized --data real --split test
+$PY -m s2a.layout.noise measure --data real --split train      # real error rates for the SFT noise model
+$PY -m s2a.layout.sft_data --noise ../docs/results/recognizer_noise_real_train.json   # adds eval_real_test_*
+$PY -m s2a.layout.evaluate --method heuristic --input recognizer --data real
+```
 
 ## Tests and linters
 

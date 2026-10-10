@@ -12,8 +12,9 @@ the prompt tokens; that is what makes 4 GB of VRAM enough.
     python -m s2a.layout.train_local --examples 4000 --epochs 2
     python -m s2a.layout.train_local --eval-only --adapter <run>/adapter     # test predictions only
 
-Writes $S2A_DATA_ROOT/runs/layout/<name>/: adapter/, val_history.json, train_log.json,
-predictions_<cond>.jsonl, config.json.
+Writes $S2A_DATA_ROOT/runs/layout/<name>/: adapter/, val_history.json, train_log.json, config.json and
+predictions_<cond>.jsonl for every eval prompt file sft_data wrote (gold, recognizer, and real_gold /
+real_recognizer once Collect-mode data is imported).
 """
 
 from __future__ import annotations
@@ -240,10 +241,8 @@ def main() -> None:
         runner = Runner(args.model, load_4bit=not args.no_4bit)  # fresh base, then the best adapter
     if args.adapter is not None:
         runner.model = PeftModel.from_pretrained(runner.model, str(args.adapter))
-    for cond in ("gold", "recognizer"):
-        path = llm_dir() / f"eval_test_{cond}.jsonl"
-        if not path.exists():
-            continue
+    for path in sorted(llm_dir().glob("eval_*test_*.jsonl")):
+        cond = path.stem.removeprefix("eval_").replace("test_", "", 1)  # gold, real_gold, ...
         rows = read_jsonl(path)[: args.test_samples]
         outs, ms = runner.generate([r["prompt"] for r in rows])
         with (out / f"predictions_{cond}.jsonl").open("w", encoding="utf-8") as f:

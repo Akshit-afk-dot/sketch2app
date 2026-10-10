@@ -3,7 +3,9 @@
 The layout model is trained on element lists derived from gold specs. If those inputs were perfect, it
 would never learn to recover from what the recognizer and handwriting reader actually get wrong. So we
 measure the trained recognizer on the val split (python -m s2a.layout.noise measure) and replay those
-error rates on gold element lists:
+error rates on gold element lists. Synthetic val understates real-sketch errors, so once Collect-mode
+data exists, measure on its fine-tuning split instead (--data real --split train) and rebuild the SFT
+data with `sft_data --noise` pointing at that file:
     - misses: drop an element with its type's measured miss rate
     - confusions: change a type with the measured P(pred type | gold type)
     - false positives: add spurious elements at the measured rate, with the measured type mix
@@ -23,7 +25,7 @@ from typing import Any
 
 import numpy as np
 
-from s2a.data.build_dataset import out_root
+from s2a.data.collected import eval_root
 from s2a.paths import REPO_ROOT
 from s2a.recognizer.metrics import match
 
@@ -130,11 +132,18 @@ def corrupt(
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("command", choices=["measure"])
-    ap.add_argument("--pred", type=Path, required=True, help="dir of predicted element lists (val)")
+    ap.add_argument("--data", choices=["synth", "real"], default="synth")
+    ap.add_argument("--split", choices=["train", "val"], default="val")
     args = ap.parse_args()
-    stats = measure(args.pred, out_root() / "eval" / "val" / "gold")
-    NOISE_STATS.parent.mkdir(parents=True, exist_ok=True)
-    NOISE_STATS.write_text(json.dumps(stats, indent=1), encoding="utf-8")
+    base = eval_root(args.data) / args.split  # recognized/ is written by s2a.layout.recognized
+    stats = measure(base / "recognized", base / "gold")
+    stats["source"] = f"{args.data}/{args.split}"
+    out = NOISE_STATS
+    if args.data == "real":
+        out = NOISE_STATS.with_name(f"recognizer_noise_real_{args.split}.json")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(stats, indent=1), encoding="utf-8")
+    print(f"wrote {out}")
     print(json.dumps({k: v for k, v in stats.items() if k not in ("confusion",)}, indent=1))
 
 

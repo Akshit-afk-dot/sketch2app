@@ -1,6 +1,7 @@
 """Evaluate layout methods on eval sketches; writes docs/results/layout_<method>_<input>_<split>.json.
 
     python -m s2a.layout.evaluate --method heuristic --input gold --split test
+    python -m s2a.layout.evaluate --method heuristic --input recognizer --data real   # real sketches
     python -m s2a.layout.evaluate --method predictions --pred preds.jsonl --input gold --split test
 
 Inputs: `gold` = the gold element list with gold labels (layout stage in isolation, perfect recognition
@@ -20,31 +21,31 @@ import time
 from pathlib import Path
 from typing import Any
 
-from s2a.data.build_dataset import out_root
+from s2a.data.collected import eval_root
 from s2a.layout.metrics import mean_scores, score
 from s2a.paths import REPO_ROOT
 
 RESULTS = REPO_ROOT / "docs" / "results"
 
 
-def load_inputs(split: str, kind: str) -> dict[str, dict[str, Any]]:
-    """id -> elements.v1 input for the layout stage."""
+def load_inputs(base: Path, kind: str) -> dict[str, dict[str, Any]]:
+    """id -> elements.v1 input for the layout stage, from an eval/<split> directory."""
     if kind == "gold":
         out = {}
-        for p in sorted((out_root() / "eval" / split / "gold").glob("*.json")):
+        for p in sorted((base / "gold").glob("*.json")):
             g = json.loads(p.read_text(encoding="utf-8"))
             out[p.stem] = g["elements"]
         return out
-    path = out_root() / "eval" / split / "recognized.jsonl"
+    path = base / "recognized.jsonl"
     if not path.exists():
-        raise SystemExit(f"{path} missing: run python -m s2a.layout.recognized --split {split}")
+        raise SystemExit(f"{path} missing: run python -m s2a.layout.recognized (same --data/--split)")
     return {r["id"]: r["elements"] for r in map(json.loads, path.open(encoding="utf-8"))}
 
 
-def gold_specs(split: str) -> dict[str, dict[str, Any]]:
+def gold_specs(base: Path) -> dict[str, dict[str, Any]]:
     return {
         p.stem: json.loads(p.read_text(encoding="utf-8"))["spec"]
-        for p in sorted((out_root() / "eval" / split / "gold").glob("*.json"))
+        for p in sorted((base / "gold").glob("*.json"))
     }
 
 
@@ -71,12 +72,14 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--method", choices=["heuristic", "predictions"], required=True)
     ap.add_argument("--input", choices=["gold", "recognizer"], default="gold")
+    ap.add_argument("--data", choices=["synth", "real"], default="synth")
     ap.add_argument("--split", choices=["val", "test"], default="test")
     ap.add_argument("--pred", type=Path, help="JSONL of model outputs (method=predictions)")
     ap.add_argument("--name", help="result name (default: method)")
     args = ap.parse_args()
-    inputs = load_inputs(args.split, args.input)
-    golds = gold_specs(args.split)
+    base = eval_root(args.data) / args.split
+    inputs = load_inputs(base, args.input)
+    golds = gold_specs(base)
     ms: dict[str, float] = {}
     if args.method == "heuristic":
         outputs, ms = run_heuristic(inputs)
@@ -90,13 +93,15 @@ def main() -> None:
         "method": args.method,
         "name": args.name or args.method,
         "input": args.input,
+        "data": args.data,
         "split": args.split,
         "samples": len(rows),
         "ms_per_sample_median": times[len(times) // 2] if times else None,
         "date": time.strftime("%Y-%m-%d"),
     }
     RESULTS.mkdir(parents=True, exist_ok=True)
-    path = RESULTS / f"layout_{args.name or args.method}_{args.input}_{args.split}.json"
+    split = args.split if args.data == "synth" else f"real_{args.split}"
+    path = RESULTS / f"layout_{args.name or args.method}_{args.input}_{split}.json"
     path.write_text(json.dumps(summary, indent=1), encoding="utf-8")
     print(json.dumps(summary, indent=1))
 

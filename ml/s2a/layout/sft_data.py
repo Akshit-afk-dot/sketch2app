@@ -1,9 +1,10 @@
 """Build layout-model SFT data and evaluation prompts; package them for the Colab/Kaggle notebook.
 
-    python -m s2a.layout.sft_data
+    python -m s2a.layout.sft_data [--noise docs/results/recognizer_noise_real_train.json]
 
-Writes $S2A_DATA_ROOT/llm/{sft_train,sft_val}.jsonl, eval_test_*.jsonl and sketch2app_llm_bundle.zip
-(the data plus the metric code the notebook needs).
+Writes $S2A_DATA_ROOT/llm/{sft_train,sft_val}.jsonl, eval_test_{gold,recognizer}.jsonl (synthetic test),
+eval_real_test_{gold,recognizer}.jsonl (held-out Collect-mode sketches, once imported) and
+sketch2app_llm_bundle.zip (the data plus the metric code the notebook needs).
 
 Each example: prompt = element list text (prompt.py) of a noisy copy of the gold element list (noise.py,
 rates measured from the real recognizer); completion = canonical gold spec. 20% of training inputs stay
@@ -13,6 +14,7 @@ Examples longer than the context budget are dropped and counted.
 
 from __future__ import annotations
 
+import argparse
 import gzip
 import json
 import zipfile
@@ -22,6 +24,7 @@ from typing import Any
 import numpy as np
 
 from s2a.data.build_dataset import out_root
+from s2a.data.collected import eval_root
 from s2a.layout.noise import NOISE_STATS, corrupt
 from s2a.layout.prompt import INSTRUCTION, build_prompt
 from s2a.paths import REPO_ROOT, data_root
@@ -67,9 +70,9 @@ def build(split: str, stats: dict[str, Any], limit: int = 0) -> tuple[list[dict[
     return rows, counts
 
 
-def eval_prompts(split: str) -> dict[str, list[dict[str, Any]]]:
-    """Prompts for the two evaluation conditions: gold element lists and real recognizer output."""
-    base = out_root() / "eval" / split
+def eval_prompts(base: Path) -> dict[str, list[dict[str, Any]]]:
+    """Prompts for the two evaluation conditions in an eval/<split> dir: gold element lists and the
+    trained recognizer's output (s2a.layout.recognized); empty when the directory does not exist."""
     gold = {p.stem: json.loads(p.read_text(encoding="utf-8")) for p in sorted((base / "gold").glob("*.json"))}
     out = {"gold": [{"id": k, "prompt": build_prompt(g["elements"])} for k, g in gold.items()]}
     rec = base / "recognized.jsonl"
@@ -99,20 +102,28 @@ def bundle(files: list[Path]) -> Path:
 
 
 def main() -> None:
-    stats = json.loads(NOISE_STATS.read_text(encoding="utf-8"))
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--noise", type=Path, default=NOISE_STATS, help="error rates to replay (noise.py)")
+    args = ap.parse_args()
+    stats = json.loads(args.noise.read_text(encoding="utf-8"))
     files = []
-    report: dict[str, Any] = {"instruction": INSTRUCTION}
+    report: dict[str, Any] = {"instruction": INSTRUCTION, "noise": args.noise.name}
     for split, name in (("train", "sft_train"), ("val", "sft_val")):
         rows, counts = build(split, stats, limit=VAL_EXAMPLES if split == "val" else 0)
         path = llm_dir() / f"{name}.jsonl"
         path.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n", encoding="utf-8")
         files.append(path)
         report[name] = {"examples": len(rows), **counts}
-    for cond, rows in eval_prompts("test").items():
-        path = llm_dir() / f"eval_test_{cond}.jsonl"
-        path.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n", encoding="utf-8")
-        files.append(path)
-        report[f"eval_test_{cond}"] = len(rows)
+    for prefix, data in (("test", "synth"), ("real_test", "real")):
+        for cond, rows in eval_prompts(eval_root(data) / "test").items():
+            if not rows:
+                continue
+            path = llm_dir() / f"eval_{prefix}_{cond}.jsonl"
+            path.write_text(
+                "\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n", encoding="utf-8"
+            )
+            files.append(path)
+            report[path.stem] = len(rows)
     report["bundle"] = str(bundle(files))
     (llm_dir() / "sft_report.json").write_text(json.dumps(report, indent=1), encoding="utf-8")
     print(json.dumps(report, indent=1))

@@ -223,6 +223,10 @@ def test_collected_import_validates_and_splits_by_participant(tmp_path: Any, mon
     assert report.get("train", 0) + report.get("test", 0) == 6
     splits = json.loads((tmp_path / "real" / "splits.json").read_text(encoding="utf-8"))
     assert set(splits) == {"p01", "p02", "p03", "p04", "p05", "p06"}
+    # Both splits land in the eval format (ink + gold per sketch) that the evaluation scripts read.
+    for pid, split in splits.items():
+        for kind in ("ink", "gold"):
+            assert (collected.eval_root("real") / split / kind / f"{pid}_t1.json").exists()
     # A participant's split is frozen: importing again keeps everyone where they were.
     collected.import_records(src)
     assert json.loads((tmp_path / "real" / "splits.json").read_text(encoding="utf-8")) == splits

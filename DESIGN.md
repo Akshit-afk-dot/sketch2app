@@ -174,6 +174,13 @@ frame width so zoom does not matter. Key feature: enclosed area / bbox area is p
 - **Training inputs are noisy on purpose:** the trained recognizer's measured errors on val (per-type miss
   rate, type confusions, false positives, box jitter) are replayed on gold element lists, plus handwriting
   typos; 20% stay clean. Otherwise the model never learns to recover from real recognizer output.
+  The rates (docs/results/recognizer_noise_val.json) are measured on *synthetic* val sketches, so they
+  understate real-sketch errors; once Collect-mode data exists they are re-measured on the real fine-tuning
+  split (`noise measure --pred` on it) and the SFT data rebuilt.
+- **Local training** (`train_local.py`, 4 GB laptop GPU, Windows): QLoRA on Qwen3.5-0.8B with a plain PEFT
+  loop. TRL's trainer needs Triton (Linux only); the loop also builds vocabulary logits only for the
+  completion, in checkpointed chunks, which keeps 2k-token examples under 2 GB. Colab/Kaggle runs use the
+  notebook (Unsloth + TRL) with identical data, LoRA settings and early-stopping rule.
 - **Inference policy** (`llm_layout.dart`), identical for LAN and on-device: generate at T=0.3 -> validate
   -> repair (strip prose, close truncated JSON, drop unknown keys/types, one-option radio -> checkbox,
   drop dangling links) -> retry at T=0 (greedy) -> the pipeline falls back to the rule-based builder.

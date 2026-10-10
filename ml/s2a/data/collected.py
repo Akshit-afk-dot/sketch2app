@@ -6,7 +6,9 @@
 Real data is split by PARTICIPANT, not by sketch: one person's drawing style must not appear in both the
 fine-tuning set and the held-out test set. The assignment is frozen in splits.json the first time a
 participant is seen (hash-based, ~40% held out), so later imports never move anyone into training.
-Held-out sketches are exported in the same eval format as synthetic data (eval/test/{ink,gold}).
+Both splits are also exported in the synthetic eval format (eval/<split>/{ink,gold}): `test` is the
+held-out real test set; `train` is where the recognizer's real-sketch error rates are measured
+(s2a.layout.noise) and real-data fine-tuning is checked.
 """
 
 from __future__ import annotations
@@ -19,6 +21,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from s2a.data.build_dataset import out_root
 from s2a.paths import data_root
 from s2a.spec import validate
 
@@ -28,6 +31,11 @@ KEYS = ("id", "participant", "task", "ink", "stroke_cls", "stroke_group", "group
 
 def real_root() -> Path:
     return data_root() / "real" / "v1"
+
+
+def eval_root(data: str) -> Path:
+    """Eval-format sketches (<split>/{ink,gold}): synthetic (`synth`) or from Collect mode (`real`)."""
+    return real_root() / "eval" if data == "real" else out_root() / "eval"
 
 
 def check_record(rec: dict[str, Any]) -> list[str]:
@@ -77,15 +85,14 @@ def import_records(src: Path) -> dict[str, Any]:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(rec, ensure_ascii=False), encoding="utf-8")
         report[split] += 1
-        if split == "test":
-            base = root / "eval" / "test"
-            (base / "ink").mkdir(parents=True, exist_ok=True)
-            (base / "gold").mkdir(parents=True, exist_ok=True)
-            (base / "ink" / f"{rec['id']}.json").write_text(json.dumps(rec["ink"]), encoding="utf-8")
-            gold = {k: rec[k] for k in ("id", "stroke_cls", "stroke_group", "groups", "elements", "spec")}
-            (base / "gold" / f"{rec['id']}.json").write_text(
-                json.dumps(gold, ensure_ascii=False), encoding="utf-8"
-            )
+        base = root / "eval" / split
+        (base / "ink").mkdir(parents=True, exist_ok=True)
+        (base / "gold").mkdir(parents=True, exist_ok=True)
+        (base / "ink" / f"{rec['id']}.json").write_text(json.dumps(rec["ink"]), encoding="utf-8")
+        gold = {k: rec[k] for k in ("id", "stroke_cls", "stroke_group", "groups", "elements", "spec")}
+        (base / "gold" / f"{rec['id']}.json").write_text(
+            json.dumps(gold, ensure_ascii=False), encoding="utf-8"
+        )
     split_file.parent.mkdir(parents=True, exist_ok=True)
     split_file.write_text(json.dumps(splits, indent=1, sort_keys=True), encoding="utf-8")
     return dict(report)

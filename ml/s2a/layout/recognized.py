@@ -1,7 +1,8 @@
 """Run the trained recognizer on eval sketches to get realistic layout inputs.
 
-    python -m s2a.layout.recognized --split val     # then: python -m s2a.layout.noise measure --pred ...
+    python -m s2a.layout.recognized --split val     # then: python -m s2a.layout.noise measure
     python -m s2a.layout.recognized --split test
+    python -m s2a.layout.recognized --data real --split train   # Collect-mode sketches (and --split test)
 
 Writes eval/<split>/recognized/<id>.json (raw predicted element lists, for measuring error rates) and
 eval/<split>/recognized.jsonl (the same, with each matched element's gold label attached, i.e. a
@@ -16,7 +17,7 @@ import json
 
 import onnxruntime as ort
 
-from s2a.data.build_dataset import out_root
+from s2a.data.collected import eval_root
 from s2a.paths import REPO_ROOT
 from s2a.recognizer.decode import decode
 from s2a.recognizer.features import ink_features
@@ -25,12 +26,13 @@ from s2a.recognizer.metrics import match
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--split", choices=["val", "test"], default="val")
+    ap.add_argument("--data", choices=["synth", "real"], default="synth")
+    ap.add_argument("--split", choices=["train", "val", "test"], default="val")
     args = ap.parse_args()
     sess = ort.InferenceSession(
         str(REPO_ROOT / "app" / "assets" / "models" / "recognizer.onnx"), providers=["CPUExecutionProvider"]
     )
-    base = out_root() / "eval" / args.split
+    base = eval_root(args.data) / args.split
     raw_dir = base / "recognized"
     raw_dir.mkdir(exist_ok=True)
     n = 0
