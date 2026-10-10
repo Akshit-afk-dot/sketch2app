@@ -14,6 +14,7 @@ from typing import Any
 
 import numpy as np
 
+from s2a.data.augment import augment_screen
 from s2a.data.hershey import write_text
 from s2a.data.sketch_layout import Item, layout_screen
 from s2a.data.strokes import Pen, PenStyle
@@ -252,9 +253,16 @@ def _apply(m: np.ndarray, pts: np.ndarray) -> np.ndarray:
     return out
 
 
-def make_sample(rng: np.random.Generator, cfg: dict[str, Any], specs: list[Node]) -> Sample | None:
-    """Sketch 1-3 screens (one source spec each, first screen of each) side by side."""
+def make_sample(
+    rng: np.random.Generator, cfg: dict[str, Any], specs: list[Node], pool: list[str] | None = None
+) -> Sample | None:
+    """Sketch 1-3 screens (one source spec each, first screen of each) side by side.
+
+    With a label [pool], legend-coverage augmentation inserts rare legend elements first.
+    """
     screens = [copy.deepcopy(s["screens"][0]) for s in specs]
+    if pool is not None and "augment" in cfg:
+        screens = [augment_screen(rng, s, cfg["augment"], pool) for s in screens]
     for k, s in enumerate(screens):
         s["id"] = f"tmp{k}"
     _rename(screens)

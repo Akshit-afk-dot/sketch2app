@@ -15,7 +15,8 @@ Future<void> _pumpApp(WidgetTester tester, Size size) async {
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
     Sketch2App(
-      settings: AppSettings.memory(),
+      // Rule-based recognizer: deterministic, and the ONNX plugin does not exist in widget tests.
+      settings: AppSettings.memory()..useModelRecognizer = false,
       handwriting: const NoHandwritingReader(),
     ),
   );

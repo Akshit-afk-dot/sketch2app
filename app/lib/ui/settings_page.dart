@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../handwriting/handwriting.dart';
 import 'app_settings.dart';
+import '../recognize/onnx_recognizer.dart';
 import 'cheat_sheet_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -9,10 +10,12 @@ class SettingsPage extends StatefulWidget {
     super.key,
     required this.settings,
     required this.handwriting,
+    required this.recognizer,
   });
 
   final AppSettings settings;
   final HandwritingReader handwriting;
+  final OnnxStrokeRecognizer recognizer;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -36,6 +39,33 @@ class _SettingsPageState extends State<SettingsPage> {
       ready = false; // plugin unavailable on this platform
     }
     if (mounted) setState(() => _hwReady = ready);
+  }
+
+  /// Runs the bundled fixture through ONNX Runtime on this device and compares with PyTorch's output.
+  Future<void> _selfTest() async {
+    String msg;
+    try {
+      final r = await widget.recognizer.selfTest();
+      msg =
+          'ONNX Runtime vs PyTorch: max |diff| = ${r.maxAbsDiff.toStringAsExponential(2)} '
+          '(${r.strokes} strokes, ${r.millis} ms)';
+    } on Object catch (e) {
+      msg = 'Self-test failed: $e';
+    }
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Recognizer self-test'),
+        content: SelectableText(msg),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _download() async {
@@ -84,6 +114,14 @@ class _SettingsPageState extends State<SettingsPage> {
               onChanged: (v) => s.stylusOnly = v,
             ),
             SwitchListTile(
+              title: const Text('Learned recognizer'),
+              subtitle: const Text(
+                'Off = rule-based recognizer (the baseline; also the automatic fallback)',
+              ),
+              value: s.useModelRecognizer,
+              onChanged: (v) => s.useModelRecognizer = v,
+            ),
+            SwitchListTile(
               title: const Text('Debug overlay'),
               subtitle: const Text(
                 'Recognized boxes on the canvas and per-stage timings',
@@ -112,6 +150,14 @@ class _SettingsPageState extends State<SettingsPage> {
                       child: const Text('Download'),
                     )
                   : null,
+            ),
+            ListTile(
+              leading: const Icon(Icons.fact_check_outlined),
+              title: const Text('Recognizer self-test'),
+              subtitle: const Text(
+                'Checks on-device ONNX output against the Python reference',
+              ),
+              onTap: _selfTest,
             ),
             ListTile(
               leading: const Icon(Icons.help_outline),

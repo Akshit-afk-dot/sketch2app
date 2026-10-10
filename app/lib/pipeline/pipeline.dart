@@ -75,12 +75,16 @@ class Pipeline {
     this.handwriting = const NoHandwritingReader(),
     this.layout = const HeuristicLayoutEngine(),
     this.layoutTimeout = const Duration(seconds: 30),
+    this.recognizeTimeout = const Duration(seconds: 8),
   });
 
   final StrokeRecognizer recognizer;
   final HandwritingReader handwriting;
   final LayoutEngine layout;
   final Duration layoutTimeout;
+
+  /// A model that hangs (e.g. a broken asset) must not stall the demo: fall back after this.
+  final Duration recognizeTimeout;
 
   static const _recognizerFallback = HeuristicStrokeRecognizer();
   static const _layoutFallback = HeuristicLayoutEngine();
@@ -91,7 +95,7 @@ class Pipeline {
     final elements = await _stage(
       'recognize',
       recognizer.name,
-      () => recognizer.recognize(doc),
+      () => recognizer.recognize(doc).timeout(recognizeTimeout),
       fallbackName: _recognizerFallback.name,
       fallback: identical(recognizer, _recognizerFallback)
           ? null

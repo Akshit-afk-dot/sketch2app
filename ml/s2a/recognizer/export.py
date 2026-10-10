@@ -19,15 +19,18 @@ from typing import Any
 import numpy as np
 import onnxruntime as ort
 import torch
+import yaml
 from torch import Tensor, nn
 
 from s2a.data.build_dataset import out_root
-from s2a.paths import REPO_ROOT
+from s2a.data.synth import make_sample
+from s2a.paths import REPO_ROOT, SPEC_DIR
 from s2a.recognizer.decode import decode
 from s2a.recognizer.features import GEOM_DIM, RESAMPLE, ink_features
 from s2a.recognizer.model import RecognizerConfig, StrokeRecognizer
 
 FIXTURES = REPO_ROOT / "app" / "test" / "fixtures" / "recognizer"
+SELFTEST = REPO_ROOT / "app" / "assets" / "selftest" / "recognizer.json"
 
 
 class Single(nn.Module):
@@ -86,7 +89,11 @@ def parity(model: StrokeRecognizer, path: Path, inks: list[dict[str, Any]]) -> d
         times.append((time.perf_counter() - t0) * 1000)
         for r, g in zip(ref, got, strict=True):
             worst = max(worst, float(np.abs(r.numpy() - g).max()))
-    return {"max_abs_diff": worst, "ort_version": ort.__version__, "laptop_cpu_ms_median": float(np.median(times))}
+    return {
+        "max_abs_diff": worst,
+        "ort_version": ort.__version__,
+        "laptop_cpu_ms_median": float(np.median(times)),
+    }
 
 
 def write_fixtures(model: StrokeRecognizer, inks: list[tuple[str, dict[str, Any]]]) -> None:
@@ -94,7 +101,10 @@ def write_fixtures(model: StrokeRecognizer, inks: list[tuple[str, dict[str, Any]
     for name, ink in inks:
         shape, geom = ink_features(ink)
         with torch.no_grad():
-            c, t, a = (x[0].numpy() for x in Single(model)(torch.from_numpy(shape)[None], torch.from_numpy(geom)[None]))
+            c, t, a = (
+                x[0].numpy()
+                for x in Single(model)(torch.from_numpy(shape)[None], torch.from_numpy(geom)[None])
+            )
         fixture = {
             "ink": ink,
             "shape": np.round(shape, 6).tolist(),
@@ -105,6 +115,25 @@ def write_fixtures(model: StrokeRecognizer, inks: list[tuple[str, dict[str, Any]
             "decoded": decode(ink, np.round(c, 5), np.round(t, 5), np.round(a, 5)),
         }
         (FIXTURES / f"{name}.json").write_text(json.dumps(fixture), encoding="utf-8")
+    # The largest fixture doubles as the on-device ORT parity self-test shipped with this model.
+    SELFTEST.write_text((FIXTURES / f"{inks[-1][0]}.json").read_text(encoding="utf-8"), encoding="utf-8")
+
+
+def sample_inks(limit: int = 50) -> list[tuple[str, dict[str, Any]]]:
+    """Val eval sketches when the dataset exists; otherwise deterministic sketches of the example specs."""
+    files = sorted((out_root() / "eval" / "val" / "ink").glob("*.json"))[:limit]
+    if files:
+        inks = [(f.stem, json.loads(f.read_text(encoding="utf-8"))) for f in files]
+    else:
+        cfg = yaml.safe_load((REPO_ROOT / "ml" / "configs" / "data.yaml").read_text(encoding="utf-8"))
+        rng = np.random.default_rng(5)
+        inks = []
+        for p in sorted((SPEC_DIR / "examples").glob("*.json")):
+            spec = json.loads(p.read_text(encoding="utf-8"))
+            sample = make_sample(rng, cfg, [{"v": 1, "screens": [sc]} for sc in spec["screens"]])
+            if sample is not None:
+                inks.append((p.stem, sample.ink))
+    return [(name, ink) for name, ink in inks if ink["strokes"]]
 
 
 def main() -> None:
@@ -116,13 +145,11 @@ def main() -> None:
     model = load(args.ckpt)
     path = args.out / "recognizer.onnx"
     export(model, path)
-    files = sorted((out_root() / "eval" / "val" / "ink").glob("*.json"))[:50]
-    inks = [json.loads(f.read_text(encoding="utf-8")) for f in files]
-    inks = [i for i in inks if i["strokes"]]
-    report = parity(model, path, inks)
+    inks = sample_inks()
+    report = parity(model, path, [ink for _, ink in inks])
     report["size_mb"] = round(path.stat().st_size / 2**20, 2)
-    small = sorted(zip(files, inks, strict=False), key=lambda fi: len(fi[1]["strokes"]))[: args.fixtures]
-    write_fixtures(model, [(f.stem, ink) for f, ink in small])
+    report["checkpoint"] = str(args.ckpt) if args.ckpt else "untrained (random init, seed 0)"
+    write_fixtures(model, sorted(inks, key=lambda ni: len(ni[1]["strokes"]))[: args.fixtures])
     print(json.dumps(report, indent=1))
     (path.with_suffix(".parity.json")).write_text(json.dumps(report, indent=1), encoding="utf-8")
 

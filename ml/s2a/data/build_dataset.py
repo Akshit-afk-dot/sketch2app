@@ -26,6 +26,7 @@ from typing import Any
 import numpy as np
 import yaml
 
+from s2a.data.augment import label_pool
 from s2a.data.synth import make_sample
 from s2a.paths import REPO_ROOT, data_root
 
@@ -63,12 +64,12 @@ def plan(records: list[dict[str, Any]], cfg: dict[str, Any], split: str) -> list
     return out
 
 
-Job = tuple[str, int, list[list[dict[str, Any]]], dict[str, Any], int]
+Job = tuple[str, int, list[list[dict[str, Any]]], dict[str, Any], int, list[str]]
 
 
 def _build_shard(job: Job) -> dict[str, Any]:
     """One shard; each group is the list of source records (spec + metadata) for one sample."""
-    split, shard, groups, cfg, start = job
+    split, shard, groups, cfg, start, labels = job
     path = out_root() / split / f"shard_{shard:04d}.jsonl.gz"
     path.parent.mkdir(parents=True, exist_ok=True)
     stats: Counter[str] = Counter()
@@ -78,7 +79,7 @@ def _build_shard(job: Job) -> dict[str, Any]:
         for k, group in enumerate(groups):
             idx = start + k
             rng = np.random.default_rng([cfg["seed"], SPLITS.index(split), idx + 1])
-            sample = make_sample(rng, cfg, [r["spec"] for r in group])
+            sample = make_sample(rng, cfg, [r["spec"] for r in group], labels)
             if sample is None:
                 stats["failed"] += 1
                 continue
@@ -137,13 +138,14 @@ def main() -> None:
     for r in records:
         by_split[split_of(r["app"], cfg["dataset"]["split_percent"])].append(r)
 
+    labels = label_pool([r["spec"] for r in records])
     jobs: list[Job] = []
     size = cfg["dataset"]["shard_size"]
     for split in SPLITS:
         recs = by_split[split][: args.limit] if args.limit else by_split[split]
         groups = [[recs[i] for i in g] for g in plan(recs, cfg, split)]
         for shard, start in enumerate(range(0, len(groups), size)):
-            jobs.append((split, shard, groups[start : start + size], cfg, start))
+            jobs.append((split, shard, groups[start : start + size], cfg, start, labels))
 
     summary: dict[str, Any] = {
         s: {"specs": len(by_split[s]), "apps": len({r["app"] for r in by_split[s]})} for s in SPLITS

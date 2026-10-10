@@ -36,3 +36,8 @@ app/test/_out/
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Model binaries are build outputs (see app/assets/models/README.md)
+app/assets/models/*.onnx
+app/assets/models/*.parity.json
+app/assets/selftest/recognizer.json

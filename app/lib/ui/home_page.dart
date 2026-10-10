@@ -10,6 +10,7 @@ import '../export/zip.dart';
 import '../handwriting/handwriting.dart';
 import '../ink/samples.dart';
 import '../pipeline/pipeline.dart';
+import '../recognize/onnx_recognizer.dart';
 import '../render/spec_renderer.dart';
 import 'app_settings.dart';
 import 'canvas/sketch_canvas.dart';
@@ -24,12 +25,10 @@ class HomePage extends StatefulWidget {
   const HomePage({
     super.key,
     required this.settings,
-    required this.pipeline,
     required this.handwriting,
   });
 
   final AppSettings settings;
-  final Pipeline pipeline;
   final HandwritingReader handwriting;
 
   @override
@@ -38,6 +37,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final controller = SketchController();
+  final _onnx = OnnxStrokeRecognizer();
   PipelineResult? _result;
   Map<String, String>? _files;
   String _file = 'lib/main.dart';
@@ -99,7 +99,13 @@ class _HomePageState extends State<HomePage> {
     if (_converting) return;
     setState(() => _converting = true);
     try {
-      final result = await widget.pipeline.run(controller.doc);
+      final pipeline = Pipeline(
+        recognizer: settings.useModelRecognizer
+            ? _onnx
+            : const HeuristicStrokeRecognizer(),
+        handwriting: widget.handwriting,
+      );
+      final result = await pipeline.run(controller.doc);
       controller.setOverlay(result.elements);
       setState(() {
         _result = result;
@@ -228,6 +234,7 @@ class _HomePageState extends State<HomePage> {
                   builder: (_) => SettingsPage(
                     settings: settings,
                     handwriting: widget.handwriting,
+                    recognizer: _onnx,
                   ),
                 ),
               ),

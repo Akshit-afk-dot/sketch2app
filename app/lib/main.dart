@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'handwriting/handwriting.dart';
-import 'pipeline/pipeline.dart';
 import 'ui/app_settings.dart';
 import 'ui/home_page.dart';
 
@@ -32,11 +31,7 @@ class Sketch2App extends StatelessWidget {
     return MaterialApp(
       title: 'Sketch2App',
       theme: ThemeData(colorSchemeSeed: Colors.deepPurple),
-      home: HomePage(
-        settings: settings,
-        handwriting: handwriting,
-        pipeline: Pipeline(handwriting: handwriting),
-      ),
+      home: HomePage(settings: settings, handwriting: handwriting),
     );
   }
 }

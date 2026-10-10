@@ -169,6 +169,7 @@ def main() -> None:
         f"| canvas.drawn_frame_prob | {cfg['canvas']['drawn_frame_prob']} |",
         f"| layout.list_mark_prob | {cfg['layout']['list_mark_prob']} |",
         f"| multiscreen.share | {cfg['multiscreen']['share']} |",
+        *[f"| augment.{k} | {v} |" for k, v in cfg["augment"].items()],
         "",
         "Element types in the train split:",
         "",

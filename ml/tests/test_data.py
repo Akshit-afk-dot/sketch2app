@@ -179,3 +179,20 @@ def test_synthetic_sample_invariants(stem: str) -> None:
         assert '"go":' in canonical_json(sample.spec)
     again = make_sample(np.random.default_rng(42), cfg, screens)
     assert again is not None and again.ink == sample.ink, "same seed, same sample"
+
+
+def test_augmentation_inserts_legend_elements_and_stays_valid() -> None:
+    from s2a.data.augment import augment_screen, label_pool
+
+    specs = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((SPEC_DIR / "examples").glob("*.json"))]
+    pool = label_pool(specs)
+    assert "Sign in" in pool and len(pool) >= 8
+    rates = {"divider": 1.0, "bottomnav": 1.0, "fab": 1.0, "radio": 1.0, "switch": 1.0, "grid": 1.0}
+    rng = np.random.default_rng(0)
+    for spec in specs:
+        screen = augment_screen(rng, spec["screens"][0], rates, pool)
+        out = {"v": 1, "screens": [screen, *spec["screens"][1:]]}
+        assert validate(out) == [], spec["screens"][0]["id"]
+        text = canonical_json(out)
+        for needle in ('"t":"radio"', '"t":"switch"', '"t":"bottomnav"', '"t":"fab"'):
+            assert needle in text

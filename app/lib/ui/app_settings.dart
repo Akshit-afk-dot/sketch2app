@@ -33,6 +33,10 @@ class AppSettings extends ChangeNotifier {
   bool get stylusOnly => _get('stylusOnly', false);
   set stylusOnly(bool v) => _set('stylusOnly', v);
 
+  /// Use the learned stroke recognizer (ONNX); off = rule-based recognizer (baseline, also the fallback).
+  bool get useModelRecognizer => _get('useModelRecognizer', true);
+  set useModelRecognizer(bool v) => _set('useModelRecognizer', v);
+
   /// Show recognized element boxes on the canvas and per-stage timings.
   bool get debugOverlay => _get('debugOverlay', false);
   set debugOverlay(bool v) => _set('debugOverlay', v);
