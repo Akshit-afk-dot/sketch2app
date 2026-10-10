@@ -46,3 +46,8 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+# Large ML libraries with partial/complex annotations: treat as Any, keep strict checking on our code.
+[[tool.mypy.overrides]]
+module = ["transformers.*", "trl.*", "peft.*", "datasets.*", "bitsandbytes.*", "llama_cpp.*"]
+follow_imports = "skip"
