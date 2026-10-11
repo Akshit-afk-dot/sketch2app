@@ -279,3 +279,22 @@ def test_photo_render_then_label_recovers_the_original_labels() -> None:
         x, y, bw, bh = e["box"]
         assert x >= -2 and y >= -2 and x + bw <= w + 2 and y + bh <= h + 2
         assert e["strokes"]
+
+
+def test_photo_study_import_keeps_valid_records_with_their_photo(tmp_path: Any, monkeypatch: Any) -> None:
+    import zipfile
+
+    from s2a.data import real_photos
+
+    monkeypatch.setattr(real_photos, "root", lambda: tmp_path / "real")
+    spec = json.loads((SPEC_DIR / "examples" / "01_login.json").read_text(encoding="utf-8"))
+    rec = {"v": 1, "id": "p1_t1_1", "participant": "p1", "task": "t1", "photo": "p1_t1_1.jpg",
+           "target": spec, "device": {"spec": spec}}  # fmt: skip
+    orphan = dict(rec, id="p1_t2_2", photo="missing.jpg")
+    src = tmp_path / "export.zip"
+    with zipfile.ZipFile(src, "w") as z:
+        z.writestr("photo_study/p1_t1_1.json", json.dumps(rec))
+        z.writestr("photo_study/p1_t1_1.jpg", b"jpeg bytes")
+        z.writestr("photo_study/p1_t2_2.json", json.dumps(orphan))
+    assert real_photos.import_zip(src) == {"imported": 1, "rejected": 1}
+    assert (tmp_path / "real" / "records" / "p1_t1_1.jpg").read_bytes() == b"jpeg bytes"
