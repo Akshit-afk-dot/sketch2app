@@ -43,8 +43,16 @@ docs/results.md and docs/data_report.md (script-generated).
   element lists and on real recognizer output; validity, tree similarity, type/link F1, latency.
 - Ablation: noise augmentation on/off; spec vs direct Dart (tokens, latency).
 
+## 6b. Photo input (3-4 pages) — DESIGN.md §11, app/lib/photo/, ml/s2a/data/photo.py
+- Problem: paper sketches photographed with a phone; no pen order or timing, uneven light, perspective.
+- Vectorizer pipeline (figure: photo -> threshold -> skeleton -> strokes), why strokes and not a detector.
+- Synthetic photos and pseudo-stroke labelling (vote by element group; noise class); dataset statistics.
+- Photo model (fine-tuned ink model): rule-based vs ink model zero-shot vs photo model on synthetic photos.
+- OCR for labels; Photo study protocol (target spec as label) and real-photo results; failure cases.
+
 ## 7. Application (3 pages) — app/lib/
-- Canvas (stylus/finger, pan/zoom, frames), split view, preview, code view, export, settings, Collect mode.
+- Canvas (stylus/finger, pan/zoom, frames), photo import, split view, preview, code view, export, settings,
+  Collect mode and Photo study.
 - On-device and LAN modes; offline verification (airplane mode).
 - End-to-end latency per stage on laptop and devices; memory; exported projects passing flutter analyze.
 
