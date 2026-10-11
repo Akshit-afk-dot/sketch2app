@@ -157,6 +157,10 @@ class _PaperTips extends StatelessWidget {
             '• Several screens: draw a phone outline around each, arrows between them.',
           ),
           Text(
+            '• Arrows: start on the element, end inside the target screen, open arrowhead; '
+            'cross as few other lines as you can (photos lose arrows at crossings).',
+          ),
+          Text(
             '• Photo from straight above, even light, no hand or phone shadow on the drawing.',
           ),
           Text(
