@@ -1,11 +1,13 @@
 """End-to-end evaluation on synthetic test sketches, run on the laptop.
 
-    python -m s2a.e2e --n 200 --analyze 20 [--layout heuristic | --pred <llm predictions jsonl> --name NAME]
+    python -m s2a.e2e --n 200 --analyze 20 [--pred <llm predictions jsonl> --name NAME]
+    S2A_DATASET=v1-photo python -m s2a.e2e --recognizer onnx_photomodel   # synthetic photos, photo model
 
 ink -> learned recognizer (ONNX) -> labels -> layout -> spec -> render check -> export + `flutter analyze`.
 Labels come from the gold elements matched to recognized ones (s2a.layout.recognized), i.e. a perfect
 handwriting reader: ML Kit only runs on Android, so handwriting is measured on the device, not here.
-Writes docs/results/e2e_<name>_test.json.
+Photos: run `s2a.layout.recognized --model recognizer_photo --split test` first; the vectorizer's time
+comes from the photo dataset's stats.json (same compiled app code). Writes docs/results/e2e_<name>_<tag>.json.
 """
 
 from __future__ import annotations
@@ -20,6 +22,7 @@ from pathlib import Path
 from typing import Any
 
 from s2a.data.build_dataset import out_root
+from s2a.data.collected import eval_tag
 from s2a.layout.metrics import parse_output
 from s2a.paths import REPO_ROOT, data_root
 from s2a.spec import canonical_json, validate
@@ -33,6 +36,12 @@ def _run(cmd: list[str], env: dict[str, str] | None = None) -> None:
     subprocess.run(cmd, cwd=APP, check=True, shell=True, env={**os.environ, **(env or {})})
 
 
+def _vectorize_ms() -> float | None:
+    stats = out_root() / "stats.json"
+    test = json.loads(stats.read_text(encoding="utf-8")).get("test", {}) if stats.exists() else {}
+    return test.get("vectorize_ms_median")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=200)
@@ -41,6 +50,7 @@ def main() -> None:
         "--pred", type=Path, help="LLM predictions JSONL (recognizer input); default: rule-based layout"
     )
     ap.add_argument("--name", default="heuristic")
+    ap.add_argument("--recognizer", default="onnx", help="recognizer result name for the latency column")
     args = ap.parse_args()
 
     work = data_root() / "e2e" / args.name
@@ -52,8 +62,11 @@ def main() -> None:
         for line in (out_root() / "eval" / "test" / "recognized.jsonl").open(encoding="utf-8")
     ]
     recognized = recognized[: args.n]
+    tag = eval_tag("synth", "test")
     rec_meta = json.loads(
-        (REPO_ROOT / "docs" / "results" / "recognizer_onnx_test.json").read_text(encoding="utf-8")
+        (REPO_ROOT / "docs" / "results" / f"recognizer_{args.recognizer}_{tag}.json").read_text(
+            encoding="utf-8"
+        )
     )["meta"]
 
     t0 = time.perf_counter()
@@ -109,6 +122,7 @@ def main() -> None:
         "render_errors": sorted({v["error"] for v in render.values() if v.get("error")})[:10],
         "exported_analyze_pass": f"{export['analyze_pass']}/{export['projects']}",
         "laptop_ms_median": {
+            **({"vectorize": _vectorize_ms()} if tag.startswith("photo") else {}),
             "recognizer": rec_meta["laptop_ms_per_sketch"]["median"],
             "layout": statistics.median(layout_ms) if layout_ms else None,
         },
@@ -116,7 +130,7 @@ def main() -> None:
         "layout": args.name,
         "seconds": round(time.perf_counter() - t0, 1),
     }
-    path = REPO_ROOT / "docs" / "results" / f"e2e_{args.name}_test.json"
+    path = REPO_ROOT / "docs" / "results" / f"e2e_{args.name}_{tag}.json"
     path.write_text(json.dumps(result, indent=1), encoding="utf-8")
     print(json.dumps(result, indent=1))
 

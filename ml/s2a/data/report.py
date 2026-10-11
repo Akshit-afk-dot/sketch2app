@@ -61,6 +61,83 @@ def _hist(values: Sequence[float], title: str, xlabel: str, path: Path, line: fl
     plt.close(fig)
 
 
+def photo_section(cfg: dict[str, Any]) -> list[str]:
+    """Section on the synthetic-photo dataset (s2a.data.build_photo), if it has been built."""
+    from PIL import Image, ImageDraw
+
+    from s2a.data.build_photo import root as photo_root
+
+    stats_path = photo_root() / "stats.json"
+    if not stats_path.exists():
+        return [
+            "## 5. Synthetic photos (photo mode)",
+            "",
+            "Not built yet (`python -m s2a.data.build_photo`).",
+            "",
+        ]
+    st = json.loads(stats_path.read_text(encoding="utf-8"))
+    base = photo_root() / "eval" / "val"
+    colours = {"frame": (150, 150, 150), "text": (40, 90, 230), "shape": (0, 0, 0), "arrow": (220, 120, 0)}
+    tiles = []
+    for photo in sorted((base / "photo").glob("*.png"))[:4]:
+        gold = json.loads((base / "gold" / f"{photo.stem}.json").read_text(encoding="utf-8"))
+        ink = json.loads((base / "ink" / f"{photo.stem}.json").read_text(encoding="utf-8"))
+        img = Image.open(photo).convert("RGB")
+        over = Image.new("RGB", img.size, "white")
+        d = ImageDraw.Draw(over)
+        for k, stroke in enumerate(ink["strokes"]):
+            noise = gold["groups"][gold["stroke_group"][k]]["kind"] == "noise"
+            col = (230, 0, 0) if noise else colours[gold["stroke_cls"][k]]
+            pts = [tuple(q[:2]) for q in stroke["pts"]]
+            if len(pts) > 1:
+                d.line(pts, fill=col, width=2)
+            else:
+                d.ellipse([pts[0][0] - 2, pts[0][1] - 2, pts[0][0] + 2, pts[0][1] + 2], fill=col)
+        tile = Image.new("RGB", (img.width * 2, img.height), "white")
+        tile.paste(img, (0, 0))
+        tile.paste(over, (img.width, 0))
+        tile.thumbnail((1200, 450))
+        tiles.append(tile)
+    if tiles:
+        grid = Image.new("RGB", (max(t.width for t in tiles), sum(t.height for t in tiles)), "white")
+        y = 0
+        for t in tiles:
+            grid.paste(t, (0, y))
+            y += t.height
+        grid.save(FIG / "photo_samples.png", optimize=True)
+    pc = cfg["photo"]
+    rows = [
+        f"| {s} | {st[s].get('ok', 0):,} | {st[s]['pseudo_strokes_per_sample']['median']:.0f}, "
+        f"{st[s]['pseudo_strokes_per_sample']['p90']:.0f} | {st[s]['noise_strokes_share']:.1%} | "
+        f"{st[s]['elements_without_strokes']:.1%} | {st[s]['vectorize_ms_median']:.0f} |"
+        for s in SPLITS
+        if s in st and "pseudo_strokes_per_sample" in st[s]
+    ]
+    return [
+        "## 5. Synthetic photos (photo mode)",
+        "",
+        "Same specs and by-app splits as above, drawn as phone photos of paper (`ml/s2a/data/photo.py`)",
+        "and turned into strokes by the app's own vectorizer (`app/lib/photo/vectorize.dart`, compiled).",
+        "Each pseudo-stroke takes the element group under most of its points; strokes mostly over blank",
+        "paper are noise.",
+        "",
+        "| Split | Photos | Pseudo-strokes/photo (median, p90) | Noise strokes "
+        "| Elements with no strokes left | Vectorize ms (median) |",
+        "|---|---:|---|---:|---:|---:|",
+        *rows,
+        "",
+        "Photo effects (configs/data.yaml `photo`): "
+        + ", ".join(f"{k} {v}" for k, v in pc.items() if k not in ("samples", "long_side"))
+        + f"; long side {pc['long_side']} px.",
+        "",
+        "Validation photos (left) and the strokes the vectorizer extracted, coloured by label (frame grey,",
+        "text blue, shape black, arrow orange, noise red):",
+        "",
+        "![photos](figures/photo_samples.png)",
+        "",
+    ]
+
+
 def main() -> None:
     FIG.mkdir(parents=True, exist_ok=True)
     cfg = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
@@ -194,6 +271,7 @@ def main() -> None:
         "```",
         "",
     ]
+    lines += photo_section(cfg)
     (DOCS / "data_report.md").write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {DOCS / 'data_report.md'}")
 

@@ -91,6 +91,82 @@ def e2e_rows() -> list[str]:
     return rows
 
 
+def photo_section() -> list[str]:
+    """Photo mode: recognizer on synthetic photos, end to end on them, and the real Photo study."""
+    rows = []
+    for name, label in (
+        ("heuristic", "Rule-based (baseline)"),
+        ("onnx", "Ink model, zero-shot"),
+        ("onnx_photomodel", "Photo model (ink model fine-tuned on photos)"),
+    ):
+        r = load(f"recognizer_{name}_photo_test.json")
+        if r is None:
+            rows.append(f"| {label} | {PENDING} | | | | | |")
+            continue
+        a, t = r["detection_any_type"], r["detection_typed"]
+        rows.append(
+            f"| {label} | {f(a['f1'])} | {f(t['precision'])} | {f(t['recall'])} | **{f(t['f1'])}** | "
+            f"{f(r['stroke_accuracy'])} | {f(r['meta']['laptop_ms_per_sketch']['median'], 1)} |"
+        )
+    e = load("e2e_heuristic_photo_test.json")
+    e2e = (
+        f"| {e['sketches']} | {f(e['spec_valid_rate'])} | **{f(e['render_success_rate'])}** | "
+        f"{e['exported_analyze_pass']} | {f(e['laptop_ms_median'].get('vectorize'), 0)} | "
+        f"{f(e['laptop_ms_median']['recognizer'], 1)} | {f(e['laptop_ms_median']['layout'], 1)} |"
+        if e
+        else f"| {PENDING} | | | | | | |"
+    )
+    dev = load("photo_real_device.json")
+    lap = load("photo_real_laptop_recognizer_photo.json")
+    real = [
+        "| Run | Photos (people) | Tree sim. | Type F1 | Link F1 | Screens | Labels |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    for label, r in (
+        ("On the device (photo model + OCR)", dev),
+        ("Laptop re-run (photo model, no OCR)", lap),
+    ):
+        if r is None:
+            real.append(f"| {label} | {PENDING} (needs the Photo study) | | | | | |")
+            continue
+        m = r["meta"]
+        real.append(
+            f"| {label} | {m['photos']} ({m['participants']}) | **{f(r['tree_similarity'])}** | "
+            f"{f(r['type_f1'])} | {f(r.get('link_f1'))} | {f(r['screens_correct'])} | "
+            f"{f(r.get('label_accuracy'))} |"
+        )
+    lat = (
+        ", ".join(f"{k} {f(v, 0)}" for k, v in dev["latency_ms_median"].items())
+        if dev
+        else f"{PENDING} (needs the Photo study)"
+    )
+    return [
+        "## 5. Photo mode (paper sketches)",
+        "",
+        "Photos are turned into strokes by the app's vectorizer, then recognized like drawn ink. Synthetic",
+        "photos: 1,000 test-split sketches (apps never seen in training) rendered as phone photos of paper.",
+        "",
+        "### Recognizer on synthetic photos",
+        "",
+        "| Method | Any-type F1 | Typed P | Typed R | Typed F1 | Stroke acc. | Laptop ms/sketch |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+        *rows,
+        "",
+        "### End to end on synthetic photos (rule-based layout, oracle labels)",
+        "",
+        "| Sketches | Spec valid | Rendered | Exports passing analyze | Vectorize ms | Recognizer ms | Layout ms |",
+        "|---:|---:|---:|---:|---:|---:|---:|",
+        e2e,
+        "",
+        "### Real paper sketches (Photo study: target app drawn on paper, scored against its spec)",
+        "",
+        *real,
+        "",
+        f"Device latency per stage (median ms): {lat}.",
+        "",
+    ]
+
+
 def recognizer_chart() -> str | None:
     h, m = load("recognizer_heuristic_test.json"), load("recognizer_onnx_test.json")
     if not (h and m):
@@ -227,7 +303,8 @@ def main() -> None:
         f"| Render success rate on real sketches | {PENDING} (needs Collect data) |",
         f"| Layout model size (.litertlm / GGUF) | {PENDING} (needs notebook run) |",
         "",
-        "## 5. Ablations",
+        *photo_section(),
+        "## 6. Ablations",
         "",
         "| Ablation | Status |",
         "|---|---|",

@@ -88,7 +88,35 @@ matched elements): ML Kit only runs on Android, so its accuracy and latency are 
 | Render success rate on real sketches | pending (needs Collect data) |
 | Layout model size (.litertlm / GGUF) | pending (needs notebook run) |
 
-## 5. Ablations
+## 5. Photo mode (paper sketches)
+
+Photos are turned into strokes by the app's vectorizer, then recognized like drawn ink. Synthetic
+photos: 1,000 test sketches (same apps as the synthetic test) rendered as phone photos of paper.
+
+### Recognizer on synthetic photos
+
+| Method | Any-type F1 | Typed P | Typed R | Typed F1 | Stroke acc. | Laptop ms/sketch |
+|---|---:|---:|---:|---:|---:|---:|
+| Rule-based (baseline) | pending | | | | | |
+| Ink model, zero-shot | pending | | | | | |
+| Photo model (ink model fine-tuned on photos) | pending | | | | | |
+
+### End to end on synthetic photos (rule-based layout, oracle labels)
+
+| Sketches | Spec valid | Rendered | Exports passing analyze | Vectorize ms | Recognizer ms | Layout ms |
+|---:|---:|---:|---:|---:|---:|---:|
+| pending | | | | | | |
+
+### Real paper sketches (Photo study: target app drawn on paper, scored against its spec)
+
+| Run | Photos (people) | Tree sim. | Type F1 | Link F1 | Screens | Labels |
+|---|---:|---:|---:|---:|---:|---:|
+| On the device (photo model + OCR) | pending (needs the Photo study) | | | | | |
+| Laptop re-run (photo model, no OCR) | pending (needs the Photo study) | | | | | |
+
+Device latency per stage (median ms): pending (needs the Photo study).
+
+## 6. Ablations
 
 | Ablation | Status |
 |---|---|
