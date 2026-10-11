@@ -1,0 +1,233 @@
+{
+ "elements_gold": 20269,
+ "elements_pred": 17130,
+ "detection_any_type": {
+  "precision": 0.8449503794512551,
+  "recall": 0.7140954166461099,
+  "f1": 0.7740313912136688
+ },
+ "detection_typed": {
+  "precision": 0.8198482194979568,
+  "recall": 0.6928807538605752,
+  "f1": 0.7510361239605337
+ },
+ "stroke_accuracy": 0.9699205536418086,
+ "per_type": {
+  "btn": {
+   "matched_gold": 892,
+   "type_accuracy": 0.9730941704035875
+  },
+  "input": {
+   "matched_gold": 390,
+   "type_accuracy": 0.8974358974358975
+  },
+  "text": {
+   "matched_gold": 4147,
+   "type_accuracy": 0.9826380516035689
+  },
+  "heading": {
+   "matched_gold": 569,
+   "type_accuracy": 0.8980667838312829
+  },
+  "para": {
+   "matched_gold": 702,
+   "type_accuracy": 0.9843304843304843
+  },
+  "img": {
+   "matched_gold": 2327,
+   "type_accuracy": 0.994413407821229
+  },
+  "icon": {
+   "matched_gold": 2282,
+   "type_accuracy": 0.99079754601227
+  },
+  "menu": {
+   "matched_gold": 147,
+   "type_accuracy": 0.9455782312925171
+  },
+  "avatar": {
+   "matched_gold": 400,
+   "type_accuracy": 0.9475
+  },
+  "check": {
+   "matched_gold": 133,
+   "type_accuracy": 0.9172932330827067
+  },
+  "radio": {
+   "matched_gold": 381,
+   "type_accuracy": 0.973753280839895
+  },
+  "switch": {
+   "matched_gold": 287,
+   "type_accuracy": 0.9930313588850174
+  },
+  "divider": {
+   "matched_gold": 475,
+   "type_accuracy": 0.9136842105263158
+  },
+  "card": {
+   "matched_gold": 239,
+   "type_accuracy": 0.6652719665271967
+  },
+  "appbar": {
+   "matched_gold": 643,
+   "type_accuracy": 0.9937791601866252
+  },
+  "bottomnav": {
+   "matched_gold": 108,
+   "type_accuracy": 0.9907407407407407
+  },
+  "fab": {
+   "matched_gold": 152,
+   "type_accuracy": 0.993421052631579
+  },
+  "listmark": {
+   "matched_gold": 200,
+   "type_accuracy": 0.94
+  }
+ },
+ "confusion": {
+  "appbar->appbar": 639,
+  "appbar->heading": 2,
+  "appbar->icon": 1,
+  "appbar->text": 1,
+  "avatar->avatar": 379,
+  "avatar->fab": 1,
+  "avatar->icon": 16,
+  "avatar->img": 1,
+  "avatar->listmark": 1,
+  "avatar->switch": 1,
+  "avatar->text": 1,
+  "bottomnav->bottomnav": 107,
+  "bottomnav->divider": 1,
+  "btn->appbar": 2,
+  "btn->btn": 868,
+  "btn->card": 4,
+  "btn->heading": 3,
+  "btn->img": 6,
+  "btn->input": 3,
+  "btn->radio": 1,
+  "btn->switch": 1,
+  "btn->text": 4,
+  "card->btn": 6,
+  "card->card": 159,
+  "card->heading": 1,
+  "card->img": 72,
+  "card->input": 1,
+  "check->check": 122,
+  "check->text": 11,
+  "divider->appbar": 3,
+  "divider->btn": 2,
+  "divider->card": 4,
+  "divider->divider": 434,
+  "divider->heading": 1,
+  "divider->icon": 1,
+  "divider->img": 2,
+  "divider->input": 11,
+  "divider->para": 3,
+  "divider->text": 14,
+  "fab->fab": 151,
+  "fab->img": 1,
+  "heading->appbar": 6,
+  "heading->avatar": 2,
+  "heading->btn": 1,
+  "heading->divider": 3,
+  "heading->heading": 511,
+  "heading->icon": 3,
+  "heading->img": 1,
+  "heading->input": 1,
+  "heading->menu": 5,
+  "heading->para": 1,
+  "heading->text": 35,
+  "icon->avatar": 6,
+  "icon->btn": 2,
+  "icon->check": 1,
+  "icon->heading": 1,
+  "icon->icon": 2261,
+  "icon->listmark": 2,
+  "icon->menu": 1,
+  "icon->radio": 1,
+  "icon->text": 7,
+  "img->appbar": 2,
+  "img->btn": 2,
+  "img->fab": 1,
+  "img->icon": 1,
+  "img->img": 2314,
+  "img->radio": 1,
+  "img->text": 6,
+  "input->btn": 8,
+  "input->divider": 8,
+  "input->heading": 1,
+  "input->img": 2,
+  "input->input": 350,
+  "input->para": 1,
+  "input->text": 20,
+  "listmark->avatar": 1,
+  "listmark->btn": 1,
+  "listmark->icon": 2,
+  "listmark->listmark": 188,
+  "listmark->text": 8,
+  "menu->divider": 1,
+  "menu->icon": 6,
+  "menu->img": 1,
+  "menu->menu": 139,
+  "para->avatar": 2,
+  "para->divider": 2,
+  "para->icon": 1,
+  "para->img": 2,
+  "para->para": 691,
+  "para->text": 4,
+  "radio->heading": 1,
+  "radio->radio": 371,
+  "radio->text": 9,
+  "switch->switch": 285,
+  "switch->text": 2,
+  "text->appbar": 6,
+  "text->avatar": 1,
+  "text->bottomnav": 1,
+  "text->btn": 5,
+  "text->check": 4,
+  "text->divider": 2,
+  "text->heading": 23,
+  "text->icon": 5,
+  "text->img": 2,
+  "text->input": 7,
+  "text->listmark": 2,
+  "text->menu": 1,
+  "text->radio": 8,
+  "text->switch": 5,
+  "text->text": 4075
+ },
+ "stroke_confusion": {
+  "arrow->arrow": 3433,
+  "arrow->frame": 10,
+  "arrow->shape": 365,
+  "arrow->text": 149,
+  "frame->arrow": 46,
+  "frame->frame": 2979,
+  "frame->shape": 412,
+  "frame->text": 74,
+  "shape->arrow": 400,
+  "shape->frame": 447,
+  "shape->shape": 37523,
+  "shape->text": 1166,
+  "text->arrow": 139,
+  "text->frame": 14,
+  "text->shape": 655,
+  "text->text": 81080
+ },
+ "meta": {
+  "method": "onnx",
+  "split": "test",
+  "data": "synth",
+  "sketches": 995,
+  "checkpoint": null,
+  "model": "recognizer_photo",
+  "dataset": "v1-photo",
+  "laptop_ms_per_sketch": {
+   "median": 51.090900000417605,
+   "p90": 124.20060000004014
+  },
+  "date": "2026-10-12"
+ }
+}
