@@ -23,6 +23,9 @@ class _FakeReader implements HandwritingReader {
     calls++;
     return 'ink';
   }
+
+  @override
+  bool get readsImage => false;
 }
 
 class _Failing implements StrokeRecognizer {
@@ -98,6 +101,27 @@ void main() {
         expect(ink.calls, 1);
       },
     );
+  });
+
+  test('OCR labels an element whose label fused into its outline', () async {
+    final list = ElementList(
+      frames: [],
+      elements: [
+        SketchElement(
+          id: 0,
+          type: ElementType.btn,
+          box: const Box(90, 40, 140, 45),
+          strokes: const [0],
+        ),
+      ],
+      arrows: [],
+    );
+    final reader = PhotoTextReader([
+      const OcrWord('Sign', Box(110, 50, 50, 22)),
+      const OcrWord('in', Box(165, 52, 30, 20)),
+    ], _FakeReader());
+    await readElementTexts(reader, list, {0: _stroke(90, 40, 140, 45)});
+    expect(list.elements.single.text, 'Sign in');
   });
 
   test('FirstWorkingRecognizer falls through to the next option', () async {

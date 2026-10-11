@@ -20,6 +20,10 @@ abstract interface class HandwritingReader {
 
   /// Best reading of [strokes], or null when nothing legible.
   Future<String?> read(List<InkStroke> strokes, Box area);
+
+  /// True when the reader sees the image, not just strokes (OCR on a photo): it can then read an element
+  /// whose handwriting was not separated into text strokes (e.g. a label fused into its button outline).
+  bool get readsImage => false;
 }
 
 /// Fills `text` of every element that carries handwriting.
@@ -30,7 +34,7 @@ Future<void> readElementTexts(
 ) async {
   await Future.wait([
     for (final e in list.elements)
-      if (e.type.hasText && e.textStrokes.isNotEmpty)
+      if (e.type.hasText && (e.textStrokes.isNotEmpty || reader.readsImage))
         reader
             .read([for (final id in e.textStrokes) ?strokes[id]], e.box)
             .then((t) => e.text = t),
@@ -85,6 +89,9 @@ class MlKitHandwritingReader implements HandwritingReader {
   }
 
   Future<void> close() => _recognizer.close();
+
+  @override
+  bool get readsImage => false;
 }
 
 /// Used where ML Kit does not exist (tests, desktop builds) or before the language pack is downloaded:
@@ -97,4 +104,6 @@ class NoHandwritingReader implements HandwritingReader {
   Future<bool> prepare({bool wifiOnly = false}) async => false;
   @override
   Future<String?> read(List<InkStroke> strokes, Box area) async => null;
+  @override
+  bool get readsImage => false;
 }

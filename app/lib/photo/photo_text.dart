@@ -65,11 +65,17 @@ class PhotoTextReader implements HandwritingReader {
   Future<bool> prepare({bool wifiOnly = false}) async => true;
 
   @override
+  bool get readsImage => true;
+
+  /// Words over the element's handwriting strokes, or, when none were separated out (a label fused into
+  /// its outline), over the element's box.
+  @override
   Future<String?> read(List<InkStroke> strokes, Box area) async {
-    if (strokes.isEmpty) return null;
-    final box = strokes.map((s) => s.box).reduce((a, b) => a.union(b));
+    final box = strokes.isEmpty
+        ? area
+        : strokes.map((s) => s.box).reduce((a, b) => a.union(b));
     final text = wordsIn(words, box);
-    if (text != null) return text;
+    if (text != null || strokes.isEmpty) return text;
     try {
       return await fallback.isReady()
           ? await fallback.read(strokes, area)
