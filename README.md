@@ -1,11 +1,15 @@
 # Sketch2App
 
-Sketch app screens with a finger or stylus on an Android tablet or classroom board, and get a working,
-interactive preview plus a clean Flutter project — fully offline after a one-time setup.
+Sketch app screens with a finger or stylus on an Android tablet or classroom board — or draw them on paper
+and take a photo — and get a working, interactive preview plus a clean Flutter project, fully offline
+after a one-time setup.
 
 ```
-ink strokes ──► stroke recognizer (our transformer, ONNX) ──► elements + arrows
-                ML Kit handwriting (on-device)            ──► labels
+photo of a paper sketch ──► vectorizer (pure Dart) ──► strokes ─┐
+ink strokes (finger / stylus) ───────────────────────────────────┤
+                                                                  ▼
+strokes ──► stroke recognizer (our transformer, ONNX) ──► elements + arrows
+            ML Kit handwriting / OCR (on-device)       ──► labels
 elements ──► layout model (fine-tuned Gemma 4 E2B / Qwen3.5-0.8B, or rules) ──► UI spec JSON
 UI spec ──► live preview (Flutter interpreter)   UI spec ──► exported Flutter project (zip)
 ```
@@ -90,6 +94,23 @@ $PY -m s2a.layout.recognized --data real --split train && $PY -m s2a.layout.reco
 $PY -m s2a.layout.noise measure --data real --split train      # real error rates for the SFT noise model
 $PY -m s2a.layout.sft_data --noise ../docs/results/recognizer_noise_real_train.json   # adds eval_real_test_*
 $PY -m s2a.layout.evaluate --method heuristic --input recognizer --data real
+```
+
+### Photo mode (paper sketches)
+
+```bash
+$PY -m s2a.data.build_photo           # synthetic photos -> the app's vectorizer -> labelled pseudo-strokes
+export S2A_DATASET=v1-photo           # the commands below now read the photo dataset
+$PY -m s2a.recognizer.cache
+$PY -m s2a.recognizer.train --name photo-v1 --config configs/recognizer_photo.yaml     --init $S2A_DATA_ROOT/runs/recognizer/v1/best.pt                       # fine-tune the ink model
+$PY -m s2a.recognizer.export --ckpt $S2A_DATA_ROOT/runs/recognizer/photo-v1/best.pt --name recognizer_photo
+$PY -m s2a.recognizer.evaluate --method heuristic --split test
+$PY -m s2a.recognizer.evaluate --method onnx --split test                 # ink model on photos (zero-shot)
+$PY -m s2a.recognizer.evaluate --method onnx --model recognizer_photo --name onnx_photomodel --split test
+unset S2A_DATASET
+# Real photos: app menu > Photo study, Export, then:
+$PY -m s2a.data.real_photos import <sketch2app_photo_study.zip>
+$PY -m s2a.data.real_photos evaluate
 ```
 
 ## Tests and linters

@@ -6,9 +6,12 @@ choice here has to be defended in the viva. Status and numbers live in PROGRESS.
 ## 1. Architecture
 
 ```
-ink strokes (x,y,t) ──► stroke recognizer ──► elements (type, box, stroke ids) + arrows
+photo of paper ──► vectorizer (paper, threshold, thinning, tracing) ──► pseudo-strokes ─┐   (section 11)
+ink strokes (x,y,t) ─────────────────────────────────────────────────────────────────────┤
+                                                                                          ▼
+               stroke recognizer (ink model, or photo model for photos) ──► elements (type, box, stroke ids) + arrows
                               (own model; heuristic fallback)
-text groups ──► ML Kit Digital Ink ──► labels
+text groups ──► ML Kit Digital Ink (drawn) / ML Kit OCR on the photo ──► labels
 elements + labels + arrows ──► layout model ──► UI spec JSON ──► validate/repair
                               (fine-tuned Gemma 4 E2B / Qwen3.5-0.8B; heuristic fallback)
 UI spec ──► renderer (live preview)       UI spec ──► exporter (Flutter project zip)
@@ -196,13 +199,56 @@ element and role are labelled exactly with no manual annotation. Records use the
 Targets come from test-split apps. Real data is split **by participant** (frozen, ~40% held out), so the
 real test set never shares a drawing style with fine-tuning data.
 
-## 11. Rejected alternatives (running list)
+## 11. Photo input (P11)
+
+Users can photograph a sketch drawn on paper; the app converts it on the device like a drawn one.
+
+- **Photo -> strokes, not a second model family.** `lib/photo/vectorize.dart` turns the photo into
+  pseudo-strokes: paper detection on an 8 px grid (Otsu on cell means, largest bright region, holes
+  filled, shrunk one cell so the sheet's edge is never a line), Bradley-Roth adaptive threshold (15% and
+  at least 16 grey levels below the local mean: survives uneven light and shadows), 3x3 majority
+  smoothing, speck and blob removal, Zhang-Suen thinning, a skeleton graph (diagonals only where no
+  orthogonal pixel connects, so staircases are not junctions), spur pruning (< 2 pen widths), strokes
+  joined straight through junctions (< 45 degrees), Ramer-Douglas-Peucker, reading order with synthetic
+  timing (time follows arc length; the pause before a stroke grows with pen travel). Everything
+  downstream (recognizer, decoder, layout, export, canvas editing) is reused, and the user can erase stray
+  strokes before converting.
+- **One vectorizer for training and the device.** It is pure Dart; `tool/batch.dart vectorize`, compiled
+  with `dart compile exe`, produces the photo model's training strokes from synthetic photos, so
+  training and inference cannot drift (no Python port to keep in sync). ~100 ms per photo on the laptop.
+- **Synthetic photos** (`ml/s2a/data/photo.py`, `configs/data.yaml: photo`): every synthetic sample is
+  drawn as a photo of paper: pen width and darkness (ballpoint to marker to pencil), paper brightness,
+  lighting ramp and vignette, soft shadow, rotation, perspective, a darker table around the sheet, blur,
+  sensor noise, JPEG, and unlabelled stray marks. Phone outlines are always drawn for 2-3 screens; a single
+  screen has one 60% of the time (otherwise the page is the screen).
+- **Labels for pseudo-strokes** come from the original ink: each pseudo-stroke takes the element group
+  under most of its points (vote by group, not by pen stroke: a 4-stroke box traced as one loop or a
+  cursive word is still one element). Strokes mostly over blank paper are `noise`, an own group with
+  type NONE. The decoder drops groups whose most likely type is NONE (on the pen-ink model this changes 1
+  element in 1,000 test sketches) and, with no frame at all, makes the whole drawing one screen.
+- **Photo model** = the ink model fine-tuned on the synthetic photos (`train --init`,
+  `configs/recognizer_photo.yaml`), exported as `recognizer_photo.onnx`; same features and decoder, so the
+  app runs it with the same code. Fallback chain for photos: photo model -> ink model -> rules.
+- **Labels on photos come from OCR**, not Digital Ink: pseudo-strokes have no real pen trajectory, and
+  ML Kit text recognition (bundled Latin model, offline from the first launch) reads the pixels. The
+  photo is decoded once (EXIF applied); the vectorizer and OCR read the same pixels, so OCR word boxes
+  and strokes share one coordinate space. Words are assigned to the element whose handwriting strokes
+  they overlap (at least half the word, area grown by a third of its height), in reading order; Digital
+  Ink on the pseudo-strokes is the fallback.
+- **Real-photo evaluation without annotation:** the Photo study page shows a target app (test split); the
+  participant draws it on paper and photographs it; the target spec is the label. Device outputs are
+  scored against it (structure and labels), and the laptop re-runs the same photos for model comparisons
+  (`s2a.data.real_photos`).
+- **Not supported (documented):** ruled or squared paper (the lines are ink to the threshold), coloured
+  paper, strong perspective (> ~10 degrees off top-down), drawings that touch the paper's edge.
+
+## 12. Rejected alternatives (running list)
 
 | Alternative | Why not |
 |---|---|
 | Generate Dart directly with the LLM | More tokens, unbounded failure modes, no on-device compiler to check it. Kept as an ablation. |
 | rfw for the preview | See section 3. |
-| Image-based recognizer (CNN on a rendered sketch) | Strokes carry order, timing and grouping for free and are tiny; P4 will justify in detail. |
+| Image-based recognizer (CNN on a rendered sketch) | Strokes carry order, timing and grouping for free and are tiny (section 7). Photos are turned into strokes too (section 11). |
 | `GridView` for grids | Forces a fixed cell aspect ratio, so card content overflows; `GridOf` sizes rows to content. |
 | Copying PNG launcher icons into exports | Binary files in an otherwise text-only template; a vector drawable works from API 21. |
 | LiteRT (TFLite) for the recognizer | litert-torch export is Linux-only; ONNX exports on Windows, keeps a dynamic stroke axis, and avoids a second LiteRT runtime next to LiteRT-LM. |
@@ -212,3 +258,7 @@ real test set never shares a drawing style with fine-tuning data.
 | Using RICO pixel bounds for sketches | Sketch and simplified spec would disagree; our own layout keeps them consistent. |
 | Training the LLM on clean element lists | The model would never see recognizer errors; measured noise is replayed instead. |
 | Icon identity in the spec (search, cart...) | The legend has no way to draw which icon; gold uses generic `circle` (menu and fab excepted). |
+| An image detector (YOLO-style) for photos | A second model family, data format and decoder; strokes reuse the recognizer, layout and canvas editing, and the vectorizer is deterministic and testable. Its cost (merged/split lines) is learned by training on the vectorizer's own output. |
+| ML Kit Document Scanner for photos | Needs Google Play services (missing on many classroom boards) and its own UI flow; our paper detection plus adaptive threshold covers the top-down photo case. |
+| Digital Ink for photo labels | Pseudo-strokes have no real trajectory; OCR on the pixels reads them instead (Digital Ink stays the fallback). |
+| A Python port of the vectorizer for training data | Two implementations would drift; the app's Dart code is compiled once and called from the data pipeline. |

@@ -3,25 +3,33 @@
 Living log of what is done, what is next, blockers, and exact commands to reproduce.
 Newest phase at the top of "Phase log".
 
-## Status board
+## Status board (2026-10-11)
 
 | Phase | State |
 |---|---|
-| P0 Recon | done (2026-10-10) |
-| P1 Spec, renderer, exporter | done (2026-10-10) |
-| P2 Walking skeleton | code done, APK builds; on-device run pending (needs device) |
-| P3 Data pipeline | dataset built (42,265 samples); data report pending |
-| P4 Recognizer | model/train/decode/metrics/ONNX export written; training not started |
-| P5 Collect mode | pending |
-| P6 Layout LLM | pending |
-| P7 Evaluation | pending |
-| P8 Demo polish | pending |
-| P9 Docs | pending |
-| P10 GRPO (stretch) | pending |
+| P0 Recon | done |
+| P1 Spec, renderer, exporter | done; 11/11 example exports pass `flutter analyze` and their tests |
+| P2 Walking skeleton | done; APK builds; on-device run pending (needs device) |
+| P3 Data pipeline | done: 42,266 synthetic samples (by-app splits), legend-coverage augmentation, data report |
+| P4 Recognizer | done: typed F1 0.980 vs 0.487 rule-based (synthetic test); ONNX + Dart parity |
+| P5 Collect mode | done (app + import + per-participant split); real sketches pending (needs people) |
+| P6 Layout LLM | SFT data, notebook, LAN server, on-device path done; local Qwen3.5-0.8B QLoRA at step 200/500 (val tree sim 0.677), resuming |
+| P7 Evaluation | rule-based end-to-end done (200/200 render, 20/20 analyze); LLM rows pending training |
+| P8 Demo polish | 4 built-in samples, debug overlay, cheat sheet; device rehearsal pending |
+| P9 Docs | README, DESIGN, demo script, viva notes, report outline; kept current |
+| P10 GRPO (stretch) | not started |
+| **P11 Photo input** | app + vectorizer + synthetic-photo data + photo study done; photo model training next |
 
-## Open requests for Akshit (batched)
+## Needs you (batched)
 
-See the bottom of this file ("Needs you"). Work continues on everything that does not depend on them.
+1. **Device info**: model, RAM, Android version of your tablet/phone; is an Android smart board available? (LiteRT-LM needs Android 11+, arm64.)
+2. **Install and try the APK** (USB debugging on): `"%LOCALAPPDATA%/Android/sdk/platform-tools/adb.exe" install -r D:/sketch2app-data/apk/sketch2app-release.apk`.
+   Open once with internet and tap Download (handwriting pack). Then in airplane mode: menu > Sample: Login -> list > Convert; draw something; **camera button > photo of a paper sketch** (plain paper, dark pen, see the cheat sheet). Tell me what breaks.
+3. **Photo study** (the real-world number for photo mode): menu > Photo study. 5-10 classmates x 4-6 tasks each, drawn on paper and photographed; then Export and send me the zip (`python -m s2a.data.real_photos import <zip>`).
+4. **Collect mode** (real drawn sketches, 100-200): menu > Collect data; export the zip the same way.
+5. **Layout LLM on Colab/Kaggle** (Gemma 4 E2B rows): upload `D:/sketch2app-data/llm/sketch2app_llm_bundle.zip` and run `notebooks/layout_sft.ipynb`; bring back the small results zip.
+6. **Disk**: move the repo out of OneDrive to D: (OneDrive syncs build files and locks Gradle caches).
+7. **RICO terms**: you are the "Researcher" under RICO's research terms (LICENSES.md); don't publish RICO-derived data.
 
 ---
 
@@ -128,6 +136,8 @@ Flutter (`app/pubspec.yaml`):
 | Package | Pin | Use |
 |---|---|---|
 | google_mlkit_digital_ink_recognition | 0.16.1 | handwriting |
+| google_mlkit_text_recognition | 0.17.1 | OCR for photo labels (bundled `com.google.mlkit:text-recognition:16.0.1`, offline) |
+| image_picker | 1.2.4 | camera / gallery for photo mode |
 | flutter_onnxruntime | 1.9.0 | stroke recognizer |
 | flutter_edge_ai / flutter_edge_ai_litertlm | 2.1.1 / 1.11.0 | on-device LLM |
 | share_plus | 13.3.1 | export via share sheet |
@@ -143,24 +153,68 @@ Syntax highlighting: `flutter_highlight` is unmaintained (2021, Dart < 3), so th
 
 ## Phase log
 
+### P11 Photo input (2026-10-11) — app, data and evaluation path done; photo model training next
+
+Asked for by the user: take a photo of a paper sketch, upload it in the app, convert locally.
+- Design (DESIGN.md section 11): photo -> pseudo-strokes with a pure-Dart vectorizer -> the same
+  recognizer/layout pipeline; labels by on-device OCR (ML Kit text recognition, bundled model).
+- `lib/photo/vectorize.dart` (9 tests), `photo_import.dart`, `photo_text.dart` (OCR -> element labels);
+  camera button on the canvas, photo shown faded under the editable strokes; Photo study page.
+- Training data: `s2a.data.build_photo` renders synthetic samples as photos (pen, paper, light, shadow,
+  rotation, perspective, table, blur, noise, JPEG, stray marks), vectorizes them with the app's own code
+  (compiled `tool/batch.dart`, ~100 ms per photo) and labels pseudo-strokes by majority element group.
+  Smoke build (60 photos): ~1% noise strokes, 1-3% of elements lose all ink to the vectorizer.
+  Full build (12k/1k/1k) running.
+- Decoders drop NONE-type groups (noise) and add one implicit screen when no frame exists. Effect on
+  the pen-ink model: 1 element in 1,000 test sketches.
+- Next: cache + fine-tune the photo model (`configs/recognizer_photo.yaml`, `--init` ink model), evaluate
+  rule-based vs ink model (zero-shot) vs photo model on synthetic photos, end-to-end on photos, APK.
+
+### P7 Evaluation — rule-based end-to-end done
+
+- `python -m s2a.e2e --n 200 --analyze 20`: spec valid 200/200, **render 200/200** (was 197/200: a secure
+  multi-line input asserted in Flutter, a 15-item row overflowed; both fixed in renderer and exporter),
+  **20/20 exports pass `flutter analyze`**; laptop medians: recognizer 48.7 ms, rule-based layout 0.46 ms.
+- Re-measure on an idle laptop before the final results: recognizer latency (the 2026-10-11 re-run under
+  load read 82 ms and was discarded).
+
+### P6 Layout model — tooling done, local fine-tune in progress
+
+- SFT data from noisy element lists (recognizer error rates measured on val), notebook for Colab/Kaggle
+  (Unsloth + TRL), LAN server (llama.cpp with JSON-schema constrained decoding), on-device LiteRT-LM path.
+- Local QLoRA of Qwen3.5-0.8B on the 4 GB RTX 3050 Ti (`s2a.layout.train_local`): TRL's trainer needs
+  Triton (Linux only), so a plain PEFT loop computes logits only for completion positions in checkpointed
+  chunks (peak 1.9 GB). Validation tree similarity 0.34 / 0.54 / 0.58 / 0.68 at steps 50-200. The run was
+  interrupted at step 210 by a session end; it now checkpoints at every validation and resumes with
+  `--resume` (from step 200, fresh optimizer moments, 10-step LR re-warmup).
+- Baselines (synthetic test, rule-based builder): gold input tree sim 0.816, type F1 0.873, link F1 0.934;
+  recognizer input 0.801 / 0.865 / 0.687.
+
+### P5 Collect mode — done (needs participants)
+
+- Step-by-step drawing of test-split targets gives exact stroke labels; zip export; Python import with a
+  frozen per-participant split (40% held out). Every evaluation script takes `--data real`.
+
+### P4 Recognizer — done
+
+- 1.98M-param stroke transformer, 12 epochs in 44 min on the RTX 3050 Ti; best val typed F1 0.984.
+- Synthetic test (1,000 sketches): typed F1 **0.980** (rule-based 0.487), any-type F1 0.983 (0.663),
+  stroke accuracy 0.9996 (0.850). ONNX 8.05 MB, PyTorch vs ORT 1.28 max |diff| 9.9e-5, 14.2 ms laptop CPU;
+  Dart features/decoder match Python on the fixtures.
+
 ### P2 Walking skeleton (heuristic path) — code done, device test pending
 
 - Canvas (pen/finger, stylus-only mode, two-finger pan/zoom, eraser, undo/redo, multiple template frames), heuristic recognizer, ML Kit handwriting reader, heuristic layout builder, pipeline with per-stage timings and fallbacks, split view (>= 840 px) / tabs, live preview, code tab, zip export via share sheet, settings, cheat sheet, built-in sample sketches.
 - 85+ Dart tests pass (`flutter test`), analyzer clean. Release APK builds: `D:/sketch2app-data/apk/sketch2app-release.apk` (37.7 MB, arm64).
 - Lesson: building inside the repo filled C: (Gradle caches, ~3 GB) and failed. Builds now go through `scripts/build_apk.ps1` (mirror on D:, GRADLE_USER_HOME on D:, `kotlin.incremental=false` because project and Pub cache are on different drives).
 
-### P3 Data pipeline — code done, full build in progress
+### P3 Data pipeline — done
 
 - RICO -> specs: 42,313 of 66,261 screens kept (drops: overlay 10,552; too few elements 7,702; non-Latin 1,980; too many 1,979; empty 1,616; landscape 119); 0 schema-invalid. XY-cut layout recovery + sanitize pass.
 - Synthetic sketcher (legend-faithful, smooth pen noise, Hershey text, multi-screen arrows), by-app splits (val 830 apps / test 753 apps), shards + eval exports. 77 Python tests pass.
 - Reproduce: `python -m s2a.data.download all && python -m s2a.data.rico_convert && python -m s2a.data.build_dataset --workers 6 && python -m s2a.data.report`
 - Full build done (2026-10-10): train 33,560 samples / 6,279 apps, val 4,440 / 830 apps, test 4,265 / 753 apps (48 of 42,313 failed layout). Multi-screen: train 5,311 two-screen + 4,763 three-screen. Strokes per sample median 94, p90 ~271, max 1,086. Size on D: train 1.1 GB, val 142 MB, test 137 MB, eval exports 231 MB (1,000 val + 1,000 test).
-- Next: `python -m s2a.data.report` (writes docs/data_report.md + figures).
-
-### P4 Recognizer — in progress
-
-- 1.98M-param stroke transformer (CNN stroke encoder + 4-layer transformer; heads: stroke class, element type, pairwise affinity -> average-linkage grouping). ONNX export verified on an untrained model: PyTorch vs ORT 1.28 max abs diff 2.6e-6, 8.0 MB, 15.7 ms laptop CPU.
-- Next: `python -m s2a.recognizer.data` (feature cache), `python -m s2a.recognizer.train --smoke`, then full training on the local RTX 3050 Ti; Dart port of features/decoder + parity fixtures; heuristic baseline eval via `dart run tool/batch.dart recognize`.
+- Legend-coverage augmentation (divider, bottom nav, FAB, radio, switch, grids) and `docs/data_report.md` regenerated (2026-10-11).
 
 ### P1 Spec, legend, renderer, exporter — done
 
@@ -203,13 +257,3 @@ uv pip install --python /d/sketch2app-data/venv/Scripts/python.exe torch==2.14.1
 uv pip install --python /d/sketch2app-data/venv/Scripts/python.exe -e "ml[dev]"
 ```
 
----
-
-## Needs you
-
-1. **Device info** (brief left it as [FILL]): model, RAM, Android version of your tablet(s), and whether an Android smart board is available. LiteRT-LM (on-device LLM) needs Android 11+ (minSdk 30) and arm64.
-2. **Install and try the APK** (USB debugging on):
-   `"%LOCALAPPDATA%/Android/sdk/platform-tools/adb.exe" install -r D:/sketch2app-data/apk/sketch2app-release.apk`
-   Open the app with internet once and tap Download on the handwriting banner; then in airplane mode, menu > Sample: Login -> list > Convert > Preview, and try drawing. Report what breaks.
-3. **Disk**: C: has ~5 GB free. Recommended: move this repo out of OneDrive to D: (OneDrive syncs build files and locks Gradle caches).
-4. **RICO terms**: by our download you are the "Researcher" under RICO's research terms (LICENSES.md); fine for a college project, but don't publish RICO-derived data.

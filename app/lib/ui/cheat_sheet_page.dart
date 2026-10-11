@@ -106,16 +106,66 @@ class CheatSheetPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('How to sketch')),
-      body: GridView.extent(
-        maxCrossAxisExtent: 320,
-        childAspectRatio: 1.35,
-        padding: const EdgeInsets.all(12),
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        children: [for (final e in _entries) _EntryCard(e)],
+      body: CustomScrollView(
+        slivers: [
+          const SliverPadding(
+            padding: EdgeInsets.fromLTRB(12, 12, 12, 0),
+            sliver: SliverToBoxAdapter(child: _PaperTips()),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.all(12),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 320,
+                childAspectRatio: 1.35,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+              ),
+              delegate: SliverChildListDelegate([
+                for (final e in _entries) _EntryCard(e),
+              ]),
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+/// Photo mode only sees what the camera sees: these are the conditions the vectorizer and the photo
+/// model were built for (and the ones the synthetic training photos cover).
+class _PaperTips extends StatelessWidget {
+  const _PaperTips();
+
+  @override
+  Widget build(BuildContext context) => const Card(
+    child: Padding(
+      padding: EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 4,
+        children: [
+          Text(
+            'Sketching on paper (camera button)',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Text(
+            '• Plain white paper (no ruled or squared lines), dark pen or marker.',
+          ),
+          Text('• Same legend as below. Write labels in clear print.'),
+          Text(
+            '• Several screens: draw a phone outline around each, arrows between them.',
+          ),
+          Text(
+            '• Photo from straight above, even light, no hand or phone shadow on the drawing.',
+          ),
+          Text(
+            '• After import, erase stray marks on the canvas before converting if needed.',
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _EntryCard extends StatelessWidget {
