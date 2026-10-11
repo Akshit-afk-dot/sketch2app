@@ -82,6 +82,8 @@ def layout_rows(inp: str, split: str = "test") -> list[str]:
 def e2e_rows() -> list[str]:
     rows = []
     for name, label in LAYOUT_METHODS:
+        if name == "heuristic_llmsubset":
+            continue
         r = load(f"e2e_{name}_test.json")
         if r is None:
             rows.append(f"| {label} | {PENDING} | | | | | |")
