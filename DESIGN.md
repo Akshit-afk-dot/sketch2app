@@ -235,6 +235,11 @@ Users can photograph a sketch drawn on paper; the app converts it on the device 
   and strokes share one coordinate space. Words are assigned to the element whose handwriting strokes
   they overlap (at least half the word, area grown by a third of its height), in reading order; Digital
   Ink on the pseudo-strokes is the fallback.
+- **Orientation:** image_picker keeps the camera's EXIF orientation tag without rotating pixels. The JPEG
+  header gives the stored size and the tag; if a quarter turn is due but the decoded image still has the
+  stored size, the app rotates it before anything reads it (`lib/photo/jpeg_orientation.dart`).
+- **APK size:** the APK is arm64-only (`abiFilters`), as LiteRT-LM is; otherwise the ONNX Runtime and
+  ML Kit AARs add armeabi-v7a and x86_64 libraries (195 MB measured).
 - **Real-photo evaluation without annotation:** the Photo study page shows a target app (test split); the
   participant draws it on paper and photographs it; the target spec is the label. Device outputs are
   scored against it (structure and labels), and the laptop re-runs the same photos for model comparisons
