@@ -70,7 +70,7 @@ augment:                         # legend-coverage insertion rates per screen (s
 
 photo:                           # synthetic photos of paper sketches (s2a/data/photo.py, P11)
   long_side: 1280                # px; must equal photoLongSide in app/lib/photo/vectorize.dart
-  samples: {train: 12000, val: 1000, test: 1000}
+  samples: {train: 24000, val: 1000, test: 1000}
   single_frame_drawn_prob: 0.6   # one-screen sketches without a phone outline use the page as the screen
   margin: [0.04, 0.15]           # blank paper around the drawing, fraction of the drawing's long side
   table_prob: 0.35               # sheet does not fill the photo; a darker table shows around it
