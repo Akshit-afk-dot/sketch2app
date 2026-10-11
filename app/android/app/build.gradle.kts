@@ -21,14 +21,18 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         // Android 11+: LiteRT-LM (on-device layout model) requires API 30.
         minSdk = 30
-        // LiteRT-LM is arm64-only; without this, plugin AARs (ONNX Runtime, ML Kit) also ship armeabi-v7a
-        // and x86_64 libraries, which nearly doubled the APK (195 MB).
-        ndk {
-            abiFilters += listOf("arm64-v8a")
-        }
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    // The app is arm64-only (LiteRT-LM ships arm64 only). Plugin AARs (ONNX Runtime, ML Kit) bring
+    // armeabi-v7a and x86_64 libraries too, which nearly doubled the APK (195 MB); `ndk.abiFilters` did not
+    // remove them because the Flutter Gradle plugin sets the ABI filters itself, so exclude them here.
+    packaging {
+        jniLibs {
+            excludes += setOf("lib/armeabi-v7a/**", "lib/x86/**", "lib/x86_64/**")
+        }
     }
 
     buildTypes {
