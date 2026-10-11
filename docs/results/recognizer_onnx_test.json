@@ -1,15 +1,15 @@
 {
  "elements_gold": 20272,
- "elements_pred": 20017,
+ "elements_pred": 20015,
  "detection_any_type": {
-  "precision": 0.9896088324923815,
-  "recall": 0.9771606156274665,
-  "f1": 0.9833453299908163
+  "precision": 0.9896077941543842,
+  "recall": 0.977061957379637,
+  "f1": 0.9832948593839204
  },
  "detection_typed": {
-  "precision": 0.9859619323574961,
-  "recall": 0.973559589581689,
-  "f1": 0.9797215120752562
+  "precision": 0.9859605296027979,
+  "recall": 0.9734609313338595,
+  "f1": 0.9796708615682478
  },
  "stroke_accuracy": 0.9996242296708252,
  "per_type": {
@@ -34,8 +34,8 @@
    "type_accuracy": 1.0
   },
   "img": {
-   "matched_gold": 2835,
-   "type_accuracy": 0.9992945326278659
+   "matched_gold": 2834,
+   "type_accuracy": 0.9992942836979535
   },
   "icon": {
    "matched_gold": 3505,
@@ -82,8 +82,8 @@
    "type_accuracy": 0.994475138121547
   },
   "listmark": {
-   "matched_gold": 322,
-   "type_accuracy": 0.9937888198757764
+   "matched_gold": 321,
+   "type_accuracy": 0.9937694704049844
   }
  },
  "confusion": {
@@ -118,12 +118,12 @@
   "icon->check": 1,
   "icon->icon": 3503,
   "img->card": 2,
-  "img->img": 2833,
+  "img->img": 2832,
   "input->appbar": 1,
   "input->heading": 3,
   "input->input": 445,
   "input->text": 2,
-  "listmark->listmark": 320,
+  "listmark->listmark": 319,
   "listmark->text": 2,
   "menu->menu": 217,
   "para->para": 894,
@@ -154,10 +154,12 @@
   "data": "synth",
   "sketches": 1000,
   "checkpoint": null,
+  "model": "recognizer",
+  "dataset": "v1",
   "laptop_ms_per_sketch": {
-   "median": 48.733200001152,
-   "p90": 234.15907999806228
+   "median": 52.25084999801766,
+   "p90": 257.86096000010735
   },
-  "date": "2026-10-10"
+  "date": "2026-10-12"
  }
 }

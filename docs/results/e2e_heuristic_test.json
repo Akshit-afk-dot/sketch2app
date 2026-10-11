@@ -5,10 +5,10 @@
  "render_errors": [],
  "exported_analyze_pass": "20/20",
  "laptop_ms_median": {
-  "recognizer": 48.733200001152,
-  "layout": 0.463
+  "recognizer": 52.25084999801766,
+  "layout": 2.2125000000000004
  },
  "handwriting": "oracle (gold labels); ML Kit is measured on the device",
  "layout": "heuristic",
- "seconds": 346.9
+ "seconds": 161.4
 }

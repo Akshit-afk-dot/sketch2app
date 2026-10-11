@@ -13,7 +13,7 @@ Detection: a predicted element matches a gold element at IoU >= 0.5. *Any-type F
 | Method | Any-type F1 | Typed P | Typed R | Typed F1 | Stroke acc. | Laptop ms/sketch |
 |---|---:|---:|---:|---:|---:|---:|
 | Rule-based (baseline) | 0.663 | 0.424 | 0.572 | **0.487** | 0.850 | 2.5 |
-| Learned (ONNX, ships in app) | 0.983 | 0.986 | 0.974 | **0.980** | 1.000 | 48.7 |
+| Learned (ONNX, ships in app) | 0.983 | 0.986 | 0.973 | **0.980** | 1.000 | 52.3 |
 | Learned + real-data fine-tune | pending | | | | | |
 
 ### Real sketches (held-out participants)
@@ -38,18 +38,20 @@ only over samples whose gold spec has navigation links.
 | Method | Samples | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | Rule-based builder (baseline) | 1000 | 1.000 | 1.000 | **0.816** | 0.873 | 0.934 | 0.995 | 0.4 |
+| Rule-based builder, on the LLM rows' samples | 300 | 1.000 | 1.000 | **0.814** | 0.873 | 0.929 | 0.994 | 9.9 |
 | Gemma 4 E2B base, 3-shot | pending | | | | | | | |
 | Gemma 4 E2B + LoRA | pending | | | | | | | |
-| Qwen3.5-0.8B + LoRA | pending | | | | | | | |
+| Qwen3.5-0.8B + LoRA | 300 | 0.963 | 0.947 | **0.795** | 0.831 | 0.800 | 0.920 | 13939.6 |
 
 ### Input: trained recognizer output (realistic errors)
 
 | Method | Samples | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | Rule-based builder (baseline) | 1000 | 1.000 | 1.000 | **0.801** | 0.865 | 0.687 | 0.973 | 0.3 |
+| Rule-based builder, on the LLM rows' samples | 300 | 1.000 | 1.000 | **0.802** | 0.868 | 0.674 | 0.971 | 9.4 |
 | Gemma 4 E2B base, 3-shot | pending | | | | | | | |
 | Gemma 4 E2B + LoRA | pending | | | | | | | |
-| Qwen3.5-0.8B + LoRA | pending | | | | | | | |
+| Qwen3.5-0.8B + LoRA | 300 | 0.960 | 0.950 | **0.782** | 0.832 | 0.551 | 0.912 | 13433.3 |
 
 ### Input: trained recognizer output on real sketches (held-out participants)
 
@@ -76,10 +78,10 @@ matched elements): ML Kit only runs on Android, so its accuracy and latency are 
 
 | Layout | Sketches | Spec valid | Rendered | Exports passing analyze | Recognizer ms | Layout ms |
 |---|---:|---:|---:|---:|---:|---:|
-| Rule-based builder (baseline) | 200 | 1.000 | **1.000** | 20/20 | 48.7 | 0.5 |
+| Rule-based builder (baseline) | 200 | 1.000 | **1.000** | 20/20 | 52.3 | 2.2 |
 | Gemma 4 E2B base, 3-shot | pending | | | | | |
 | Gemma 4 E2B + LoRA | pending | | | | | |
-| Qwen3.5-0.8B + LoRA | pending | | | | | |
+| Qwen3.5-0.8B + LoRA | 200 | 0.960 | **0.945** | 20/20 | 52.3 | 13433.3 |
 
 | Measure | Value |
 |---|---|

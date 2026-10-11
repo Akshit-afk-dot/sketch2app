@@ -1,0 +1,20 @@
+{
+ "json_valid": 1.0,
+ "schema_valid": 1.0,
+ "tree_similarity": 0.8144647513780027,
+ "type_f1": 0.8730575029220186,
+ "link_f1": 0.9290351346531123,
+ "n_link_f1": 89,
+ "label_accuracy": 0.9938040888787263,
+ "screens_correct": 1.0,
+ "meta": {
+  "method": "heuristic",
+  "name": "heuristic_llmsubset",
+  "input": "gold",
+  "data": "synth",
+  "split": "test",
+  "samples": 300,
+  "ms_per_sample_median": 9.86,
+  "date": "2026-10-12"
+ }
+}

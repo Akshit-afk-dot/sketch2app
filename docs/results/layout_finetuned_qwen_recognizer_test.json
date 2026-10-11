@@ -1,0 +1,20 @@
+{
+ "json_valid": 0.96,
+ "schema_valid": 0.95,
+ "tree_similarity": 0.7819699297646251,
+ "type_f1": 0.831844361678071,
+ "link_f1": 0.5505172106295702,
+ "n_link_f1": 89,
+ "label_accuracy": 0.9116819540095831,
+ "screens_correct": 0.93,
+ "meta": {
+  "method": "predictions",
+  "name": "finetuned_qwen",
+  "input": "recognizer",
+  "data": "synth",
+  "split": "test",
+  "samples": 300,
+  "ms_per_sample_median": 13433.317681153616,
+  "date": "2026-10-12"
+ }
+}

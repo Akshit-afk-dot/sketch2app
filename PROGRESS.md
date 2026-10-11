@@ -13,8 +13,8 @@ Newest phase at the top of "Phase log".
 | P3 Data pipeline | done: 42,266 synthetic samples (by-app splits), legend-coverage augmentation, data report |
 | P4 Recognizer | done: typed F1 0.980 vs 0.487 rule-based (synthetic test); ONNX + Dart parity |
 | P5 Collect mode | done (app + import + per-participant split); real sketches pending (needs people) |
-| P6 Layout LLM | SFT data, notebook, LAN server, on-device path done; local Qwen3.5-0.8B QLoRA resumed at step 250/500 (best val tree sim 0.677 at step 200) |
-| P7 Evaluation | rule-based end-to-end done (200/200 render, 20/20 analyze); LLM rows pending training |
+| P6 Layout LLM | local Qwen3.5-0.8B LoRA done: 0.782 vs rules 0.802 on recognizer input (does not beat rules on synthetic data); Gemma on Colab pending |
+| P7 Evaluation | rule-based and Qwen rows done (end to end 200/200 vs 189/200 rendered); real-data and Gemma rows pending |
 | P8 Demo polish | 4 built-in samples, debug overlay, cheat sheet; device rehearsal pending |
 | P9 Docs | README, DESIGN, demo script, viva notes, report outline; kept current |
 | P10 GRPO (stretch) | not started |
@@ -185,7 +185,18 @@ Asked for by the user: take a photo of a paper sketch, upload it in the app, con
 - Re-measure on an idle laptop before the final results: recognizer latency (the 2026-10-11 re-run under
   load read 82 ms and was discarded).
 
-### P6 Layout model — tooling done, local fine-tune in progress
+### P6 Layout model — local Qwen3.5-0.8B fine-tune done (2026-10-12); Gemma 4 E2B on Colab pending
+
+- Result (docs/results.md section 2, same 300 test samples for both): the fine-tuned Qwen does **not** beat
+  the rule-based builder on synthetic data. Gold input: tree similarity 0.795 vs 0.814; recognizer input
+  0.782 vs 0.802, link F1 0.551 vs 0.674; 95-96% schema-valid outputs vs 100%; end to end 189/200 rendered
+  vs 200/200. Laptop generation ~13.4 s per spec (RTX 3050 Ti, PyTorch fallback kernels, batch 8).
+- Why, most likely: the synthetic sketches are laid out by our own program, which the rule-based builder
+  essentially inverts, so synthetic tests favour the rules. Real sketches (Collect mode, Photo study) are
+  the fair comparison; Gemma 4 E2B (notebook) is the larger candidate. The app keeps rules as default.
+- Training: 500 steps (4,000 examples x 2 epochs), validation tree similarity rose 0.34 -> 0.68 (step 200)
+  -> 0.76 (step 500, best). Resumed twice from checkpoints without loss of progress.
+
 
 - SFT data from noisy element lists (recognizer error rates measured on val), notebook for Colab/Kaggle
   (Unsloth + TRL), LAN server (llama.cpp with JSON-schema constrained decoding), on-device LiteRT-LM path.
