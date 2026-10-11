@@ -23,7 +23,15 @@ RICO consequences for this repo: raw RICO files and RICO-derived specs are store
 committed; classmates reproduce by running the download script themselves (accepting the terms). Cite:
 Deka et al., "Rico: A Mobile App Dataset for Building Data-Driven Design Applications", UIST 2017; semantic
 annotations: Liu et al., "Learning Design Semantics for Mobile Apps", UIST 2018.
-| Hershey vector fonts | pending (P3) | |
+
+| Dataset | Licence | Verified |
+|---|---|---|
+| Hershey vector fonts (`futural`, `scripts`, `cursive` .jhf from `github.com/kamalmostafa/hershey-fonts`, with the original `hershey.txt`) | Usenet distribution notice: free for any purpose provided the acknowledgement below accompanies the font data, and not converted into the NTIS format. | 2026-10-11, `hershey.txt` read directly |
+
+Hershey acknowledgement (required with the font data; the data stays under `S2A_DATA_ROOT` and is not
+committed, the synthetic sketches only contain strokes drawn from it): *The Hershey Fonts were originally
+created by Dr. A. V. Hershey while working at the U. S. National Bureau of Standards. The format of the Font
+data in this distribution was originally created by James Hurt, Cognition, Inc.*
 
 ## Libraries (direct dependencies)
 
@@ -38,6 +46,8 @@ Verified 2026-10-10 from pub.dev `license:` tags and PyPI metadata.
 | flutter_edge_ai 2.1.1, flutter_edge_ai_litertlm 1.11.0 | MIT | added in P6 |
 | share_plus, path_provider, shared_preferences, http | BSD-3-Clause | added in P2 |
 | archive 4.3.0 | MIT | added in P2 |
+| google_mlkit_text_recognition 0.17.1 | MIT (plugin); ML Kit text recognition (bundled Latin model) under the ML Kit terms | added in P11 (photo labels) |
+| image_picker 1.2.4 | BSD-3-Clause and Apache-2.0 (pub.dev tags; some files Apache) | added in P11 (camera / gallery) |
 | PyTorch 2.14.1 | BSD-3-Clause | |
 | jsonschema, PyYAML, NumPy, Pillow, Matplotlib, Flask, tokenizers, apted | MIT / MIT / BSD-3 / MIT-CMU / PSF-based / BSD-3 / Apache-2.0 / MIT | |
 
