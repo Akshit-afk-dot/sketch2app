@@ -6,6 +6,7 @@
 library;
 
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -13,6 +14,7 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import 'package:path_provider/path_provider.dart';
 
 import '../ink/ink_model.dart';
+import 'jpeg_orientation.dart';
 import 'photo_text.dart';
 import 'vectorize.dart';
 
@@ -44,7 +46,17 @@ class PhotoSketch {
 Future<PhotoSketch> importPhoto(Uint8List bytes, {bool ocr = true}) async {
   final sw = Stopwatch()..start();
   final codec = await ui.instantiateImageCodec(bytes);
-  final image = (await codec.getNextFrame()).image;
+  var image = (await codec.getNextFrame()).image;
+  // A quarter-turn EXIF tag with the decoded size still equal to the stored size means the decoder did
+  // not apply it: rotate here, before the vectorizer, OCR and the canvas background see the image.
+  final info = readJpegInfo(bytes);
+  if (info != null &&
+      info.quarterTurn &&
+      info.width != info.height &&
+      image.width == info.width &&
+      image.height == info.height) {
+    image = await _applyOrientation(image, info.orientation);
+  }
   final rgba = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
   final gray = GrayImage.fromRgba(
     image.width,
@@ -75,6 +87,34 @@ Future<PhotoSketch> importPhoto(Uint8List bytes, {bool ocr = true}) async {
     micros: {...micros, ...result.micros},
     ocrError: error,
   );
+}
+
+/// EXIF orientations 5-8 drawn upright (the ones that swap width and height).
+Future<ui.Image> _applyOrientation(ui.Image src, int orientation) async {
+  final w = src.width.toDouble(), h = src.height.toDouble();
+  final rec = ui.PictureRecorder();
+  final canvas = ui.Canvas(rec);
+  switch (orientation) {
+    case 6: // (x, y) -> (h - y, x)
+      canvas
+        ..translate(h, 0)
+        ..rotate(math.pi / 2);
+    case 8: // (x, y) -> (y, w - x)
+      canvas
+        ..translate(0, w)
+        ..rotate(-math.pi / 2);
+    case 5: // transpose: (x, y) -> (y, x)
+      canvas
+        ..rotate(math.pi / 2)
+        ..scale(1, -1);
+    case 7: // transverse: (x, y) -> (h - y, w - x)
+      canvas
+        ..translate(h, w)
+        ..rotate(math.pi / 2)
+        ..scale(-1, 1);
+  }
+  canvas.drawImage(src, ui.Offset.zero, ui.Paint());
+  return rec.endRecording().toImage(src.height, src.width);
 }
 
 /// OCR on the decoded pixels (written as PNG, so the orientation is the one the vectorizer saw), words
