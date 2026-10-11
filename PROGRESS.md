@@ -13,12 +13,12 @@ Newest phase at the top of "Phase log".
 | P3 Data pipeline | done: 42,266 synthetic samples (by-app splits), legend-coverage augmentation, data report |
 | P4 Recognizer | done: typed F1 0.980 vs 0.487 rule-based (synthetic test); ONNX + Dart parity |
 | P5 Collect mode | done (app + import + per-participant split); real sketches pending (needs people) |
-| P6 Layout LLM | SFT data, notebook, LAN server, on-device path done; local Qwen3.5-0.8B QLoRA at step 200/500 (val tree sim 0.677), resuming |
+| P6 Layout LLM | SFT data, notebook, LAN server, on-device path done; local Qwen3.5-0.8B QLoRA resumed at step 250/500 (best val tree sim 0.677 at step 200) |
 | P7 Evaluation | rule-based end-to-end done (200/200 render, 20/20 analyze); LLM rows pending training |
 | P8 Demo polish | 4 built-in samples, debug overlay, cheat sheet; device rehearsal pending |
 | P9 Docs | README, DESIGN, demo script, viva notes, report outline; kept current |
 | P10 GRPO (stretch) | not started |
-| **P11 Photo input** | app + vectorizer + synthetic-photo data + photo study done; photo model training next |
+| **P11 Photo input** | working end to end: photo model typed F1 0.751 on synthetic photos (rules 0.179); real-photo study pending |
 
 ## Needs you (batched)
 
@@ -153,22 +153,29 @@ Syntax highlighting: `flutter_highlight` is unmaintained (2021, Dart < 3), so th
 
 ## Phase log
 
-### P11 Photo input (2026-10-11) — app, data and evaluation path done; photo model training next
+### P11 Photo input (2026-10-11/12) — working end to end; real-photo study pending (needs people)
 
 Asked for by the user: take a photo of a paper sketch, upload it in the app, convert locally.
 - Design (DESIGN.md section 11): photo -> pseudo-strokes with a pure-Dart vectorizer -> the same
-  recognizer/layout pipeline; labels by on-device OCR (ML Kit text recognition, bundled model).
-- `lib/photo/vectorize.dart` (9 tests), `photo_import.dart`, `photo_text.dart` (OCR -> element labels);
-  camera button on the canvas, photo shown faded under the editable strokes; Photo study page.
-- Training data: `s2a.data.build_photo` renders synthetic samples as photos (pen, paper, light, shadow,
-  rotation, perspective, table, blur, noise, JPEG, stray marks), vectorizes them with the app's own code
-  (compiled `tool/batch.dart`, ~100 ms per photo) and labels pseudo-strokes by majority element group.
-  Smoke build (60 photos): ~1% noise strokes, 1-3% of elements lose all ink to the vectorizer.
-  Full build (12k/1k/1k) running.
-- Decoders drop NONE-type groups (noise) and add one implicit screen when no frame exists. Effect on
-  the pen-ink model: 1 element in 1,000 test sketches.
-- Next: cache + fine-tune the photo model (`configs/recognizer_photo.yaml`, `--init` ink model), evaluate
-  rule-based vs ink model (zero-shot) vs photo model on synthetic photos, end-to-end on photos, APK.
+  recognizer/layout pipeline; labels by on-device OCR (ML Kit text recognition, bundled model, offline).
+- App: camera/gallery button, strokes shown over the faded photo (editable), conversion right after import,
+  EXIF-orientation guard, Photo study page (target app drawn on paper, photographed, scored against its spec).
+- Data: 11,954 / 999 / 995 synthetic photos rendered from the v1 specs and vectorized by the app's own code
+  (compiled `tool/batch.dart`, ~105 ms per photo); pseudo-strokes labelled by majority element group.
+- Results on 995 synthetic test photos (docs/results.md section 5):
+  recognizer typed F1 rules **0.179**, ink model zero-shot **0.311**, photo model **0.751** (P 0.82, R 0.69);
+  specs (rule-based layout) tree similarity **0.674** (0.782 from perfect elements), screens correct 0.926,
+  link F1 0.153; end to end 200/200 valid and rendered, 20/20 exports pass `flutter analyze`.
+- What moved the numbers (all measured on val): label vote by element group, not pen stroke (noise share
+  7% -> 0.1% of real ink mislabelled); stray marks as a learnable noise class; arrow ends from the farthest
+  pair of points (2.5% -> 31% of arrows correct with perfect grouping); spurs pruned only up to one pen
+  width (arrows 30% -> 38%, detection ceiling 0.891 -> 0.905); 20 epochs at lr 6e-4 (0.698 -> 0.747).
+  Tried and dropped: outline tracing for fused thick blobs (+0.0004).
+- Known weak points: arrows (link F1 0.15: shafts cut at crossings, heads fused), small handwriting written
+  with a thick pen fuses into blobs, ruled paper unsupported. The perfect-grouping ceiling is 0.905, so the
+  model (0.75) is the main gap; more photos or epochs are the next cheap step.
+- Next: Photo study with classmates (Needs you 3); on-device latency; re-run the ink-mode layout and
+  end-to-end rows on an idle laptop (arrow rule changed; latency figures).
 
 ### P7 Evaluation — rule-based end-to-end done
 
