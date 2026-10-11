@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import '../../ink/ink_model.dart';
+import '../../photo/photo_import.dart';
 import '../../recognize/elements.dart';
 
 enum DrawTool { pen, eraser }
@@ -16,9 +17,12 @@ const Size frameSize = Size(360, 760);
 const double frameGap = 120;
 
 class _Snapshot {
-  _Snapshot(InkDocument d) : strokes = [...d.strokes], frames = [...d.frames];
+  _Snapshot(InkDocument d, this.photo)
+    : strokes = [...d.strokes],
+      frames = [...d.frames];
   final List<InkStroke> strokes;
   final List<InkFrame> frames;
+  final PhotoSketch? photo;
 }
 
 class SketchController extends ChangeNotifier {
@@ -28,6 +32,10 @@ class SketchController extends ChangeNotifier {
 
   InkDocument _doc = InkDocument();
   InkDocument get doc => _doc;
+
+  /// The photo the ink was extracted from (photo mode): painted under the ink, and its OCR words label
+  /// the elements. Null for drawn sketches.
+  PhotoSketch? photo;
 
   DrawTool tool = DrawTool.pen;
 
@@ -51,6 +59,9 @@ class SketchController extends ChangeNotifier {
   /// Bumped on every ink change so listeners (auto-convert) can tell ink edits from view changes.
   int revision = 0;
 
+  /// Bumped when new content replaces the canvas (photo, sample): the canvas re-fits the view.
+  int fitRequests = 0;
+
   bool get canUndo => _undo.isNotEmpty;
   bool get canRedo => _redo.isNotEmpty;
   List<InkPoint>? get currentStroke => _current;
@@ -58,7 +69,7 @@ class SketchController extends ChangeNotifier {
   Offset toCanvas(Offset screen) => (screen - offset) / scale;
 
   void _record() {
-    _undo.add(_Snapshot(_doc));
+    _undo.add(_Snapshot(_doc, photo));
     if (_undo.length > 200) _undo.removeAt(0);
     _redo.clear();
   }
@@ -131,9 +142,11 @@ class SketchController extends ChangeNotifier {
 
   void addFrame({bool record = true}) {
     if (record) _record();
-    final x = _doc.frames.isEmpty
-        ? 0.0
-        : _doc.frames.map((f) => f.box.right).reduce(math.max) + frameGap;
+    final rights = [
+      for (final f in _doc.frames) f.box.right,
+      if (photo case final p?) p.bounds.right,
+    ];
+    final x = rights.isEmpty ? 0.0 : rights.reduce(math.max) + frameGap;
     _doc.frames.add(
       InkFrame(_doc.nextFrameId, Box(x, 0, frameSize.width, frameSize.height)),
     );
@@ -149,29 +162,45 @@ class SketchController extends ChangeNotifier {
 
   void clear() {
     _record();
+    photo = null;
     _doc = InkDocument(frames: [..._doc.frames]);
+    if (_doc.frames.isEmpty) addFrame(record: false);
     _changed();
   }
 
   void load(InkDocument d) {
     _record();
+    photo = null;
     _doc = InkDocument(strokes: [...d.strokes], frames: [...d.frames]);
+    fitRequests++;
+    _changed();
+  }
+
+  /// Replace the canvas with a photo's strokes. No template frames: the recognizer finds drawn phone
+  /// outlines, and without any the whole drawing is one screen.
+  void loadPhoto(PhotoSketch p) {
+    _record();
+    photo = p;
+    _doc = InkDocument(strokes: [...p.result.ink.strokes]);
+    fitRequests++;
     _changed();
   }
 
   void undo() {
     if (_undo.isEmpty) return;
-    _redo.add(_Snapshot(_doc));
+    _redo.add(_Snapshot(_doc, photo));
     final s = _undo.removeLast();
     _doc = InkDocument(strokes: s.strokes, frames: s.frames);
+    photo = s.photo;
     _changed();
   }
 
   void redo() {
     if (_redo.isEmpty) return;
-    _undo.add(_Snapshot(_doc));
+    _undo.add(_Snapshot(_doc, photo));
     final s = _redo.removeLast();
     _doc = InkDocument(strokes: s.strokes, frames: s.frames);
+    photo = s.photo;
     _changed();
   }
 
@@ -199,13 +228,14 @@ class SketchController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Fit all frames into the viewport with a margin.
+  /// Fit all frames (and the photo, in photo mode) into the viewport with a margin.
   void fitTo(Size viewport) {
-    if (_doc.frames.isEmpty || viewport.isEmpty) return;
-    final all = _doc.frames
-        .map((f) => f.box)
-        .reduce((a, b) => a.union(b))
-        .inflate(40);
+    final boxes = [
+      for (final f in _doc.frames) f.box,
+      if (photo case final p?) p.bounds,
+    ];
+    if (boxes.isEmpty || viewport.isEmpty) return;
+    final all = boxes.reduce((a, b) => a.union(b)).inflate(40);
     scale = math
         .min(viewport.width / all.w, viewport.height / all.h)
         .clamp(0.2, 2.0);

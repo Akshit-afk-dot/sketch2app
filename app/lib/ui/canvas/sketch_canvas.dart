@@ -16,10 +16,14 @@ class SketchCanvas extends StatefulWidget {
     super.key,
     required this.controller,
     this.showOverlay = false,
+    this.showPhoto = true,
   });
 
   final SketchController controller;
   final bool showOverlay;
+
+  /// Paint the source photo (faded) under ink extracted from it.
+  final bool showPhoto;
 
   @override
   State<SketchCanvas> createState() => _SketchCanvasState();
@@ -30,9 +34,30 @@ class _SketchCanvasState extends State<SketchCanvas> {
   int? _drawingPointer;
   double? _pinchStartDistance;
   Offset? _lastFocal;
-  bool _fitted = false;
+  int _fittedFor = -1;
+  Size? _size;
 
   SketchController get c => widget.controller;
+
+  @override
+  void initState() {
+    super.initState();
+    c.addListener(_maybeFit);
+  }
+
+  @override
+  void dispose() {
+    c.removeListener(_maybeFit);
+    super.dispose();
+  }
+
+  /// Fit the view on first layout and whenever new content replaced the canvas.
+  void _maybeFit() {
+    final size = _size;
+    if (size == null || c.fitRequests == _fittedFor) return;
+    _fittedFor = c.fitRequests;
+    WidgetsBinding.instance.addPostFrameCallback((_) => c.fitTo(size));
+  }
 
   bool _draws(PointerDownEvent e) => switch (e.kind) {
     PointerDeviceKind.stylus || PointerDeviceKind.invertedStylus => true,
@@ -108,11 +133,9 @@ class _SketchCanvasState extends State<SketchCanvas> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (!_fitted && constraints.biggest.isFinite) {
-          _fitted = true;
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) => c.fitTo(constraints.biggest),
-          );
+        if (constraints.biggest.isFinite) {
+          _size = constraints.biggest;
+          _maybeFit();
         }
         return Listener(
           onPointerDown: _down,
@@ -129,6 +152,7 @@ class _SketchCanvasState extends State<SketchCanvas> {
                   c,
                   Theme.of(context).colorScheme,
                   showOverlay: widget.showOverlay,
+                  showPhoto: widget.showPhoto,
                 ),
               ),
             ),
@@ -140,11 +164,17 @@ class _SketchCanvasState extends State<SketchCanvas> {
 }
 
 class _InkPainter extends CustomPainter {
-  _InkPainter(this.c, this.scheme, {required this.showOverlay});
+  _InkPainter(
+    this.c,
+    this.scheme, {
+    required this.showOverlay,
+    required this.showPhoto,
+  });
 
   final SketchController c;
   final ColorScheme scheme;
   final bool showOverlay;
+  final bool showPhoto;
 
   static const _typeColors = {
     ElementType.btn: Colors.indigo,
@@ -193,6 +223,27 @@ class _InkPainter extends CustomPainter {
         )
         ..layout();
       label.paint(canvas, Offset(b.x + 4, b.y - 22));
+    }
+
+    if (c.photo case final p?) {
+      final page = Rect.fromLTWH(0, 0, p.bounds.w, p.bounds.h);
+      canvas.drawRect(page, Paint()..color = Colors.white);
+      if (showPhoto) {
+        final src = Rect.fromLTWH(
+          0,
+          0,
+          p.image.width.toDouble(),
+          p.image.height.toDouble(),
+        );
+        canvas.drawImageRect(
+          p.image,
+          src,
+          page,
+          Paint()
+            ..color = const Color(0x55FFFFFF)
+            ..filterQuality = FilterQuality.medium,
+        );
+      }
     }
 
     final ink = Paint()

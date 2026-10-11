@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import random
 import time
 from pathlib import Path
@@ -102,8 +103,11 @@ def main() -> None:
     ap.add_argument("--config", type=Path, default=CONFIG)
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--name", default=time.strftime("%Y%m%d-%H%M%S"))
+    ap.add_argument("--init", type=Path, help="start from this checkpoint (photo model: the ink model)")
     args = ap.parse_args()
     cfg = yaml.safe_load(args.config.read_text(encoding="utf-8"))
+    cfg["init"] = str(args.init) if args.init else None
+    cfg["dataset"] = os.environ.get("S2A_DATASET", "v1")
     tcfg = cfg["train"]
     if args.smoke:
         tcfg.update(epochs=1, batch_size=8)
@@ -118,6 +122,8 @@ def main() -> None:
     sampler = BucketBatchSampler([len(x["cls"]) for x in train.items], tcfg["batch_size"], cfg["seed"])
     loader = DataLoader(train, batch_sampler=sampler, collate_fn=collate, num_workers=tcfg["workers"])
     model = StrokeRecognizer(RecognizerConfig(**cfg["model"])).to(device)
+    if args.init:
+        model.load_state_dict(torch.load(args.init, map_location=device, weights_only=False)["model"])
     print(f"train samples {len(train)}, params {count_parameters(model):,}, device {device}", flush=True)
 
     opt = torch.optim.AdamW(model.parameters(), lr=tcfg["lr"], weight_decay=tcfg["weight_decay"])

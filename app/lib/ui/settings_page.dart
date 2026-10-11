@@ -164,6 +164,14 @@ class _SettingsPageState extends State<SettingsPage> {
               onChanged: (v) => s.useModelRecognizer = v,
             ),
             SwitchListTile(
+              title: const Text('Show photo under ink'),
+              subtitle: const Text(
+                'Imported photos: compare the extracted strokes with the paper',
+              ),
+              value: s.showPhoto,
+              onChanged: (v) => s.showPhoto = v,
+            ),
+            SwitchListTile(
               title: const Text('Debug overlay'),
               subtitle: const Text(
                 'Recognized boxes on the canvas and per-stage timings',

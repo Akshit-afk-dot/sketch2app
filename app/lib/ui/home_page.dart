@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -12,6 +13,8 @@ import '../layout/llm_layout.dart';
 import '../layout/on_device_llm.dart';
 import '../handwriting/handwriting.dart';
 import '../ink/samples.dart';
+import '../photo/photo_import.dart';
+import '../photo/photo_text.dart';
 import '../pipeline/pipeline.dart';
 import '../recognize/onnx_recognizer.dart';
 import '../render/spec_renderer.dart';
@@ -41,6 +44,12 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final controller = SketchController();
   final _onnx = OnnxStrokeRecognizer();
+
+  /// Photos: the photo-tuned model, else the ink model (if the photo model is not installed).
+  late final _photoRecognizer = FirstWorkingRecognizer([
+    OnnxStrokeRecognizer(asset: photoRecognizerAsset, name: 'photo model'),
+    _onnx,
+  ]);
   final _deviceLlm = LlmLayoutEngine(
     OnDeviceTextGenerator(),
   ); // keeps the loaded model between converts
@@ -48,6 +57,7 @@ class _HomePageState extends State<HomePage> {
   Map<String, String>? _files;
   String _file = 'lib/main.dart';
   bool _converting = false;
+  bool _importing = false;
   bool _handwritingMissing = false;
   Timer? _idle;
   int _lastRevision = 0;
@@ -105,11 +115,16 @@ class _HomePageState extends State<HomePage> {
     if (_converting) return;
     setState(() => _converting = true);
     try {
+      final photo = controller.photo;
       final pipeline = Pipeline(
-        recognizer: settings.useModelRecognizer
-            ? _onnx
-            : const HeuristicStrokeRecognizer(),
-        handwriting: widget.handwriting,
+        recognizer: !settings.useModelRecognizer
+            ? const HeuristicStrokeRecognizer()
+            : photo != null
+            ? _photoRecognizer
+            : _onnx,
+        handwriting: photo != null
+            ? PhotoTextReader(photo.words, widget.handwriting)
+            : widget.handwriting,
         layout: switch (settings.layoutMode) {
           'lan' => LlmLayoutEngine(LanTextGenerator(settings.lanUrl)),
           'device' => _deviceLlm,
@@ -151,6 +166,69 @@ class _HomePageState extends State<HomePage> {
         subject: 'Flutter project from Sketch2App',
       ),
     );
+  }
+
+  /// Photo of a paper sketch -> strokes on the canvas -> convert right away.
+  Future<void> _importPhoto() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Take a photo'),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from gallery'),
+              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+            ),
+            const ListTile(
+              dense: true,
+              leading: Icon(Icons.info_outline),
+              title: Text(
+                'Plain white paper, dark pen, even light, photo from straight above. '
+                'Draw a phone outline around each screen when there are several.',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+    final XFile? file;
+    try {
+      file = await ImagePicker().pickImage(
+        source: source,
+        maxWidth: 2560,
+        maxHeight: 2560,
+        imageQuality: 95,
+      );
+    } on Object catch (e) {
+      _snack('Could not open the ${source.name}: $e');
+      return;
+    }
+    if (file == null) return;
+    setState(() => _importing = true);
+    try {
+      final photo = await importPhoto(await file.readAsBytes());
+      controller.loadPhoto(photo);
+      final strokes = photo.result.ink.strokes.length;
+      _snack(
+        strokes == 0
+            ? 'No drawing found: try a darker pen or more light'
+            : '$strokes strokes found${photo.ocrError != null ? ' (text reading unavailable)' : ''}. '
+                  'Erase stray marks if needed.',
+      );
+      if (strokes > 0) unawaited(_convert());
+    } on Object catch (e) {
+      _snack('Could not read the photo: $e');
+    } finally {
+      if (mounted) setState(() => _importing = false);
+    }
   }
 
   void _snack(String msg) {
@@ -321,6 +399,16 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.add_to_queue),
             onPressed: controller.addFrame,
           ),
+          IconButton(
+            tooltip: 'Photo of a paper sketch',
+            icon: _importing
+                ? const SizedBox.square(
+                    dimension: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.add_a_photo_outlined),
+            onPressed: _importing ? null : _importPhoto,
+          ),
         ],
       ),
     ),
@@ -332,6 +420,7 @@ class _HomePageState extends State<HomePage> {
         child: SketchCanvas(
           controller: controller,
           showOverlay: settings.debugOverlay,
+          showPhoto: settings.showPhoto,
         ),
       ),
       Positioned(left: 8, top: 8, child: _tools()),
@@ -340,7 +429,7 @@ class _HomePageState extends State<HomePage> {
           left: 8,
           right: 8,
           bottom: 8,
-          child: _Timings(result: _result!),
+          child: _Timings(result: _result!, photo: controller.photo),
         ),
     ],
   );
@@ -449,14 +538,21 @@ class _Empty extends StatelessWidget {
 
 /// Per-stage latency chips (debug overlay).
 class _Timings extends StatelessWidget {
-  const _Timings({required this.result});
+  const _Timings({required this.result, this.photo});
   final PipelineResult result;
+  final PhotoSketch? photo;
 
   @override
   Widget build(BuildContext context) => Wrap(
     spacing: 6,
     runSpacing: 6,
     children: [
+      if (photo case final p?)
+        for (final k in ['decode', 'vectorize', 'ocr'])
+          Chip(
+            visualDensity: VisualDensity.compact,
+            label: Text('photo $k ${(p.micros[k] ?? 0) ~/ 1000} ms'),
+          ),
       for (final t in result.timings)
         Chip(
           visualDensity: VisualDensity.compact,

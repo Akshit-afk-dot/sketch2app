@@ -18,17 +18,24 @@ import 'elements.dart';
 import 'features.dart';
 
 const recognizerAsset = 'assets/models/recognizer.onnx';
+
+/// Same network fine-tuned on synthetic photos run through the app's vectorizer (lib/photo/).
+const photoRecognizerAsset = 'assets/models/recognizer_photo.onnx';
 const selfTestAsset = 'assets/selftest/recognizer.json';
 
 class OnnxStrokeRecognizer implements StrokeRecognizer {
-  OnnxStrokeRecognizer({this.asset = recognizerAsset, this.threshold = 0.5});
+  OnnxStrokeRecognizer({
+    this.asset = recognizerAsset,
+    this.threshold = 0.5,
+    this.name = 'model',
+  });
 
   final String asset;
   final double threshold;
   Future<OrtSession>? _session;
 
   @override
-  String get name => 'model';
+  final String name;
 
   Future<OrtSession> _open() =>
       _session ??= OnnxRuntime().createSessionFromAsset(asset);

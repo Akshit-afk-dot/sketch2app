@@ -33,6 +33,32 @@ class HeuristicStrokeRecognizer implements StrokeRecognizer {
       const HeuristicRecognizer().recognize(doc);
 }
 
+/// Tries recognizers in order (e.g. photo model, then ink model); the pipeline's rule-based fallback
+/// still applies when all of them fail.
+class FirstWorkingRecognizer implements StrokeRecognizer {
+  FirstWorkingRecognizer(this.options) : assert(options.isNotEmpty);
+  final List<StrokeRecognizer> options;
+  StrokeRecognizer? _last;
+
+  @override
+  String get name => (_last ?? options.first).name;
+
+  @override
+  Future<ElementList> recognize(InkDocument doc) async {
+    Object? error;
+    for (final r in options) {
+      try {
+        final out = await r.recognize(doc);
+        _last = r;
+        return out;
+      } on Object catch (e) {
+        error = e;
+      }
+    }
+    throw error!;
+  }
+}
+
 class HeuristicLayoutEngine implements LayoutEngine {
   const HeuristicLayoutEngine();
   @override

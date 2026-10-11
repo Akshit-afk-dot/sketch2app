@@ -1,0 +1,30 @@
+# Photo recognizer: the ink model fine-tuned on synthetic photos vectorized by the app's own code
+# (S2A_DATASET=v1-photo, `train --init <ink best.pt>`). Same architecture, so the app runs either model with
+# the same feature and decoder code. Shorter schedule and lower peak LR than from scratch: the model already
+# knows the legend; it has to adapt to pseudo-strokes (merged/split pen lines, synthetic order and timing).
+seed: 1234
+model:
+  d_model: 192
+  heads: 6
+  layers: 4
+  ffn: 768
+  dropout: 0.1
+  affinity_dim: 64
+train:
+  epochs: 8
+  batch_size: 32
+  lr: 3.0e-4
+  weight_decay: 0.05
+  warmup_steps: 200
+  max_strokes: 512
+  amp: true
+  grad_clip: 1.0
+  workers: 0
+loss:
+  cls: 1.0
+  type: 1.0
+  affinity: 2.0
+  affinity_pos_weight: 5.0
+eval:
+  val_limit: 1000
+  threshold: 0.5

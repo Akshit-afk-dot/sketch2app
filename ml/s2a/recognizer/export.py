@@ -144,18 +144,22 @@ def main() -> None:
     ap.add_argument("--ckpt", type=Path)
     ap.add_argument("--out", type=Path, default=REPO_ROOT / "app" / "assets" / "models")
     ap.add_argument("--fixtures", type=int, default=3)
+    ap.add_argument("--name", default="recognizer", help="recognizer (pen ink) or recognizer_photo")
     args = ap.parse_args()
     model = load(args.ckpt)
-    path = args.out / "recognizer.onnx"
+    path = args.out / f"{args.name}.onnx"
     export(model, path)
     inks = sample_inks()
     report = parity(model, path, [ink for _, ink in inks])
     report["size_mb"] = round(path.stat().st_size / 2**20, 2)
     report["checkpoint"] = str(args.ckpt) if args.ckpt else "untrained (random init, seed 0)"
-    write_fixtures(model, sorted(inks, key=lambda ni: len(ni[1]["strokes"]))[: args.fixtures])
+    # Dart feature/decoder fixtures and the on-device self-test belong to the ink model; the photo model
+    # shares that code, so its export only checks PyTorch vs ONNX Runtime.
+    if args.name == "recognizer":
+        write_fixtures(model, sorted(inks, key=lambda ni: len(ni[1]["strokes"]))[: args.fixtures])
     print(json.dumps(report, indent=1))
     (path.with_suffix(".parity.json")).write_text(json.dumps(report, indent=1), encoding="utf-8")
-    results = REPO_ROOT / "docs" / "results" / "recognizer_parity.json"  # committed copy for docs/results.md
+    results = REPO_ROOT / "docs" / "results" / f"{args.name}_parity.json"  # committed copy for results.md
     results.write_text(json.dumps(report, indent=1), encoding="utf-8")
 
 

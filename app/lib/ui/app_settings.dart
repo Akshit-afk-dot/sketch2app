@@ -54,6 +54,10 @@ class AppSettings extends ChangeNotifier {
   bool get useModelRecognizer => _get('useModelRecognizer', true);
   set useModelRecognizer(bool v) => _set('useModelRecognizer', v);
 
+  /// Paint an imported photo (faded) under the strokes extracted from it.
+  bool get showPhoto => _get('showPhoto', true);
+  set showPhoto(bool v) => _set('showPhoto', v);
+
   /// Show recognized element boxes on the canvas and per-stage timings.
   bool get debugOverlay => _get('debugOverlay', false);
   set debugOverlay(bool v) => _set('debugOverlay', v);
