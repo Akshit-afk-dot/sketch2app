@@ -44,6 +44,10 @@ uv pip install --python $PY -e "ml[dev]"
 cd app && flutter pub get
 ```
 
+One-time network use besides the steps above: the first `dart run` / `flutter test` runs flutter_edge_ai's
+build hook, which downloads its LiteRT-LM desktop libraries from the plugin's GitHub release (checksum-verified)
+into `%LOCALAPPDATA%/flutter_gemma`; later runs use that cache.
+
 ## Run the app
 
 ```bash

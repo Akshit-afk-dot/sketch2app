@@ -116,6 +116,18 @@ def photo_section() -> list[str]:
         if e
         else f"| {PENDING} | | | | | | |"
     )
+    spec_rows = []
+    for inp, label in (
+        ("gold", "Perfect elements (layout stage alone)"),
+        ("recognizer", "Photo model output"),
+    ):
+        r = load(f"layout_heuristic_{inp}_photo_test.json")
+        spec_rows.append(
+            f"| {label} | **{f(r['tree_similarity'])}** | {f(r['type_f1'])} | {f(r.get('link_f1'))} | "
+            f"{f(r['screens_correct'])} |"
+            if r
+            else f"| {label} | {PENDING} | | | |"
+        )
     dev = load("photo_real_device.json")
     lap = load("photo_real_laptop_recognizer_photo.json")
     real = [
@@ -157,6 +169,12 @@ def photo_section() -> list[str]:
         "| Sketches | Spec valid | Rendered | Exports passing analyze | Vectorize ms | Recognizer ms | Layout ms |",
         "|---:|---:|---:|---:|---:|---:|---:|",
         e2e,
+        "",
+        "### Specs from synthetic photos (rule-based layout, oracle labels)",
+        "",
+        "| Input to the layout stage | Tree sim. | Type F1 | Link F1 | Screens correct |",
+        "|---|---:|---:|---:|---:|",
+        *spec_rows,
         "",
         "### Real paper sketches (Photo study: target app drawn on paper, scored against its spec)",
         "",
