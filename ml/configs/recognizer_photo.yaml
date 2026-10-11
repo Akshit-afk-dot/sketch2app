@@ -1,7 +1,8 @@
 # Photo recognizer: the ink model fine-tuned on synthetic photos vectorized by the app's own code
 # (S2A_DATASET=v1-photo, `train --init <ink best.pt>`). Same architecture, so the app runs either model with
-# the same feature and decoder code. Shorter schedule and lower peak LR than from scratch: the model already
-# knows the legend; it has to adapt to pseudo-strokes (merged/split pen lines, synthetic order and timing).
+# the same feature and decoder code. It has to adapt to pseudo-strokes (merged or split pen lines, synthetic
+# order and timing). Schedule chosen on val typed F1 (2026-10-11): 8 epochs at lr 3e-4 gave 0.698, these
+# 20 epochs at lr 6e-4 (the from-scratch rate of the ink model) gave 0.747 (run photo-v2-long).
 seed: 1234
 model:
   d_model: 192
@@ -11,11 +12,11 @@ model:
   dropout: 0.1
   affinity_dim: 64
 train:
-  epochs: 8
+  epochs: 20
   batch_size: 32
-  lr: 3.0e-4
+  lr: 6.0e-4
   weight_decay: 0.05
-  warmup_steps: 200
+  warmup_steps: 500
   max_strokes: 512
   amp: true
   grad_clip: 1.0
