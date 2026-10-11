@@ -106,8 +106,14 @@ def decode(
             arrows.append({"id": len(arrows), "strokes": g, "tail": tail, "head": head})
         else:
             scores = type_p[g].sum(axis=0)
+            if int(np.argmax(scores)) == NONE_TYPE:
+                continue  # noise (stray marks in photos); element strokes are never trained towards NONE
             scores[NONE_TYPE] = -1
             pending.append((g, int(np.argmax(scores))))
+    if (
+        not frames and pending
+    ):  # no template and no drawn outline (a photo of one screen): the ink is the screen
+        frames.append({"id": 0, "box": _box([strokes[i] for g, _ in pending for i in g])})
     for g, t in pending:
         box = _box([strokes[i] for i in g])
         el: dict[str, Any] = {"id": len(elements), "type": ELEMENT_TYPES[t], "box": box, "strokes": g}

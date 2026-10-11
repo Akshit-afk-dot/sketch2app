@@ -18,6 +18,7 @@ import argparse
 import gzip
 import hashlib
 import json
+import os
 from collections import Counter, defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
@@ -35,7 +36,10 @@ CONFIG = REPO_ROOT / "ml" / "configs" / "data.yaml"
 
 
 def out_root() -> Path:
-    return data_root() / "synth" / "v1"
+    """$S2A_DATA_ROOT/synth/<dataset>; S2A_DATASET picks the dataset (default v1, pen ink). Every
+    tool that reads samples or eval exports goes through here, so S2A_DATASET=v1-photo points
+    caching, training and evaluation at the synthetic-photo dataset (s2a.data.build_photo)."""
+    return data_root() / "synth" / os.environ.get("S2A_DATASET", "v1")
 
 
 def split_of(app: str, percent: dict[str, int]) -> str:

@@ -67,3 +67,27 @@ augment:                         # legend-coverage insertion rates per screen (s
   radio: 0.10
   switch: 0.10
   grid: 0.30                     # of lists whose item is a card
+
+photo:                           # synthetic photos of paper sketches (s2a/data/photo.py, P11)
+  long_side: 1280                # px; must equal photoLongSide in app/lib/photo/vectorize.dart
+  samples: {train: 12000, val: 1000, test: 1000}
+  single_frame_drawn_prob: 0.6   # one-screen sketches without a phone outline use the page as the screen
+  margin: [0.04, 0.15]           # blank paper around the drawing, fraction of the drawing's long side
+  table_prob: 0.35               # sheet does not fill the photo; a darker table shows around it
+  paper_fill: [0.72, 0.95]       # sheet's share of the photo when the table shows (else 1.0-1.08: cropped)
+  rotation_deg: [-7.0, 7.0]
+  perspective: 0.05              # corner displacement, fraction of the photo size
+  paper_brightness: [185, 250]
+  table_brightness: [25, 150]
+  pen_width: [1.8, 5.5]          # px at long_side; ballpoint ~2, marker ~5
+  pen_width_jitter: 0.2          # per stroke, relative
+  ink_ratio: [0.12, 0.5]         # ink brightness / paper brightness (pencil is near 0.5)
+  lighting_ramp: [0.0, 0.35]     # brightness drop across the photo along a random direction
+  vignette: [0.0, 0.25]
+  stray_marks_mean: 1.5          # unlabelled dots/scribbles per photo (Poisson): the noise class
+  shadow_prob: 0.35
+  shadow_strength: [0.15, 0.45]
+  blur_sigma: [0.0, 1.2]
+  noise_sigma: [1.0, 6.0]
+  jpeg_prob: 0.8
+  jpeg_quality: [55, 95]

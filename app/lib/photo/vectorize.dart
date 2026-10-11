@@ -18,6 +18,8 @@ import 'dart:typed_data';
 
 import '../ink/ink_model.dart';
 
+bool _isSpace(int c) => c == 0x20 || c == 0x0a || c == 0x0d || c == 0x09;
+
 /// Photos are downscaled to this long side first: enough for ~3 px pen lines and handwriting ~15 px high
 /// on a 3-screen page, and thinning stays well under a second on a phone.
 const int photoLongSide = 1280;
@@ -34,6 +36,38 @@ class GrayImage {
       out[i] = (299 * rgba[j] + 587 * rgba[j + 1] + 114 * rgba[j + 2]) ~/ 1000;
     }
     return GrayImage(width, height, out);
+  }
+
+  /// Binary PGM (P5, 8-bit), the format ml/s2a/data/photo.py writes: lossless and trivial to parse.
+  factory GrayImage.fromPgm(Uint8List bytes) {
+    final fields = <String>[];
+    var i = 0;
+    while (fields.length < 4) {
+      while (i < bytes.length && _isSpace(bytes[i])) {
+        i++;
+      }
+      if (i < bytes.length && bytes[i] == 0x23) {
+        while (i < bytes.length && bytes[i] != 0x0a) {
+          i++;
+        }
+        continue;
+      }
+      final start = i;
+      while (i < bytes.length && !_isSpace(bytes[i])) {
+        i++;
+      }
+      if (start == i) throw const FormatException('truncated PGM header');
+      fields.add(String.fromCharCodes(bytes, start, i));
+    }
+    if (fields[0] != 'P5' || fields[3] != '255') {
+      throw FormatException('not an 8-bit binary PGM: ${fields.join(' ')}');
+    }
+    final w = int.parse(fields[1]), h = int.parse(fields[2]);
+    return GrayImage(
+      w,
+      h,
+      Uint8List.fromList(bytes.sublist(i + 1, i + 1 + w * h)),
+    );
   }
 
   final int width;

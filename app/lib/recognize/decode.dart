@@ -172,9 +172,23 @@ ElementList decodeRecognizer(
       );
     } else {
       final scores = sumRows(typeP, g);
+      // Noise (stray marks in photos); element strokes are never trained towards NONE.
+      if (argmax(scores) == noneType) continue;
       scores[noneType] = -1;
       pending.add((g, argmax(scores)));
     }
+  }
+  // No template and no drawn outline (a photo of one screen): the ink is the screen.
+  if (frames.isEmpty && pending.isNotEmpty) {
+    frames.add(
+      InkFrame(
+        0,
+        _box([
+          for (final (g, _) in pending)
+            for (final i in g) doc.strokes[i],
+        ]),
+      ),
+    );
   }
   for (final (g, t) in pending) {
     final box = _box([for (final i in g) doc.strokes[i]]);

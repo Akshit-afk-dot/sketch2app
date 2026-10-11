@@ -230,3 +230,52 @@ def test_collected_import_validates_and_splits_by_participant(tmp_path: Any, mon
     # A participant's split is frozen: importing again keeps everyone where they were.
     collected.import_records(src)
     assert json.loads((tmp_path / "real" / "splits.json").read_text(encoding="utf-8")) == splits
+
+
+def test_homography_maps_the_four_points() -> None:
+    from s2a.data.photo import apply, homography
+
+    src = np.array([[0, 0], [100, 0], [100, 50], [0, 50]], float)
+    dst = np.array([[3, 2], [97, 6], [104, 55], [-2, 48]], float)
+    assert np.allclose(apply(homography(src, dst), src), dst, atol=1e-6)
+
+
+def test_write_pgm_header_and_bytes(tmp_path: Any) -> None:
+    from s2a.data.photo import write_pgm
+
+    img = np.arange(12, dtype=np.uint8).reshape(3, 4)
+    write_pgm(tmp_path / "x.pgm", img)
+    raw = (tmp_path / "x.pgm").read_bytes()
+    assert raw.startswith(b"P5\n4 3\n255\n") and raw.endswith(bytes(range(12)))
+
+
+@needs_fonts
+def test_photo_render_then_label_recovers_the_original_labels() -> None:
+    """With the original strokes mapped into the photo standing in for the vectorizer's output, labelling
+    must give back every stroke's class and group, no noise, and element boxes inside the photo."""
+    from s2a.data.photo import apply, label, label_map, render
+    from s2a.data.synth import make_sample
+
+    cfg = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
+    cfg["canvas"]["drawn_frame_prob"] = 1.0
+    spec = json.loads((SPEC_DIR / "examples" / "01_login.json").read_text(encoding="utf-8"))
+    rng = np.random.default_rng(3)
+    s = make_sample(rng, cfg, [spec])
+    assert s is not None
+    pc = dict(cfg["photo"], stray_marks_mean=0.0)
+    img, m, pen, _ = render(rng, s, pc)
+    assert img.dtype == np.uint8 and max(img.shape) == pc["long_side"]
+    assert img.min() < 100 < img.max()  # dark ink on lighter paper
+    mapped = [apply(m, np.asarray([p[:2] for p in st["pts"]], float)) for st in s.ink["strokes"]]
+    pseudo = {"strokes": [{"id": k, "pts": [[x, y, 0] for x, y in q.tolist()]} for k, q in enumerate(mapped)]}
+    rec = label(s, m, pseudo, label_map(s, m, pen, (img.shape[1], img.shape[0])))
+    assert rec is not None
+    # A pseudo-stroke may land on an overlapping stroke of the same element; group and class must agree.
+    assert rec["stroke_group"] == s.stroke_group
+    assert rec["stroke_cls"] == s.stroke_cls
+    assert all(g["kind"] != "noise" for g in rec["groups"])
+    h, w = img.shape
+    for e in rec["elements"]["elements"]:
+        x, y, bw, bh = e["box"]
+        assert x >= -2 and y >= -2 and x + bw <= w + 2 and y + bh <= h + 2
+        assert e["strokes"]
