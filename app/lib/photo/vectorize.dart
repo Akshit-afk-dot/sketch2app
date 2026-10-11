@@ -625,8 +625,11 @@ List<List<(double, double)>> _trace(Uint8List sk, int w, int h, double width) {
     edges.add(_Edge(-1, -1, pts));
   }
 
-  // Spurs: short branches from a junction to a free end are thinning artefacts of a thick pen.
-  final spur = math.max(3.0, 2 * width);
+  // Spurs: short branches from a junction to a free end are thinning artefacts of a thick pen (about
+  // half a pen width). Pruning only up to one pen width keeps short real strokes such as arrowhead barbs:
+  // on 300 synthetic val photos, 2 widths -> 1 width raised arrows with both ends found 30% -> 38% and the
+  // perfect-grouping detection ceiling 0.891 -> 0.905.
+  final spur = math.max(2.5, 1.0 * width);
   final incident = <int, List<_Edge>>{};
   for (final e in edges) {
     if (e.a >= 0) incident.putIfAbsent(e.a, () => []).add(e);
