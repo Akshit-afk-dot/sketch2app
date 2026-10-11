@@ -28,9 +28,11 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", choices=["synth", "real"], default="synth")
     ap.add_argument("--split", choices=["train", "val", "test"], default="val")
+    ap.add_argument("--model", default="recognizer", help="app asset name (recognizer_photo = photo model)")
     args = ap.parse_args()
     sess = ort.InferenceSession(
-        str(REPO_ROOT / "app" / "assets" / "models" / "recognizer.onnx"), providers=["CPUExecutionProvider"]
+        str(REPO_ROOT / "app" / "assets" / "models" / f"{args.model}.onnx"),
+        providers=["CPUExecutionProvider"],
     )
     base = eval_root(args.data) / args.split
     raw_dir = base / "recognized"

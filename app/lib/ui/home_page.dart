@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../collect/collect_page.dart';
+import '../collect/photo_collect_page.dart';
 import '../export/project.dart';
 import '../export/zip.dart';
 import '../layout/llm_layout.dart';
@@ -326,6 +327,15 @@ class _HomePageState extends State<HomePage> {
                 MaterialPageRoute<void>(builder: (_) => const CollectPage()),
               ),
             );
+          case 'photoStudy':
+            unawaited(
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) =>
+                      PhotoCollectPage(handwriting: widget.handwriting),
+                ),
+              ),
+            );
           case 'settings':
             unawaited(
               Navigator.of(context).push(
@@ -356,6 +366,10 @@ class _HomePageState extends State<HomePage> {
         const PopupMenuItem(
           value: 'collect',
           child: Text('Collect data (study mode)'),
+        ),
+        const PopupMenuItem(
+          value: 'photoStudy',
+          child: Text('Photo study (paper sketches)'),
         ),
         const PopupMenuItem(value: 'settings', child: Text('Settings')),
       ],

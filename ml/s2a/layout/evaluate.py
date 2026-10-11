@@ -21,7 +21,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from s2a.data.collected import eval_root
+from s2a.data.collected import eval_root, eval_tag
 from s2a.layout.metrics import mean_scores, score
 from s2a.paths import REPO_ROOT
 
@@ -100,8 +100,7 @@ def main() -> None:
         "date": time.strftime("%Y-%m-%d"),
     }
     RESULTS.mkdir(parents=True, exist_ok=True)
-    split = args.split if args.data == "synth" else f"real_{args.split}"
-    path = RESULTS / f"layout_{args.name or args.method}_{args.input}_{split}.json"
+    path = RESULTS / f"layout_{args.name or args.method}_{args.input}_{eval_tag(args.data, args.split)}.json"
     path.write_text(json.dumps(summary, indent=1), encoding="utf-8")
     print(json.dumps(summary, indent=1))
 

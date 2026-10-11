@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import tempfile
 import time
@@ -21,7 +22,7 @@ from typing import Any
 
 import numpy as np
 
-from s2a.data.collected import eval_root
+from s2a.data.collected import eval_root, eval_tag
 from s2a.paths import REPO_ROOT
 from s2a.recognizer.decode import decode
 from s2a.recognizer.features import ink_features
@@ -59,13 +60,13 @@ def eval_heuristic(inks: list[Path]) -> tuple[DetectionStats, list[float]]:
 
 
 def eval_model(
-    inks: list[Path], method: str, ckpt: Path | None, threshold: float
+    inks: list[Path], method: str, ckpt: Path | None, threshold: float, model: str = "recognizer"
 ) -> tuple[DetectionStats, list[float]]:
     if method == "onnx":
         import onnxruntime as ort
 
         sess = ort.InferenceSession(
-            str(REPO_ROOT / "app" / "assets" / "models" / "recognizer.onnx"),
+            str(REPO_ROOT / "app" / "assets" / "models" / f"{model}.onnx"),
             providers=["CPUExecutionProvider"],
         )
 
@@ -76,12 +77,12 @@ def eval_model(
 
         from s2a.recognizer.export import Single, load
 
-        model = Single(load(ckpt)).eval()
+        net = Single(load(ckpt)).eval()
 
         def run(shape: np.ndarray, geom: np.ndarray) -> list[np.ndarray]:
             with torch.no_grad():
                 return [
-                    o[0].numpy() for o in model(torch.from_numpy(shape)[None], torch.from_numpy(geom)[None])
+                    o[0].numpy() for o in net(torch.from_numpy(shape)[None], torch.from_numpy(geom)[None])
                 ]
 
     stats, ms = DetectionStats(), []
@@ -106,13 +107,16 @@ def main() -> None:
     ap.add_argument("--ckpt", type=Path)
     ap.add_argument("--name", help="result name (default: method)")
     ap.add_argument("--threshold", type=float, default=0.5)
+    ap.add_argument(
+        "--model", default="recognizer", help="onnx: app asset name (recognizer_photo = photo model)"
+    )
     args = ap.parse_args()
     inks = sorted(f for f in (eval_root(args.data) / args.split / "ink").glob("*.json"))
     inks = [f for f in inks if json.loads(f.read_text(encoding="utf-8"))["strokes"]]
     if args.method == "heuristic":
         stats, ms = eval_heuristic(inks)
     else:
-        stats, ms = eval_model(inks, args.method, args.ckpt, args.threshold)
+        stats, ms = eval_model(inks, args.method, args.ckpt, args.threshold, args.model)
     summary = stats.summary()
     summary["meta"] = {
         "method": args.method,
@@ -120,12 +124,13 @@ def main() -> None:
         "data": args.data,
         "sketches": len(inks),
         "checkpoint": str(args.ckpt) if args.ckpt else None,
+        "model": args.model if args.method == "onnx" else None,
+        "dataset": os.environ.get("S2A_DATASET", "v1"),
         "laptop_ms_per_sketch": {"median": float(np.median(ms)), "p90": float(np.percentile(ms, 90))},
         "date": time.strftime("%Y-%m-%d"),
     }
     RESULTS.mkdir(parents=True, exist_ok=True)
-    suffix = args.split if args.data == "synth" else f"real_{args.split}"
-    path = RESULTS / f"recognizer_{args.name or args.method}_{suffix}.json"
+    path = RESULTS / f"recognizer_{args.name or args.method}_{eval_tag(args.data, args.split)}.json"
     path.write_text(json.dumps(summary, indent=1), encoding="utf-8")
     keys = ("detection_any_type", "detection_typed", "stroke_accuracy", "meta")
     print(json.dumps({k: summary[k] for k in keys}, indent=1))

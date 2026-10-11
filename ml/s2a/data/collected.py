@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sys
 import zipfile
 from collections import Counter
@@ -36,6 +37,15 @@ def real_root() -> Path:
 def eval_root(data: str) -> Path:
     """Eval-format sketches (<split>/{ink,gold}): synthetic (`synth`) or from Collect mode (`real`)."""
     return real_root() / "eval" if data == "real" else out_root() / "eval"
+
+
+def eval_tag(data: str, split: str) -> str:
+    """Result-file suffix: `test` (pen-ink synthetic), `photo_test` (synthetic photos, S2A_DATASET=v1-photo),
+    `real_test` (Collect mode), so results of different datasets never overwrite each other."""
+    if data == "real":
+        return f"real_{split}"
+    dataset = os.environ.get("S2A_DATASET", "v1")
+    return split if dataset == "v1" else f"{dataset.removeprefix('v1-')}_{split}"
 
 
 def check_record(rec: dict[str, Any]) -> list[str]:
