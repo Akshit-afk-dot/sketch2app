@@ -149,7 +149,7 @@
       "properties": {
         "t": { "const": "input" },
         "label": { "$ref": "#/$defs/label" },
-        "secure": { "type": "boolean" },
+        "secure": { "type": "boolean", "description": "Obscured text; a secure field is always single-line, so multiline is ignored when both are set" },
         "multiline": { "type": "boolean" }
       }
     },

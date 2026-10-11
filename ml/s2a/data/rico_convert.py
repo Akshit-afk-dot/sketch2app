@@ -187,7 +187,7 @@ class Converter:
                 node: Node = {"t": "input", "label": label}
                 if "pass" in hint or "pin" in hint:
                     node["secure"] = True
-                if c.h > 0.12 * self.H:
+                elif c.h > 0.12 * self.H:  # secure fields are single-line (spec rule)
                     node["multiline"] = True
                 return node
             case "Image":

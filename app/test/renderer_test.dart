@@ -117,4 +117,19 @@ void main() {
       });
     }
   });
+
+  testWidgets(
+    'secure multiline input and a 15-item row render without errors',
+    (tester) async {
+      await _pumpPreview(tester, parseSpecString(edgeCaseSpec).spec!);
+      expect(tester.takeException(), isNull);
+      expect(tester.widget<TextField>(find.byType(TextField)).maxLines, 1);
+      expect(find.text('Item 7'), findsOneWidget);
+    },
+  );
 }
+
+/// Regression spec from the end-to-end run: a secure field also marked multiline (Flutter asserts on
+/// obscured multi-line text) and a 15-item row (fixed-width icons alone overflow a phone).
+const edgeCaseSpec =
+    r'{"v":1,"screens":[{"id":"login","title":"Login","body":{"t":"col","c":[{"t":"input","label":"Password","secure":true,"multiline":true},{"t":"row","c":[{"t":"icon","name":"circle"},{"t":"icon","name":"circle"},{"t":"icon","name":"circle"},{"t":"icon","name":"circle"},{"t":"avatar"},{"t":"avatar"},{"t":"avatar"},{"t":"text","v":"Item 0"},{"t":"text","v":"Item 1"},{"t":"text","v":"Item 2"},{"t":"text","v":"Item 3"},{"t":"text","v":"Item 4"},{"t":"text","v":"Item 5"},{"t":"text","v":"Item 6"},{"t":"text","v":"Item 7"}]}]}}]}';

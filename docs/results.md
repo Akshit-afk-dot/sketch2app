@@ -51,6 +51,15 @@ only over samples whose gold spec has navigation links.
 | Gemma 4 E2B + LoRA | pending | | | | | | |
 | Qwen3.5-0.8B + LoRA | pending | | | | | | |
 
+### Input: trained recognizer output on real sketches (held-out participants)
+
+| Method | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Rule-based builder (baseline) | pending | | | | | | |
+| Gemma 4 E2B base, 3-shot | pending | | | | | | |
+| Gemma 4 E2B + LoRA | pending | | | | | | |
+| Qwen3.5-0.8B + LoRA | pending | | | | | | |
+
 ## 3. Spec format and export
 
 - Spec size on the 11 hand-written examples: median 122 Gemma 4 tokens per screen (max 181); pretty-printed JSON costs 2.5x more.
@@ -60,9 +69,20 @@ only over samples whose gold spec has navigation links.
 
 ## 4. End-to-end and on-device
 
+Synthetic test sketches through the whole pipeline on the laptop (`python -m s2a.e2e`): ink -> learned
+recognizer (ONNX) -> layout -> spec -> preview render (phone size, overflow counts as failure) -> export
+-> `flutter analyze` on the first 20 exported projects. Handwriting is an oracle here (gold labels on
+matched elements): ML Kit only runs on Android, so its accuracy and latency are measured on the device.
+
+| Layout | Sketches | Spec valid | Rendered | Exports passing analyze | Recognizer ms | Layout ms |
+|---|---:|---:|---:|---:|---:|---:|
+| Rule-based builder (baseline) | 200 | 1.000 | **1.000** | 20/20 | 48.7 | 0.5 |
+| Gemma 4 E2B base, 3-shot | pending | | | | | |
+| Gemma 4 E2B + LoRA | pending | | | | | |
+| Qwen3.5-0.8B + LoRA | pending | | | | | |
+
 | Measure | Value |
 |---|---|
-| Latency per stage on the laptop | pending |
 | Latency per stage on the Android device(s) | pending (needs device) |
 | Peak memory on device | pending (needs device) |
 | Render success rate on real sketches | pending (needs Collect data) |

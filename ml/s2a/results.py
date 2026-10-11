@@ -53,16 +53,18 @@ def recognizer_rows(split: str, data: str = "synth") -> list[str]:
     return rows
 
 
-def layout_rows(inp: str) -> list[str]:
+LAYOUT_METHODS = (
+    ("heuristic", "Rule-based builder (baseline)"),
+    ("fewshot_gemma", "Gemma 4 E2B base, 3-shot"),
+    ("finetuned_gemma", "Gemma 4 E2B + LoRA"),
+    ("finetuned_qwen", "Qwen3.5-0.8B + LoRA"),
+)
+
+
+def layout_rows(inp: str, split: str = "test") -> list[str]:
     rows = []
-    methods = (
-        ("heuristic", "Rule-based builder (baseline)"),
-        ("fewshot_gemma", "Gemma 4 E2B base, 3-shot"),
-        ("finetuned_gemma", "Gemma 4 E2B + LoRA"),
-        ("finetuned_qwen", "Qwen3.5-0.8B + LoRA"),
-    )
-    for name, label in methods:
-        r = load(f"layout_{name}_{inp}_test.json")
+    for name, label in LAYOUT_METHODS:
+        r = load(f"layout_{name}_{inp}_{split}.json")
         if r is None:
             rows.append(f"| {label} | {PENDING} | | | | | | |")
             continue
@@ -70,6 +72,21 @@ def layout_rows(inp: str) -> list[str]:
             f"| {label} | {f(r['json_valid'])} | {f(r['schema_valid'])} | **{f(r['tree_similarity'])}** | "
             f"{f(r['type_f1'])} | {f(r.get('link_f1'))} | {f(r['label_accuracy'])} | "
             f"{f(r['meta'].get('ms_per_sample_median'), 1)} |"
+        )
+    return rows
+
+
+def e2e_rows() -> list[str]:
+    rows = []
+    for name, label in LAYOUT_METHODS:
+        r = load(f"e2e_{name}_test.json")
+        if r is None:
+            rows.append(f"| {label} | {PENDING} | | | | | |")
+            continue
+        ms = r["laptop_ms_median"]
+        rows.append(
+            f"| {label} | {r['sketches']} | {f(r['spec_valid_rate'])} | **{f(r['render_success_rate'])}** | "
+            f"{r['exported_analyze_pass']} | {f(ms['recognizer'], 1)} | {f(ms['layout'], 1)} |"
         )
     return rows
 
@@ -158,6 +175,12 @@ def main() -> None:
         "|---|---:|---:|---:|---:|---:|---:|---:|",
         *layout_rows("recognizer"),
         "",
+        "### Input: trained recognizer output on real sketches (held-out participants)",
+        "",
+        "| Method | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
+        *layout_rows("recognizer", "real_test"),
+        "",
         "## 3. Spec format and export",
         "",
     ]
@@ -188,9 +211,17 @@ def main() -> None:
         "",
         "## 4. End-to-end and on-device",
         "",
+        "Synthetic test sketches through the whole pipeline on the laptop (`python -m s2a.e2e`): ink -> learned",
+        "recognizer (ONNX) -> layout -> spec -> preview render (phone size, overflow counts as failure) -> export",
+        "-> `flutter analyze` on the first 20 exported projects. Handwriting is an oracle here (gold labels on",
+        "matched elements): ML Kit only runs on Android, so its accuracy and latency are measured on the device.",
+        "",
+        "| Layout | Sketches | Spec valid | Rendered | Exports passing analyze | Recognizer ms | Layout ms |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+        *e2e_rows(),
+        "",
         "| Measure | Value |",
         "|---|---|",
-        f"| Latency per stage on the laptop | {PENDING} |",
         f"| Latency per stage on the Android device(s) | {PENDING} (needs device) |",
         f"| Peak memory on device | {PENDING} (needs device) |",
         f"| Render success rate on real sketches | {PENDING} (needs Collect data) |",

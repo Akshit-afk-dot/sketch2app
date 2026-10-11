@@ -1,0 +1,14 @@
+{
+ "sketches": 200,
+ "spec_valid_rate": 1.0,
+ "render_success_rate": 1.0,
+ "render_errors": [],
+ "exported_analyze_pass": "20/20",
+ "laptop_ms_median": {
+  "recognizer": 48.733200001152,
+  "layout": 0.463
+ },
+ "handwriting": "oracle (gold labels); ML Kit is measured on the device",
+ "layout": "heuristic",
+ "seconds": 346.9
+}

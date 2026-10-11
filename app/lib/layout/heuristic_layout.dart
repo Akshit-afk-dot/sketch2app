@@ -387,9 +387,12 @@ class _FrameLayout {
     final link = go[e.id];
     return switch (e.type) {
       ElementType.btn => ButtonNode(text ?? 'Button', go: link),
+      ElementType.input when _secret.hasMatch(text ?? '') => InputNode(
+        text ?? 'Input',
+        secure: true,
+      ),
       ElementType.input => InputNode(
         text ?? 'Input',
-        secure: _secret.hasMatch(text ?? ''),
         multiline: e.box.h > 0.15 * u,
       ),
       ElementType.text => TextNode(

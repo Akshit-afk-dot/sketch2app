@@ -76,6 +76,15 @@ class ScreenCodegen {
 
   Code node(SpecNode n) => switch (n) {
     ColNode(:final c) => _column(c, 12),
+    RowNode(:final c) when c.length > maxRowItems => Call(
+      'Wrap',
+      named: [
+        ('spacing', const Raw('8')),
+        ('runSpacing', const Raw('8')),
+        ('crossAxisAlignment', const Raw('WrapCrossAlignment.center')),
+        ('children', ListCode([for (final x in c) node(x)])),
+      ],
+    ),
     RowNode(:final c) => Call(
       'Row',
       named: [
@@ -122,8 +131,8 @@ class ScreenCodegen {
       'TextField',
       named: [
         if (secure) ('obscureText', const Raw('true')),
-        if (multiline) ('minLines', const Raw('3')),
-        if (multiline) ('maxLines', const Raw('5')),
+        if (multiline && !secure) ('minLines', const Raw('3')),
+        if (multiline && !secure) ('maxLines', const Raw('5')),
         (
           'decoration',
           Call(

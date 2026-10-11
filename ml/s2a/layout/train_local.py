@@ -10,6 +10,7 @@ the output layer to completion positions only, so the 248k-entry vocabulary logi
 the prompt tokens; that is what makes 4 GB of VRAM enough.
 
     python -m s2a.layout.train_local --examples 4000 --epochs 2
+    python -m s2a.layout.train_local --name <run> --resume                    # continue an interrupted run
     python -m s2a.layout.train_local --eval-only --adapter <run>/adapter     # test predictions only
 
 Writes $S2A_DATA_ROOT/runs/layout/<name>/: adapter/, val_history.json, train_log.json, config.json and
@@ -24,11 +25,12 @@ import json
 import math
 import random
 import time
+import warnings
 from pathlib import Path
 from typing import Any
 
 import torch
-from peft import LoraConfig, PeftModel, get_peft_model
+from peft import LoraConfig, PeftModel, get_peft_model, load_peft_weights, set_peft_model_state_dict
 from torch.utils.checkpoint import checkpoint
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
@@ -37,6 +39,7 @@ from s2a.layout.sft_data import llm_dir
 from s2a.paths import data_root
 
 WARMUP_STEPS = 20
+REWARM_STEPS = 10  # after resuming without optimizer state (fresh Adam moments)
 LOSS_CHUNK = 256
 
 
@@ -161,10 +164,15 @@ def train(runner: Runner, args: argparse.Namespace, out: Path) -> None:
     sched = torch.optim.lr_scheduler.LambdaLR(opt, lr_scale)
     history: list[dict[str, Any]] = []
     log: list[dict[str, Any]] = []
-    best, bad, step, loss_sum, n_sum = -1.0, 0, 0, 0.0, 0
+    best, bad, step, start_k = -1.0, 0, 0, 0
+    if args.resume:
+        best, bad, step, start_k, history, log = resume(model, opt, sched, out, args.grad_accum)
+    loss_sum, n_sum = 0.0, 0
     t0 = time.time()
     model.train()
     for k, i in enumerate(order):
+        if k < start_k:
+            continue
         with torch.autocast("cuda", dtype=torch.bfloat16):
             loss = completion_loss(model, *data[i])
         (loss / args.grad_accum).backward()
@@ -203,10 +211,58 @@ def train(runner: Runner, args: argparse.Namespace, out: Path) -> None:
             bad += 1
         (out / "val_history.json").write_text(json.dumps(history, indent=1), encoding="utf-8")
         (out / "train_log.json").write_text(json.dumps(log, indent=1), encoding="utf-8")
+        model.save_pretrained(out / "last")
+        state = {
+            "opt": opt.state_dict(),
+            "sched": sched.state_dict(),
+            "step": step,
+            "k": k,
+            "best": best,
+            "bad": bad,
+        }
+        torch.save(state, out / "last" / "state.pt")
         if bad >= args.patience:
             print(f"early stop after {bad} checks without improvement", flush=True)
             break
     print(f"best val tree similarity {best:.4f}", flush=True)
+
+
+def resume(
+    model: Any, opt: torch.optim.Optimizer, sched: Any, out: Path, grad_accum: int
+) -> tuple[float, int, int, int, list[dict[str, Any]], list[dict[str, Any]]]:
+    """Restore an interrupted run: (best, bad, step, first example index, val history, train log).
+
+    `last/` (saved at every validation check) restores everything. Runs interrupted before that existed
+    only have the best adapter: training continues from its step with fresh Adam moments, re-warming the
+    learning rate over REWARM_STEPS so the first updates of the fresh optimizer stay small.
+    """
+    history = json.loads((out / "val_history.json").read_text(encoding="utf-8"))
+    log = json.loads((out / "train_log.json").read_text(encoding="utf-8"))
+    if (out / "last" / "state.pt").exists():
+        set_peft_model_state_dict(model, load_peft_weights(str(out / "last")))
+        st = torch.load(out / "last" / "state.pt", weights_only=False)
+        opt.load_state_dict(st["opt"])
+        sched.load_state_dict(st["sched"])
+        best, bad, step, k = st["best"], st["bad"], st["step"], st["k"] + 1
+        mode = "full"
+    else:
+        set_peft_model_state_dict(model, load_peft_weights(str(out / "adapter")))
+        top = max(history, key=lambda h: h["tree_similarity"])
+        best, bad, step, k = top["tree_similarity"], 0, top["step"], top["step"] * grad_accum
+        history = [h for h in history if h["step"] <= step]
+        log = [e for e in log if e["step"] <= step]
+        with warnings.catch_warnings():  # stepping the schedule without optimizer steps is intended here
+            warnings.simplefilter("ignore")
+            for _ in range(step):
+                sched.step()
+        rewarm = sched.lr_lambdas[0]
+        sched.lr_lambdas[0] = lambda s: rewarm(s) * min(1.0, (s - step + 1) / REWARM_STEPS)
+        for group, base_lr in zip(opt.param_groups, sched.base_lrs, strict=True):
+            group["lr"] = base_lr * sched.lr_lambdas[0](step)
+        mode = "adapter only, fresh optimizer"
+    log.append({"resumed_at_step": step, "state": mode})
+    print(json.dumps(log[-1]), flush=True)
+    return best, bad, step, k, history, log
 
 
 def main() -> None:
@@ -225,10 +281,12 @@ def main() -> None:
     ap.add_argument("--no-4bit", action="store_true")
     ap.add_argument("--eval-only", action="store_true")
     ap.add_argument("--adapter", type=Path)
+    ap.add_argument("--resume", action="store_true", help="continue run --name (same other arguments)")
     args = ap.parse_args()
     out = data_root() / "runs" / "layout" / args.name
     out.mkdir(parents=True, exist_ok=True)
-    (out / "config.json").write_text(json.dumps(vars(args), default=str, indent=1), encoding="utf-8")
+    if not args.resume:
+        (out / "config.json").write_text(json.dumps(vars(args), default=str, indent=1), encoding="utf-8")
     random.seed(1234)
     torch.manual_seed(1234)
 

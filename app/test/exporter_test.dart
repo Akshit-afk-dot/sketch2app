@@ -7,6 +7,7 @@ import 'package:sketch2app/export/screen_codegen.dart';
 import 'package:sketch2app/spec/spec.dart';
 
 import '../tool/gen.dart' as gen;
+import 'renderer_test.dart' show edgeCaseSpec;
 
 AppSpec _example(String stem) => parseSpecString(
   File('../spec/examples/$stem.json').readAsStringSync(),
@@ -120,5 +121,14 @@ void main() {
       File(gen.widgetsSourceOut).readAsStringSync(),
       gen.widgetsSourceConstant(widgets),
     );
+  });
+
+  test('long rows become Wrap and secure inputs stay single-line', () {
+    final screen = exportProject(
+      parseSpecString(edgeCaseSpec).spec!,
+    )['lib/screens/login_screen.dart']!;
+    expect(screen, contains('Wrap('));
+    expect(screen, contains('obscureText: true'));
+    expect(screen, isNot(contains('maxLines')));
   });
 }

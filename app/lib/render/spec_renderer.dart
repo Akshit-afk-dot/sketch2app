@@ -123,6 +123,12 @@ class _NodeRenderer {
 
   Widget build(SpecNode node) => switch (node) {
     ColNode(:final c) => _column(c, 12),
+    RowNode(:final c) when c.length > maxRowItems => Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [for (final n in c) build(n)],
+    ),
     RowNode(:final c) => Row(
       spacing: 8,
       children: [for (final n in c) _rowChild(n)],
@@ -156,8 +162,9 @@ class _NodeRenderer {
     },
     InputNode(:final label, :final secure, :final multiline) => TextField(
       obscureText: secure,
-      minLines: multiline ? 3 : 1,
-      maxLines: multiline ? 5 : 1,
+      // A secure field is always one line (Flutter cannot obscure multi-line text).
+      minLines: multiline && !secure ? 3 : 1,
+      maxLines: multiline && !secure ? 5 : 1,
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
