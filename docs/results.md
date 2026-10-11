@@ -35,30 +35,30 @@ only over samples whose gold spec has navigation links.
 
 ### Input: gold element lists (layout stage in isolation)
 
-| Method | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| Rule-based builder (baseline) | 1.000 | 1.000 | **0.816** | 0.873 | 0.934 | 0.995 | 0.4 |
-| Gemma 4 E2B base, 3-shot | pending | | | | | | |
-| Gemma 4 E2B + LoRA | pending | | | | | | |
-| Qwen3.5-0.8B + LoRA | pending | | | | | | |
+| Method | Samples | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Rule-based builder (baseline) | 1000 | 1.000 | 1.000 | **0.816** | 0.873 | 0.934 | 0.995 | 0.4 |
+| Gemma 4 E2B base, 3-shot | pending | | | | | | | |
+| Gemma 4 E2B + LoRA | pending | | | | | | | |
+| Qwen3.5-0.8B + LoRA | pending | | | | | | | |
 
 ### Input: trained recognizer output (realistic errors)
 
-| Method | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| Rule-based builder (baseline) | 1.000 | 1.000 | **0.801** | 0.865 | 0.687 | 0.973 | 0.3 |
-| Gemma 4 E2B base, 3-shot | pending | | | | | | |
-| Gemma 4 E2B + LoRA | pending | | | | | | |
-| Qwen3.5-0.8B + LoRA | pending | | | | | | |
+| Method | Samples | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Rule-based builder (baseline) | 1000 | 1.000 | 1.000 | **0.801** | 0.865 | 0.687 | 0.973 | 0.3 |
+| Gemma 4 E2B base, 3-shot | pending | | | | | | | |
+| Gemma 4 E2B + LoRA | pending | | | | | | | |
+| Qwen3.5-0.8B + LoRA | pending | | | | | | | |
 
 ### Input: trained recognizer output on real sketches (held-out participants)
 
-| Method | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| Rule-based builder (baseline) | pending | | | | | | |
-| Gemma 4 E2B base, 3-shot | pending | | | | | | |
-| Gemma 4 E2B + LoRA | pending | | | | | | |
-| Qwen3.5-0.8B + LoRA | pending | | | | | | |
+| Method | Samples | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Rule-based builder (baseline) | pending | | | | | | | |
+| Gemma 4 E2B base, 3-shot | pending | | | | | | | |
+| Gemma 4 E2B + LoRA | pending | | | | | | | |
+| Qwen3.5-0.8B + LoRA | pending | | | | | | | |
 
 ## 3. Spec format and export
 
@@ -77,6 +77,7 @@ matched elements): ML Kit only runs on Android, so its accuracy and latency are 
 | Layout | Sketches | Spec valid | Rendered | Exports passing analyze | Recognizer ms | Layout ms |
 |---|---:|---:|---:|---:|---:|---:|
 | Rule-based builder (baseline) | 200 | 1.000 | **1.000** | 20/20 | 48.7 | 0.5 |
+| Rule-based builder, on the LLM rows' samples | pending | | | | | |
 | Gemma 4 E2B base, 3-shot | pending | | | | | |
 | Gemma 4 E2B + LoRA | pending | | | | | |
 | Qwen3.5-0.8B + LoRA | pending | | | | | |

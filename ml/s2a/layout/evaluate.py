@@ -76,9 +76,13 @@ def main() -> None:
     ap.add_argument("--split", choices=["val", "test"], default="test")
     ap.add_argument("--pred", type=Path, help="JSONL of model outputs (method=predictions)")
     ap.add_argument("--name", help="result name (default: method)")
+    ap.add_argument("--only-ids", type=Path, help="JSONL with an `id` per line: score only those samples")
     args = ap.parse_args()
     base = eval_root(args.data) / args.split
     inputs = load_inputs(base, args.input)
+    if args.only_ids:  # e.g. the rule-based baseline on exactly the samples an LLM run covered
+        keep = {r["id"] for r in map(json.loads, args.only_ids.open(encoding="utf-8"))}
+        inputs = {k: v for k, v in inputs.items() if k in keep}
     golds = gold_specs(base)
     ms: dict[str, float] = {}
     if args.method == "heuristic":
@@ -86,6 +90,9 @@ def main() -> None:
     else:
         outputs = {r["id"]: r["output"] for r in map(json.loads, args.pred.open(encoding="utf-8"))}
         ms = {r["id"]: r.get("ms", float("nan")) for r in map(json.loads, args.pred.open(encoding="utf-8"))}
+        # A model run may cover only the first N test samples (LLM generation is slow): score exactly
+        # those, never count the rest as failures. meta.samples records N.
+        inputs = {k: v for k, v in inputs.items() if k in outputs}
     rows = [score(outputs.get(k), golds[k]) for k in sorted(inputs)]
     summary: dict[str, Any] = mean_scores(rows)
     times = sorted(v for v in ms.values() if v == v)

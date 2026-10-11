@@ -55,6 +55,7 @@ def recognizer_rows(split: str, data: str = "synth") -> list[str]:
 
 LAYOUT_METHODS = (
     ("heuristic", "Rule-based builder (baseline)"),
+    ("heuristic_llmsubset", "Rule-based builder, on the LLM rows' samples"),
     ("fewshot_gemma", "Gemma 4 E2B base, 3-shot"),
     ("finetuned_gemma", "Gemma 4 E2B + LoRA"),
     ("finetuned_qwen", "Qwen3.5-0.8B + LoRA"),
@@ -66,10 +67,12 @@ def layout_rows(inp: str, split: str = "test") -> list[str]:
     for name, label in LAYOUT_METHODS:
         r = load(f"layout_{name}_{inp}_{split}.json")
         if r is None:
-            rows.append(f"| {label} | {PENDING} | | | | | | |")
+            if name != "heuristic_llmsubset":  # only shown once an LLM run exists
+                rows.append(f"| {label} | {PENDING} | | | | | | | |")
             continue
         rows.append(
-            f"| {label} | {f(r['json_valid'])} | {f(r['schema_valid'])} | **{f(r['tree_similarity'])}** | "
+            f"| {label} | {r['meta']['samples']} | {f(r['json_valid'])} | {f(r['schema_valid'])} | "
+            f"**{f(r['tree_similarity'])}** | "
             f"{f(r['type_f1'])} | {f(r.get('link_f1'))} | {f(r['label_accuracy'])} | "
             f"{f(r['meta'].get('ms_per_sample_median'), 1)} |"
         )
@@ -259,20 +262,20 @@ def main() -> None:
         "",
         "### Input: gold element lists (layout stage in isolation)",
         "",
-        "| Method | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| Method | Samples | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
         *layout_rows("gold"),
         "",
         "### Input: trained recognizer output (realistic errors)",
         "",
-        "| Method | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| Method | Samples | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
         *layout_rows("recognizer"),
         "",
         "### Input: trained recognizer output on real sketches (held-out participants)",
         "",
-        "| Method | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| Method | Samples | JSON valid | Schema valid | Tree sim. | Type F1 | Link F1 | Labels | ms/sample |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
         *layout_rows("recognizer", "real_test"),
         "",
         "## 3. Spec format and export",
