@@ -82,3 +82,15 @@ def test_server_generate_contract() -> None:
     r = client.post("/generate", json={"prompt": "Convert...\nS1\n1 btn 1,2,3,4", "temperature": 0.3})
     assert r.status_code == 200 and r.get_json()["output"] == "1 btn 1,2,3,4"
     assert client.post("/generate", json={"temperature": 0}).status_code == 400
+
+
+def test_arrow_ends_survive_a_shaft_cut_into_pieces() -> None:
+    """A photographed arrow: shaft split where it crosses other lines, barbs as separate strokes. Tail and
+    head must come out the same whatever the stroke order."""
+    from s2a.recognizer.decode import _arrow_ends
+
+    shaft = [[[0, 0, 0], [40, 2, 0]], [[40, 2, 0], [80, 3, 0]], [[80, 3, 0], [120, 0, 0]]]
+    barbs = [[[120, 0, 0], [108, -8, 0]], [[120, 0, 0], [108, 8, 0]]]
+    for strokes in (shaft + barbs, barbs + shaft[::-1]):
+        tail, head = _arrow_ends(strokes)
+        assert tail == [0.0, 0.0] and head == [120.0, 0.0]

@@ -8,6 +8,7 @@ together, unlike connected components on a thresholded graph).
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 import numpy as np
@@ -67,17 +68,32 @@ def _inside(box: list[float], frame: list[float]) -> bool:
 
 
 def _arrow_ends(strokes: list[list[list[float]]]) -> tuple[list[float], list[float]]:
-    """Shaft = longest stroke. Head = the shaft end nearest the other (head) strokes, else its last point."""
-    lengths = [
-        sum(np.hypot(*np.subtract(s[k + 1][:2], s[k][:2])) for k in range(len(s) - 1)) for s in strokes
-    ]
-    shaft = strokes[int(np.argmax(lengths))]
-    a, b = shaft[0][:2], shaft[-1][:2]
-    others = [p[:2] for s in strokes if s is not shaft for p in s]
-    if others:
-        c = np.mean(others, axis=0)
-        if np.hypot(*(np.subtract(a, c))) < np.hypot(*(np.subtract(b, c))):
-            a, b = b, a
+    """Tail and head: the two ink points farthest apart, the head being the one with more stroke ends
+    within a fifth of the arrow's length (the arrowhead's barbs). Unlike "longest stroke = shaft", this
+    holds when a photographed shaft is cut into pieces where it crosses other lines. Mirrored exactly in
+    decode.dart (same loop order and tie-breaks)."""
+    pts = [p[:2] for s in strokes for p in s]
+    best, ia, ib = -1.0, 0, 0
+    for i in range(len(pts)):
+        xi, yi = pts[i]
+        for j in range(i + 1, len(pts)):
+            dx, dy = pts[j][0] - xi, pts[j][1] - yi
+            d2 = dx * dx + dy * dy
+            if d2 > best:
+                best, ia, ib = d2, i, j
+    a, b = pts[ia], pts[ib]
+    r = 0.2 * math.sqrt(max(best, 0.0))
+
+    def ends_near(c: list[float]) -> int:
+        return sum(
+            1
+            for s in strokes
+            for e in (s[0], s[-1])
+            if math.sqrt((e[0] - c[0]) ** 2 + (e[1] - c[1]) ** 2) < r
+        )
+
+    if ends_near(a) > ends_near(b):
+        a, b = b, a
     return [float(a[0]), float(a[1])], [float(b[0]), float(b[1])]
 
 

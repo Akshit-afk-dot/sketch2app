@@ -80,40 +80,38 @@ List<List<int>> cluster(List<double> prob, int n, {double threshold = 0.5}) {
 Box _box(Iterable<InkStroke> strokes) =>
     strokes.map((s) => s.box).reduce((a, b) => a.union(b));
 
-double _len(InkStroke s) {
-  var sum = 0.0;
-  for (var k = 0; k + 1 < s.points.length; k++) {
-    final dx = s.points[k + 1].x - s.points[k].x,
-        dy = s.points[k + 1].y - s.points[k].y;
-    sum += math.sqrt(dx * dx + dy * dy);
-  }
-  return sum;
-}
-
-/// Shaft = longest stroke; head = the shaft end nearest the other (head) strokes, else its last point.
+/// Tail and head: the two ink points farthest apart, the head being the one with more stroke ends within
+/// a fifth of the arrow's length (the barbs). Holds when a photographed shaft is cut into pieces.
 ((double, double), (double, double)) _arrowEnds(List<InkStroke> strokes) {
-  var shaft = strokes.first;
+  final pts = [for (final s in strokes) ...s.points];
   var best = -1.0;
-  for (final s in strokes) {
-    final l = _len(s);
-    if (l > best) {
-      best = l;
-      shaft = s;
+  var ia = 0, ib = 0;
+  for (var i = 0; i < pts.length; i++) {
+    for (var j = i + 1; j < pts.length; j++) {
+      final dx = pts[j].x - pts[i].x, dy = pts[j].y - pts[i].y;
+      final d2 = dx * dx + dy * dy;
+      if (d2 > best) {
+        best = d2;
+        ia = i;
+        ib = j;
+      }
     }
   }
-  var a = (shaft.points.first.x, shaft.points.first.y);
-  var b = (shaft.points.last.x, shaft.points.last.y);
-  final others = [
-    for (final s in strokes)
-      if (!identical(s, shaft)) ...s.points,
-  ];
-  if (others.isNotEmpty) {
-    final cx = others.map((p) => p.x).reduce((x, y) => x + y) / others.length;
-    final cy = others.map((p) => p.y).reduce((x, y) => x + y) / others.length;
-    double d((double, double) p) =>
-        math.sqrt(math.pow(p.$1 - cx, 2) + math.pow(p.$2 - cy, 2));
-    if (d(a) < d(b)) (a, b) = (b, a);
+  var a = (pts[ia].x, pts[ia].y);
+  var b = (pts[ib].x, pts[ib].y);
+  final r = 0.2 * math.sqrt(math.max(best, 0.0));
+  int endsNear((double, double) c) {
+    var n = 0;
+    for (final s in strokes) {
+      for (final e in [s.points.first, s.points.last]) {
+        final dx = e.x - c.$1, dy = e.y - c.$2;
+        if (math.sqrt(dx * dx + dy * dy) < r) n++;
+      }
+    }
+    return n;
   }
+
+  if (endsNear(a) > endsNear(b)) (a, b) = (b, a);
   return (a, b);
 }
 

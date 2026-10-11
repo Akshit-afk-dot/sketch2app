@@ -21,6 +21,11 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         // Android 11+: LiteRT-LM (on-device layout model) requires API 30.
         minSdk = 30
+        // LiteRT-LM is arm64-only; without this, plugin AARs (ONNX Runtime, ML Kit) also ship armeabi-v7a
+        // and x86_64 libraries, which nearly doubled the APK (195 MB).
+        ndk {
+            abiFilters += listOf("arm64-v8a")
+        }
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -31,6 +36,7 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 }

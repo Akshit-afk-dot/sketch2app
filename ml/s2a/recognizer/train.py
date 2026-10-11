@@ -143,7 +143,7 @@ def main() -> None:
     best, history, step = -1.0, [], 0
     for epoch in range(tcfg["epochs"]):
         model.train()
-        t0, running = time.time(), {"loss": 0.0, "cls": 0.0, "type": 0.0, "aff": 0.0}
+        t0, running, n_run = time.time(), {"loss": 0.0, "cls": 0.0, "type": 0.0, "aff": 0.0}, 0
         for batch in loader:
             batch = {k: v.to(device, non_blocking=True) for k, v in batch.items()}
             with torch.autocast(device.type, dtype=amp_dtype, enabled=use_amp):
@@ -160,13 +160,14 @@ def main() -> None:
             running["loss"] += loss.item()
             for k, v in parts.items():
                 running[k] += v
+            n_run += 1  # the sums restart each epoch, so average over what was actually summed
             if step % 200 == 0:
                 print(
                     f"epoch {epoch} step {step}/{total_steps} "
-                    + " ".join(f"{k} {v / 200:.4f}" for k, v in running.items()),
+                    + " ".join(f"{k} {v / n_run:.4f}" for k, v in running.items()),
                     flush=True,
                 )
-                running = dict.fromkeys(running, 0.0)
+                running, n_run = dict.fromkeys(running, 0.0), 0
         val = evaluate_elements(model, "val", cfg["eval"]["val_limit"], device, cfg["eval"]["threshold"])
         f1 = val["detection_typed"]["f1"]
         history.append(
