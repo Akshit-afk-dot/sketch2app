@@ -166,8 +166,8 @@ Asked for by the user: take a photo of a paper sketch, upload it in the app, con
   recognizer typed F1 rules **0.179**, ink model zero-shot **0.311**, photo model **0.751** (P 0.82, R 0.69);
   specs (rule-based layout) tree similarity **0.674** (0.782 from perfect elements), screens correct 0.926,
   link F1 0.153; end to end 200/200 valid and rendered, 20/20 exports pass `flutter analyze`.
-- What moved the numbers (all measured on val): label vote by element group, not pen stroke (noise share
-  7% -> 0.1% of real ink mislabelled); stray marks as a learnable noise class; arrow ends from the farthest
+- What moved the numbers (all measured on val): label vote by element group, not pen stroke (pseudo-strokes wrongly labelled
+  noise: 7% -> 0.1%); stray marks as a learnable noise class; arrow ends from the farthest
   pair of points (2.5% -> 31% of arrows correct with perfect grouping); spurs pruned only up to one pen
   width (arrows 30% -> 38%, detection ceiling 0.891 -> 0.905); 20 epochs at lr 6e-4 (0.698 -> 0.747).
   Tried and dropped: outline tracing for fused thick blobs (+0.0004).
