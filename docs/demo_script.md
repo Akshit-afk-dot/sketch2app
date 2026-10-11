@@ -12,17 +12,21 @@
 6. Run Settings > **Recognizer self-test**: note the max |diff| (proves the phone runs the same model as Python).
 7. **Airplane mode on.** Verify: sample "Login -> list" > Convert works, and a drawn sketch works.
 8. Charge the device; disable screen timeout; close other apps.
+9. **Paper sketch** for photo mode: plain white A4, dark felt-tip or ballpoint, the legend from the cheat
+   sheet. Two phone outlines (Login: image box, "Email" + box, "Password" + box, button "Sign in";
+   List: top band "Items", a card with image + "Item", "x5"), an arrow from Sign in to the list screen.
+   Photograph it once at home in good light and keep that photo in the gallery (fallback).
 
 ## The 5 minutes
 
 | Time | Say | Do |
 |---|---|---|
-| 0:00 | "Draw an app, get a working Flutter app, offline." | Show airplane mode on. Open the **cheat sheet** briefly. |
-| 0:30 | "Two screens: a login and a list." | Tap **New screen** once. Draw on screen 1: image box (X), "Email" + box, "Password" + box, button "Sign in". Screen 2: band with "Items", one card with an image + "Item", write "x5". Draw an arrow from Sign in to screen 2. |
-| 2:00 | "Convert." | Tap **Convert**. Point at the debug overlay: recognized boxes and types on the canvas, timings per stage. |
-| 2:30 | "It is interactive." | In the preview, type in Email, tap **Sign in** -> list screen with 5 items; back arrow. |
-| 3:00 | "And it is real code." | **Code** tab: `login_screen.dart` with `goTo(context, '/items')`. Tap **Export** -> share sheet (zip). |
-| 3:30 | "How it works." | Pipeline in one breath: strokes -> our transformer recognizer (2M params, ONNX) -> ML Kit handwriting -> fine-tuned LLM writes a compact spec (4x fewer tokens than Dart) -> interpreter + exporter. |
+| 0:00 | "Sketch an app on paper, get a working Flutter app, offline." | Show airplane mode on. Hold up the paper sketch. |
+| 0:20 | "One photo." | Camera button > **Take a photo** from straight above. The extracted strokes appear over the faded photo; conversion starts by itself. Point at the debug chips: photo decode / vectorize / OCR times. |
+| 1:00 | "It is interactive." | Preview: type in Email, tap **Sign in** -> list with 5 items; back arrow. |
+| 1:30 | "And it is real code." | **Code** tab: `login_screen.dart` with `goTo(context, '/items')`. Tap **Export** -> share sheet (zip). |
+| 2:00 | "Or draw directly." | Clear, draw a small settings screen with the stylus (title band, two "label + switch" rows, a button); Convert. |
+| 3:00 | "How it works." | Photo -> our vectorizer (paper, threshold, thinning, tracing) -> strokes; strokes -> our transformer recognizer (2M params, ONNX; a photo-tuned copy for photos) -> ML Kit labels (OCR on photos) -> fine-tuned LLM or rules write a compact spec (4x fewer tokens than Dart) -> interpreter + exporter. |
 | 4:15 | "Measured." | Open docs/results.md on the laptop: recognizer vs rules, layout model vs rules, validity rates. |
 | 4:45 | "Limits." | Icons are generic (the legend cannot express which icon); no styling/colours; English handwriting only. |
 
@@ -35,6 +39,8 @@
 | On-device LLM slow or fails | Spinner > 20 s, or falls back | Nothing to do: after the timeout the app uses the rule-based layout automatically. Or switch to LAN LLM. |
 | LAN server unreachable | "Not reachable" | Settings > Layout > **Rules**. Offline guarantee: rules need nothing. |
 | My drawing is not recognized well | Wrong screen | Menu > **Sample: Login -> list (2 screens)** > Convert (bundled ink, known to work). |
+| Photo comes out empty or messy | "No drawing found", or many stray strokes | More light / no shadow, retake from straight above; or **Choose from gallery** > the photo taken the day before. Stray strokes: eraser, then Convert. |
+| Labels wrong on the photo | Generic "Button"/"Text" | Expected for scrawled words; say OCR reads print best; the structure and navigation are the point. |
 | App crashes | | Re-open; samples load instantly. Worst case: play the screen recording of a full run (record one the day before). |
 | Export/share sheet fails | | Show the Code tab; the zip is optional for the story. |
 
