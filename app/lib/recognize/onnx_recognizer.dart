@@ -21,6 +21,16 @@ import 'features.dart';
 
 const recognizerAsset = 'assets/models/recognizer.onnx';
 
+/// ONNX Runtime options for the recognizers. KleidiAI (Arm's optimised kernels in ORT's CPU backend) is
+/// disabled: the first on-device run died inside `session.run` (crash breadcrumbs, 2026-10-12), and
+/// KleidiAI's convolution kernels have a known memory blow-up on some Arm64 CPUs (flutter_onnxruntime
+/// 1.8.1 changelog, microsoft/onnxruntime#29538); our stroke encoder is convolutional. Two threads are
+/// plenty for a 2M-parameter model and keep per-thread scratch memory small.
+final sessionOptions = OrtSessionOptions(
+  intraOpNumThreads: 2,
+  sessionConfigs: {'mlas.disable_kleidiai': '1'},
+);
+
 /// Same network fine-tuned on synthetic photos run through the app's vectorizer (lib/photo/).
 const photoRecognizerAsset = 'assets/models/recognizer_photo.onnx';
 const selfTestAsset = 'assets/selftest/recognizer.json';
@@ -41,7 +51,7 @@ class OnnxStrokeRecognizer implements StrokeRecognizer {
 
   Future<OrtSession> _open() => _session ??= RunLog.instance.step(
     'onnx session $asset',
-    () => OnnxRuntime().createSessionFromAsset(asset),
+    () => OnnxRuntime().createSessionFromAsset(asset, options: sessionOptions),
   );
 
   /// Raw network outputs (flattened cls, type, affinity) for [doc].

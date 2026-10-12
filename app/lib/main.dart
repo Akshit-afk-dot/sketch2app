@@ -21,6 +21,7 @@ Future<void> main() async {
     log.info(
       'app launched (${Platform.operatingSystem} ${Platform.operatingSystemVersion})',
     );
+    if (crashedIn != null) log.info('previous run died during: $crashedIn');
     final previous = FlutterError.onError;
     FlutterError.onError = (details) {
       log.error(details.exceptionAsString(), details.stack);
@@ -34,6 +35,14 @@ Future<void> main() async {
     // No documents directory (some tests/desktop setups): run without breadcrumbs.
   }
   final settings = await AppSettings.load();
+  // The model runtime killed the app last time: use the rule-based recognizer until the user re-enables
+  // the learned one, so the next Convert cannot crash the same way.
+  if (crashedIn != null && crashedIn.startsWith('onnx')) {
+    settings.useModelRecognizer = false;
+    RunLog.instance.info(
+      'learned recognizer switched off after a crash in the model runtime',
+    );
+  }
   if (Platform.isAndroid) {
     // LiteRT-LM runs the on-device layout model; registering it costs nothing until a model is loaded.
     await FlutterEdgeAi.initialize(inferenceEngines: const [LiteRtLmEngine()]);

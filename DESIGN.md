@@ -261,7 +261,12 @@ Users can photograph a sketch drawn on paper; the app converts it on the device 
   each pipeline stage, ONNX session and run, decoding) writes "start" to a log file, flushed, before it runs
   and "end" after. A native crash (ONNX Runtime, ML Kit, out of memory) gives Dart no error, but the next
   launch finds a step that never ended and says so; Settings > Diagnostics shares the log. Added after the
-  first real-photo crash, on a phone without USB debugging.
+  first real-photo crash, on a phone without USB debugging. Its first catch: the app died inside
+  `onnx run` (55 strokes, so not input size). ONNX Runtime 1.28's Arm64 CPU backend uses KleidiAI
+  kernels, whose convolutions have a known memory blow-up on some Arm64 CPUs (flutter_onnxruntime 1.8.1
+  changelog, microsoft/onnxruntime#29538); sessions now set `mlas.disable_kleidiai=1` (key verified in
+  ORT 1.28 headers) and 2 threads. If the runtime still crashes, the next launch switches to the
+  rule-based recognizer automatically and says so.
 
 ## 12. Rejected alternatives (running list)
 

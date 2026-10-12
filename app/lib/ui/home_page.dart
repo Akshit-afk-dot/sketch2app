@@ -291,7 +291,9 @@ class _HomePageState extends State<HomePage> {
                 if (_crashedIn case final step?)
                   MaterialBanner(
                     content: Text(
-                      'The app closed unexpectedly last time, during: $step',
+                      'The app closed unexpectedly last time, during: $step'
+                      '${step.startsWith('onnx') ? '. Switched to the rule-based recognizer; turn '
+                                '"Learned recognizer" back on in Settings to retry.' : ''}',
                     ),
                     actions: [
                       TextButton(
