@@ -11,6 +11,7 @@ const sketchWidgetNames = {
   'PlaceholderImage',
   'Paragraph',
   'GridOf',
+  'SketchRow',
   'CheckField',
   'SwitchField',
   'RadioField',
@@ -76,30 +77,17 @@ class ScreenCodegen {
 
   Code node(SpecNode n) => switch (n) {
     ColNode(:final c) => _column(c, 12),
-    RowNode(:final c) when c.length > maxRowItems => Call(
-      'Wrap',
-      named: [
-        ('spacing', const Raw('8')),
-        ('runSpacing', const Raw('8')),
-        ('crossAxisAlignment', const Raw('WrapCrossAlignment.center')),
-        ('children', ListCode([for (final x in c) node(x)])),
-      ],
-    ),
-    RowNode(:final c) => Call(
-      'Row',
-      named: [
-        ('spacing', const Raw('8')),
-        (
-          'children',
-          ListCode([
-            for (final x in c)
-              x is IconNode || x is AvatarNode
-                  ? node(x)
-                  : Call('Expanded', named: [('child', node(x))]),
-          ]),
-        ),
-      ],
-    ),
+    RowNode(:final c) => _helper('SketchRow', [
+      (
+        'children',
+        ListCode([
+          for (final x in c)
+            x is IconNode || x is AvatarNode
+                ? node(x)
+                : Call('Expanded', named: [('child', node(x))]),
+        ]),
+      ),
+    ]),
     CardNode(:final c, :final go) => _card(c, go),
     ListNode(:final n, :final item) => Call(
       'Column',

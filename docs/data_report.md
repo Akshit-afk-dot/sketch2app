@@ -131,9 +131,9 @@ paper are noise.
 
 | Split | Photos | Pseudo-strokes/photo (median, p90) | Noise strokes | Elements with no strokes left | Vectorize ms (median) |
 |---|---:|---|---:|---:|---:|
-| train | 11,954 | 111, 232 | 2.8% | 4.1% | 120 |
-| val | 999 | 108, 226 | 3.2% | 4.4% | 103 |
-| test | 995 | 114, 237 | 2.5% | 4.2% | 105 |
+| train | 23,893 | 110, 230 | 2.7% | 4.1% | 115 |
+| val | 999 | 108, 226 | 3.2% | 4.4% | 101 |
+| test | 995 | 114, 237 | 2.5% | 4.2% | 104 |
 
 Photo effects (configs/data.yaml `photo`): single_frame_drawn_prob 0.6, margin [0.04, 0.15], table_prob 0.35, paper_fill [0.72, 0.95], rotation_deg [-7.0, 7.0], perspective 0.05, paper_brightness [185, 250], table_brightness [25, 150], pen_width [1.8, 5.5], pen_width_jitter 0.2, ink_ratio [0.12, 0.5], lighting_ramp [0.0, 0.35], vignette [0.0, 0.25], stray_marks_mean 1.5, shadow_prob 0.35, shadow_strength [0.15, 0.45], blur_sigma [0.0, 1.2], noise_sigma [1.0, 6.0], jpeg_prob 0.8, jpeg_quality [55, 95]; long side 1280 px.
 

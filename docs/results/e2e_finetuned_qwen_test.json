@@ -1,12 +1,8 @@
 {
  "sketches": 200,
  "spec_valid_rate": 0.96,
- "render_success_rate": 0.945,
- "render_errors": [
-  "A RenderFlex overflowed by 2.7 pixels on the right.",
-  "A RenderFlex overflowed by 26 pixels on the right.",
-  "Multiple exceptions (6) were detected during the running of the current test, and at least one was unexpected."
- ],
+ "render_success_rate": 0.96,
+ "render_errors": [],
  "exported_analyze_pass": "20/20",
  "laptop_ms_median": {
   "recognizer": 52.25084999801766,
@@ -14,5 +10,5 @@
  },
  "handwriting": "oracle (gold labels); ML Kit is measured on the device",
  "layout": "finetuned_qwen",
- "seconds": 169.7
+ "seconds": 232.9
 }

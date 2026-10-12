@@ -106,6 +106,19 @@ void main() {
     expect(group.groupValue, 1);
   });
 
+  testWidgets(
+    'an icon + avatar row inside a narrow card wraps instead of overflowing',
+    (tester) async {
+      // Found end to end on a synthetic photo: four cards side by side leave each inner row ~54 px, less
+      // than an icon button (48) + avatar (40) + gap.
+      const spec =
+          r'{"v":1,"screens":[{"id":"cards","title":"Cards","body":{"t":"col","c":[{"t":"row","c":[{"t":"card","c":[{"t":"text","v":"Title","s":"h2"},{"t":"row","c":[{"t":"icon","name":"circle"},{"t":"avatar"}]}]},{"t":"card","c":[{"t":"text","v":"Title","s":"h2"},{"t":"row","c":[{"t":"icon","name":"circle"},{"t":"avatar"}]}]},{"t":"card","c":[{"t":"text","v":"Title","s":"h2"},{"t":"row","c":[{"t":"icon","name":"circle"},{"t":"avatar"}]}]},{"t":"text","v":"More"}]}]}}]}';
+      await _pumpPreview(tester, parseSpecString(spec).spec!);
+      expect(tester.takeException(), isNull);
+      expect(find.byType(Wrap), findsNWidgets(3));
+    },
+  );
+
   group('goldens (first screen, 400x800)', () {
     for (final stem in _exampleStems()) {
       testWidgets(stem, (tester) async {

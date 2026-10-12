@@ -18,7 +18,7 @@ Newest phase at the top of "Phase log".
 | P8 Demo polish | 4 built-in samples, debug overlay, cheat sheet; device rehearsal pending |
 | P9 Docs | README, DESIGN, demo script, viva notes, report outline; kept current |
 | P10 GRPO (stretch) | not started |
-| **P11 Photo input** | working end to end: photo model typed F1 0.751 on synthetic photos (rules 0.179); real-photo study pending |
+| **P11 Photo input** | working end to end: photo model typed F1 0.773 on synthetic photos (rules 0.179); real-photo study pending |
 
 ## Needs you (batched)
 
@@ -160,16 +160,17 @@ Asked for by the user: take a photo of a paper sketch, upload it in the app, con
   recognizer/layout pipeline; labels by on-device OCR (ML Kit text recognition, bundled model, offline).
 - App: camera/gallery button, strokes shown over the faded photo (editable), conversion right after import,
   EXIF-orientation guard, Photo study page (target app drawn on paper, photographed, scored against its spec).
-- Data: 11,954 / 999 / 995 synthetic photos rendered from the v1 specs and vectorized by the app's own code
+- Data: 23,893 / 999 / 995 synthetic photos rendered from the v1 specs and vectorized by the app's own code
   (compiled `tool/batch.dart`, ~105 ms per photo); pseudo-strokes labelled by majority element group.
 - Results on 995 synthetic test photos (docs/results.md section 5):
-  recognizer typed F1 rules **0.179**, ink model zero-shot **0.311**, photo model **0.751** (P 0.82, R 0.69);
-  specs (rule-based layout) tree similarity **0.674** (0.782 from perfect elements), screens correct 0.926,
-  link F1 0.153; end to end 200/200 valid and rendered, 20/20 exports pass `flutter analyze`.
+  recognizer typed F1 rules **0.179**, ink model zero-shot **0.311**, photo model **0.773** (P 0.84, R 0.72);
+  specs (rule-based layout) tree similarity **0.686** (0.782 from perfect elements), screens correct 0.940,
+  link F1 0.180; end to end 200/200 valid and rendered, 20/20 exports pass `flutter analyze`.
 - What moved the numbers (all measured on val): label vote by element group, not pen stroke (pseudo-strokes wrongly labelled
   noise: 7% -> 0.1%); stray marks as a learnable noise class; arrow ends from the farthest
   pair of points (2.5% -> 31% of arrows correct with perfect grouping); spurs pruned only up to one pen
-  width (arrows 30% -> 38%, detection ceiling 0.891 -> 0.905); 20 epochs at lr 6e-4 (0.698 -> 0.747).
+  width (arrows 30% -> 38%, detection ceiling 0.891 -> 0.905); 20 epochs at lr 6e-4 (0.698 -> 0.747);
+  24k instead of 12k training photos (val 0.747 -> 0.772, test 0.751 -> 0.773).
   Tried and dropped: outline tracing for fused thick blobs (+0.0004).
 - Known weak points: arrows (link F1 0.15: shafts cut at crossings, heads fused), small handwriting written
   with a thick pen fuses into blobs, ruled paper unsupported. The perfect-grouping ceiling is 0.905, so the

@@ -1,220 +1,207 @@
 {
  "elements_gold": 20269,
- "elements_pred": 17130,
+ "elements_pred": 17363,
  "detection_any_type": {
-  "precision": 0.8449503794512551,
-  "recall": 0.7140954166461099,
-  "f1": 0.7740313912136688
+  "precision": 0.8579162587110523,
+  "recall": 0.7349153880309833,
+  "f1": 0.7916666666666667
  },
  "detection_typed": {
-  "precision": 0.8198482194979568,
-  "recall": 0.6928807538605752,
-  "f1": 0.7510361239605337
+  "precision": 0.8378160456142372,
+  "recall": 0.7176969756771424,
+  "f1": 0.7731186224489796
  },
- "stroke_accuracy": 0.9699205536418086,
+ "stroke_accuracy": 0.974560096825249,
  "per_type": {
   "btn": {
-   "matched_gold": 892,
-   "type_accuracy": 0.9730941704035875
+   "matched_gold": 877,
+   "type_accuracy": 0.9783352337514253
   },
   "input": {
-   "matched_gold": 390,
-   "type_accuracy": 0.8974358974358975
+   "matched_gold": 397,
+   "type_accuracy": 0.9370277078085643
   },
   "text": {
-   "matched_gold": 4147,
-   "type_accuracy": 0.9826380516035689
+   "matched_gold": 4331,
+   "type_accuracy": 0.985453705841607
   },
   "heading": {
-   "matched_gold": 569,
-   "type_accuracy": 0.8980667838312829
+   "matched_gold": 594,
+   "type_accuracy": 0.9158249158249159
   },
   "para": {
-   "matched_gold": 702,
-   "type_accuracy": 0.9843304843304843
+   "matched_gold": 715,
+   "type_accuracy": 0.9944055944055944
   },
   "img": {
-   "matched_gold": 2327,
-   "type_accuracy": 0.994413407821229
+   "matched_gold": 2395,
+   "type_accuracy": 0.992901878914405
   },
   "icon": {
-   "matched_gold": 2282,
-   "type_accuracy": 0.99079754601227
+   "matched_gold": 2341,
+   "type_accuracy": 0.9944468175993165
   },
   "menu": {
-   "matched_gold": 147,
-   "type_accuracy": 0.9455782312925171
+   "matched_gold": 155,
+   "type_accuracy": 0.9741935483870968
   },
   "avatar": {
-   "matched_gold": 400,
-   "type_accuracy": 0.9475
+   "matched_gold": 403,
+   "type_accuracy": 0.9528535980148883
   },
   "check": {
-   "matched_gold": 133,
-   "type_accuracy": 0.9172932330827067
+   "matched_gold": 145,
+   "type_accuracy": 0.9379310344827586
   },
   "radio": {
-   "matched_gold": 381,
-   "type_accuracy": 0.973753280839895
+   "matched_gold": 389,
+   "type_accuracy": 0.9794344473007712
   },
   "switch": {
-   "matched_gold": 287,
-   "type_accuracy": 0.9930313588850174
+   "matched_gold": 293,
+   "type_accuracy": 1.0
   },
   "divider": {
-   "matched_gold": 475,
-   "type_accuracy": 0.9136842105263158
+   "matched_gold": 479,
+   "type_accuracy": 0.9352818371607515
   },
   "card": {
-   "matched_gold": 239,
-   "type_accuracy": 0.6652719665271967
+   "matched_gold": 242,
+   "type_accuracy": 0.71900826446281
   },
   "appbar": {
-   "matched_gold": 643,
-   "type_accuracy": 0.9937791601866252
+   "matched_gold": 654,
+   "type_accuracy": 0.9923547400611621
   },
   "bottomnav": {
-   "matched_gold": 108,
-   "type_accuracy": 0.9907407407407407
+   "matched_gold": 115,
+   "type_accuracy": 0.9826086956521739
   },
   "fab": {
-   "matched_gold": 152,
-   "type_accuracy": 0.993421052631579
+   "matched_gold": 155,
+   "type_accuracy": 0.9870967741935484
   },
   "listmark": {
-   "matched_gold": 200,
-   "type_accuracy": 0.94
+   "matched_gold": 216,
+   "type_accuracy": 0.9537037037037037
   }
  },
  "confusion": {
-  "appbar->appbar": 639,
-  "appbar->heading": 2,
-  "appbar->icon": 1,
-  "appbar->text": 1,
-  "avatar->avatar": 379,
-  "avatar->fab": 1,
-  "avatar->icon": 16,
+  "appbar->appbar": 649,
+  "appbar->icon": 2,
+  "appbar->img": 1,
+  "appbar->text": 2,
+  "avatar->avatar": 384,
+  "avatar->icon": 13,
   "avatar->img": 1,
   "avatar->listmark": 1,
   "avatar->switch": 1,
-  "avatar->text": 1,
-  "bottomnav->bottomnav": 107,
+  "avatar->text": 3,
+  "bottomnav->bottomnav": 113,
   "bottomnav->divider": 1,
-  "btn->appbar": 2,
-  "btn->btn": 868,
-  "btn->card": 4,
+  "bottomnav->text": 1,
+  "btn->appbar": 1,
+  "btn->btn": 858,
+  "btn->card": 6,
   "btn->heading": 3,
-  "btn->img": 6,
+  "btn->icon": 1,
+  "btn->img": 1,
   "btn->input": 3,
-  "btn->radio": 1,
-  "btn->switch": 1,
   "btn->text": 4,
-  "card->btn": 6,
-  "card->card": 159,
-  "card->heading": 1,
-  "card->img": 72,
+  "card->btn": 4,
+  "card->card": 174,
+  "card->img": 59,
   "card->input": 1,
-  "check->check": 122,
-  "check->text": 11,
-  "divider->appbar": 3,
-  "divider->btn": 2,
-  "divider->card": 4,
-  "divider->divider": 434,
-  "divider->heading": 1,
-  "divider->icon": 1,
-  "divider->img": 2,
-  "divider->input": 11,
-  "divider->para": 3,
-  "divider->text": 14,
-  "fab->fab": 151,
+  "card->text": 4,
+  "check->check": 136,
+  "check->heading": 1,
+  "check->radio": 1,
+  "check->text": 7,
+  "divider->appbar": 2,
+  "divider->btn": 1,
+  "divider->divider": 448,
+  "divider->heading": 4,
+  "divider->img": 3,
+  "divider->input": 6,
+  "divider->para": 2,
+  "divider->text": 13,
+  "fab->avatar": 1,
+  "fab->fab": 153,
   "fab->img": 1,
-  "heading->appbar": 6,
-  "heading->avatar": 2,
-  "heading->btn": 1,
-  "heading->divider": 3,
-  "heading->heading": 511,
+  "heading->appbar": 2,
+  "heading->avatar": 1,
+  "heading->divider": 1,
+  "heading->heading": 544,
   "heading->icon": 3,
   "heading->img": 1,
   "heading->input": 1,
-  "heading->menu": 5,
+  "heading->menu": 2,
   "heading->para": 1,
-  "heading->text": 35,
+  "heading->text": 38,
   "icon->avatar": 6,
-  "icon->btn": 2,
-  "icon->check": 1,
-  "icon->heading": 1,
-  "icon->icon": 2261,
-  "icon->listmark": 2,
+  "icon->icon": 2328,
   "icon->menu": 1,
-  "icon->radio": 1,
-  "icon->text": 7,
+  "icon->text": 6,
   "img->appbar": 2,
   "img->btn": 2,
+  "img->divider": 1,
   "img->fab": 1,
-  "img->icon": 1,
-  "img->img": 2314,
+  "img->icon": 2,
+  "img->img": 2378,
   "img->radio": 1,
-  "img->text": 6,
-  "input->btn": 8,
-  "input->divider": 8,
-  "input->heading": 1,
+  "img->text": 8,
+  "input->btn": 4,
+  "input->divider": 5,
   "input->img": 2,
-  "input->input": 350,
+  "input->input": 372,
   "input->para": 1,
-  "input->text": 20,
-  "listmark->avatar": 1,
+  "input->text": 13,
   "listmark->btn": 1,
-  "listmark->icon": 2,
-  "listmark->listmark": 188,
-  "listmark->text": 8,
-  "menu->divider": 1,
-  "menu->icon": 6,
-  "menu->img": 1,
-  "menu->menu": 139,
-  "para->avatar": 2,
-  "para->divider": 2,
-  "para->icon": 1,
-  "para->img": 2,
-  "para->para": 691,
-  "para->text": 4,
-  "radio->heading": 1,
-  "radio->radio": 371,
-  "radio->text": 9,
-  "switch->switch": 285,
-  "switch->text": 2,
-  "text->appbar": 6,
+  "listmark->icon": 3,
+  "listmark->listmark": 206,
+  "listmark->text": 6,
+  "menu->icon": 3,
+  "menu->menu": 151,
+  "menu->text": 1,
+  "para->divider": 1,
+  "para->para": 711,
+  "para->text": 3,
+  "radio->avatar": 1,
+  "radio->radio": 381,
+  "radio->text": 7,
+  "switch->switch": 293,
+  "text->appbar": 2,
   "text->avatar": 1,
-  "text->bottomnav": 1,
-  "text->btn": 5,
+  "text->btn": 6,
+  "text->card": 2,
   "text->check": 4,
-  "text->divider": 2,
-  "text->heading": 23,
-  "text->icon": 5,
+  "text->heading": 20,
+  "text->icon": 7,
   "text->img": 2,
-  "text->input": 7,
+  "text->input": 4,
   "text->listmark": 2,
-  "text->menu": 1,
-  "text->radio": 8,
+  "text->para": 1,
+  "text->radio": 7,
   "text->switch": 5,
-  "text->text": 4075
+  "text->text": 4268
  },
  "stroke_confusion": {
-  "arrow->arrow": 3433,
-  "arrow->frame": 10,
-  "arrow->shape": 365,
-  "arrow->text": 149,
-  "frame->arrow": 46,
-  "frame->frame": 2979,
-  "frame->shape": 412,
-  "frame->text": 74,
-  "shape->arrow": 400,
-  "shape->frame": 447,
-  "shape->shape": 37523,
-  "shape->text": 1166,
-  "text->arrow": 139,
-  "text->frame": 14,
-  "text->shape": 655,
-  "text->text": 81080
+  "arrow->arrow": 3452,
+  "arrow->frame": 16,
+  "arrow->shape": 342,
+  "arrow->text": 147,
+  "frame->arrow": 33,
+  "frame->frame": 3038,
+  "frame->shape": 380,
+  "frame->text": 60,
+  "shape->arrow": 364,
+  "shape->frame": 346,
+  "shape->shape": 37873,
+  "shape->text": 953,
+  "text->arrow": 107,
+  "text->frame": 17,
+  "text->shape": 514,
+  "text->text": 81250
  },
  "meta": {
   "method": "onnx",
@@ -225,8 +212,8 @@
   "model": "recognizer_photo",
   "dataset": "v1-photo",
   "laptop_ms_per_sketch": {
-   "median": 51.090900000417605,
-   "p90": 124.20060000004014
+   "median": 47.561100000166334,
+   "p90": 111.10599999665283
   },
   "date": "2026-10-12"
  }

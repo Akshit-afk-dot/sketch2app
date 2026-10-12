@@ -1,7 +1,7 @@
 {
- "max_abs_diff": 0.0001678466796875,
+ "max_abs_diff": 5.7220458984375e-05,
  "ort_version": "1.28.0",
- "laptop_cpu_ms_median": 12.983599999643047,
+ "laptop_cpu_ms_median": 12.563800002681091,
  "size_mb": 8.05,
- "checkpoint": "D:\\sketch2app-data\\runs\\recognizer\\photo-v2-long\\best.pt"
+ "checkpoint": "D:\\sketch2app-data\\runs\\recognizer\\photo-v3\\best.pt"
 }

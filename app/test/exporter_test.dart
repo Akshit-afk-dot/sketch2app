@@ -123,11 +123,15 @@ void main() {
     );
   });
 
-  test('long rows become Wrap and secure inputs stay single-line', () {
+  test('rows use SketchRow and secure inputs stay single-line', () {
     final screen = exportProject(
       parseSpecString(edgeCaseSpec).spec!,
     )['lib/screens/login_screen.dart']!;
-    expect(screen, contains('Wrap('));
+    expect(screen, contains('SketchRow('));
+    expect(
+      screen,
+      contains("import '../sketch_widgets.dart';"),
+    ); // SketchRow lives there
     expect(screen, contains('obscureText: true'));
     expect(screen, isNot(contains('maxLines')));
   });

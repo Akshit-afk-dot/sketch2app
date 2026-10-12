@@ -182,3 +182,35 @@ class _RadioFieldState extends State<RadioField> {
     );
   }
 }
+
+/// A sketched row that never overflows. Items drawn side by side share the width (stretchy ones come
+/// wrapped in [Expanded]). When the fixed-size ones (icons, avatars: at most 48 px each) do not fit the
+/// width this row actually gets (say, inside a narrow card in a row of cards), or there are more than
+/// [maxItems], the items wrap onto several lines instead.
+class SketchRow extends StatelessWidget {
+  const SketchRow({super.key, required this.children});
+
+  /// More items than this always wrap: six 48-px icon buttons with 8-px gaps fill a 360-dp phone.
+  static const maxItems = 6;
+  static const _gap = 8.0;
+  static const _fixedMax = 48.0;
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final fixed = children.where((c) => c is! Expanded).length;
+      final need = fixed * _fixedMax + _gap * (children.length - 1);
+      if (children.length <= maxItems && need <= constraints.maxWidth) {
+        return Row(spacing: _gap, children: children);
+      }
+      return Wrap(
+        spacing: _gap,
+        runSpacing: _gap,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [for (final c in children) c is Expanded ? c.child : c],
+      );
+    },
+  );
+}

@@ -4,10 +4,6 @@ library;
 
 const int specVersion = 1;
 
-/// Rows with more children than this wrap onto several lines, in the preview and in exported code alike:
-/// six 48-px icon buttons with 8-px gaps are the most that fit a 360-dp phone's content width.
-const int maxRowItems = 6;
-
 /// Canonical key order per object kind. A fixed order makes serialization unique.
 const Map<String, List<String>> keyOrder = {
   'spec': ['v', 'screens'],

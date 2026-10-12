@@ -103,7 +103,7 @@ Renderer (`spec_renderer.dart`) and exporter (`screen_codegen.dart`) implement e
 | bottomnav | `NavigationBar` (selected = item whose `go` is this screen), tap -> `goTo(replace: true)` |
 | fab | `FloatingActionButton(child: Icon)` |
 | col | `Column(stretch, spacing 12)` |
-| row | `Row(spacing 8)`; children wrapped in `Expanded` except icon/avatar |
+| row | `SketchRow` (lib/sketch_widgets.dart): a `Row(spacing 8)` with children in `Expanded` except icon/avatar; when the icons/avatars (at most 48 px each) do not fit the width the row actually gets, or it has more than 6 items, a `Wrap` instead, so nested rows in narrow cards never overflow (found end to end on a synthetic photo) |
 | card | `Card(Padding 12, Column(stretch, spacing 8))`; with `go`: `InkWell` inside, `Clip.antiAlias` |
 | list | `Column(stretch, spacing 8, [for i < n: item])` |
 | grid | `GridOf(columns, count, itemBuilder)` (rows of `Expanded`, content-sized) |

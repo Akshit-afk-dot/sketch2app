@@ -123,16 +123,7 @@ class _NodeRenderer {
 
   Widget build(SpecNode node) => switch (node) {
     ColNode(:final c) => _column(c, 12),
-    RowNode(:final c) when c.length > maxRowItems => Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [for (final n in c) build(n)],
-    ),
-    RowNode(:final c) => Row(
-      spacing: 8,
-      children: [for (final n in c) _rowChild(n)],
-    ),
+    RowNode(:final c) => SketchRow(children: [for (final n in c) _rowChild(n)]),
     CardNode(:final c, :final go) => _card(c, go),
     ListNode(:final n, :final item) => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

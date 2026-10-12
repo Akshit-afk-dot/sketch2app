@@ -78,10 +78,10 @@ matched elements): ML Kit only runs on Android, so its accuracy and latency are 
 
 | Layout | Sketches | Spec valid | Rendered | Exports passing analyze | Recognizer ms | Layout ms |
 |---|---:|---:|---:|---:|---:|---:|
-| Rule-based builder (baseline) | 200 | 1.000 | **1.000** | 20/20 | 52.3 | 2.2 |
+| Rule-based builder (baseline) | 200 | 1.000 | **1.000** | 20/20 | 52.3 | 10.3 |
 | Gemma 4 E2B base, 3-shot | pending | | | | | |
 | Gemma 4 E2B + LoRA | pending | | | | | |
-| Qwen3.5-0.8B + LoRA | 200 | 0.960 | **0.945** | 20/20 | 52.3 | 13433.3 |
+| Qwen3.5-0.8B + LoRA | 200 | 0.960 | **0.960** | 20/20 | 52.3 | 13433.3 |
 
 | Measure | Value |
 |---|---|
@@ -101,20 +101,20 @@ photos: 1,000 test-split sketches (apps never seen in training) rendered as phon
 |---|---:|---:|---:|---:|---:|---:|
 | Rule-based (baseline) | 0.329 | 0.152 | 0.218 | **0.179** | 0.533 | 2.7 |
 | Ink model, zero-shot | 0.477 | 0.342 | 0.285 | **0.311** | 0.774 | 52.0 |
-| Photo model (ink model fine-tuned on photos) | 0.774 | 0.820 | 0.693 | **0.751** | 0.970 | 51.1 |
+| Photo model (ink model fine-tuned on photos) | 0.792 | 0.838 | 0.718 | **0.773** | 0.975 | 47.6 |
 
 ### End to end on synthetic photos (rule-based layout, oracle labels)
 
 | Sketches | Spec valid | Rendered | Exports passing analyze | Vectorize ms | Recognizer ms | Layout ms |
 |---:|---:|---:|---:|---:|---:|---:|
-| 200 | 1.000 | **1.000** | 20/20 | 105 | 51.1 | 3.2 |
+| 200 | 1.000 | **1.000** | 20/20 | 104 | 47.6 | 3.1 |
 
 ### Specs from synthetic photos (rule-based layout, oracle labels)
 
 | Input to the layout stage | Tree sim. | Type F1 | Link F1 | Screens correct |
 |---|---:|---:|---:|---:|
 | Perfect elements (layout stage alone) | **0.782** | 0.872 | 0.920 | 1.000 |
-| Photo model output | **0.674** | 0.792 | 0.153 | 0.926 |
+| Photo model output | **0.686** | 0.803 | 0.180 | 0.940 |
 
 ### Real paper sketches (Photo study: target app drawn on paper, scored against its spec)
 
