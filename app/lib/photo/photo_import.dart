@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../diagnostics/run_log.dart';
 import '../ink/ink_model.dart';
 import 'jpeg_orientation.dart';
 import 'photo_text.dart';
@@ -44,9 +45,13 @@ class PhotoSketch {
 /// [bytes]: an encoded photo (JPEG/PNG), e.g. from image_picker. [ocr] false skips text recognition
 /// (tests, platforms without ML Kit).
 Future<PhotoSketch> importPhoto(Uint8List bytes, {bool ocr = true}) async {
+  final log = RunLog.instance;
   final sw = Stopwatch()..start();
-  final codec = await ui.instantiateImageCodec(bytes);
-  var image = (await codec.getNextFrame()).image;
+  var image = await log.step('photo decode (${bytes.length} bytes)', () async {
+    final codec = await ui.instantiateImageCodec(bytes);
+    return (await codec.getNextFrame()).image;
+  });
+  log.info('photo size ${image.width}x${image.height}');
   // A quarter-turn EXIF tag with the decoded size still equal to the stored size means the decoder did
   // not apply it: rotate here, before the vectorizer, OCR and the canvas background see the image.
   final info = readJpegInfo(bytes);
@@ -66,16 +71,24 @@ Future<PhotoSketch> importPhoto(Uint8List bytes, {bool ocr = true}) async {
   final scale = gray.width / image.width;
   final micros = <String, int>{'decode': sw.elapsedMicroseconds};
   sw.reset();
-  final result = await compute(vectorize, gray);
+  final result = await log.step(
+    'vectorize ${gray.width}x${gray.height}',
+    () => compute(vectorize, gray),
+  );
+  log.info(
+    'vectorized: ${result.ink.strokes.length} strokes, pen ${result.strokeWidth.toStringAsFixed(1)} px',
+  );
   micros['vectorize'] = sw.elapsedMicroseconds;
   sw.reset();
   var words = const <OcrWord>[];
   String? error;
   if (ocr) {
     try {
-      words = await _recognizeText(image, scale);
+      words = await log.step('ocr', () => _recognizeText(image, scale));
+      log.info('ocr: ${words.length} words');
     } on Object catch (e) {
       error = '$e'; // labels then come from Digital Ink on the pseudo-strokes
+      log.info('ocr unavailable: $e');
     }
   }
   micros['ocr'] = sw.elapsedMicroseconds;

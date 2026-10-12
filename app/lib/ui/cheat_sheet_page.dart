@@ -150,7 +150,7 @@ class _PaperTips extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           Text(
-            '• Plain white paper (no ruled or squared lines), dark pen or marker.',
+            '• Plain paper works best; ruled notebook lines are removed. Dark pen or marker.',
           ),
           Text('• Same legend as below. Write labels in clear print.'),
           Text(

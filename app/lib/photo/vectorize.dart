@@ -107,6 +107,7 @@ class VectorizeResult {
     required this.inkPixels,
     required this.strokeWidth,
     required this.micros,
+    this.ruledLines = 0,
   });
 
   /// Strokes in image pixel coordinates, reading order, synthetic timestamps; no template frames.
@@ -121,6 +122,9 @@ class VectorizeResult {
 
   /// Per-step wall time in microseconds, for the debug overlay and the latency table.
   final Map<String, int> micros;
+
+  /// Lines of ruled (notebook) paper that were removed before tracing; 0 on plain paper.
+  final int ruledLines;
 }
 
 // Paper detection grid cell (px). Coarse on purpose: paper is a large bright region, ink barely moves a
@@ -134,6 +138,10 @@ const _minContrast = 16;
 
 // Components smaller than this (px at 1280) are specks; an i-dot drawn with a 3 px pen is ~12-20 px.
 const _minArea = 10;
+
+// Ruled paper (see _removeRuledLines): at least this many thin lines, each covering half the page width.
+const _ruledMinLines = 5;
+const _ruledSegments = 8;
 
 // Strokes join straight through a junction when they deviate by less than 45 degrees.
 final _joinCos = math.cos(math.pi / 4);
@@ -151,6 +159,7 @@ VectorizeResult vectorize(GrayImage image) {
   lap('page');
   var ink = _binarize(image, mask);
   ink = _majority(ink, w, h);
+  final ruledLines = _removeRuledLines(ink, w, h, page);
   final inkPixels = _removeSpecksAndBlobs(ink, w, h, page);
   lap('threshold');
   final skel = _thin(ink, w, h);
@@ -170,7 +179,270 @@ VectorizeResult vectorize(GrayImage image) {
     inkPixels: inkPixels,
     strokeWidth: strokeWidth,
     micros: micros,
+    ruledLines: ruledLines,
   );
+}
+
+/// Ruled (lined) notebook paper: its lines are ink to the threshold and would become hundreds of strokes
+/// that merge with the drawing. Detection: (1) the paper's angle is the rotation (searched over +-10
+/// degrees in 0.5 degree steps) whose projection profile is sharpest; (2) at that angle each profile bin's
+/// *coverage* is how much of its length has ink within 2 bins, independent of line thickness and blur;
+/// (3) ruled paper = at least [_ruledMinLines] lines covering half the page width, evenly spaced (gaps of
+/// 1-3 spacings within 20%); (4) a grid fitted through them adds partly hidden lines (>= 20% coverage)
+/// where the drawing crosses the page. Line pixels are removed except where a pen stroke crosses (the ink
+/// is taller there than the line), so the drawing stays connected. Returns the number of lines removed.
+int _removeRuledLines(Uint8List ink, int w, int h, Box page) {
+  final xs = <int>[], ys = <int>[];
+  for (var i = 0; i < ink.length; i++) {
+    if (ink[i] == 1) {
+      xs.add(i % w);
+      ys.add(i ~/ w);
+    }
+  }
+  if (xs.isEmpty) return 0;
+  final diag = math.sqrt(w * w + h * h).ceil();
+  var bestScore = -1.0, angle = 0.0;
+  final bins = List<int>.filled(2 * diag + 1, 0);
+  for (var d = -20; d <= 20; d++) {
+    final a = d * 0.5 * math.pi / 180;
+    final c = math.cos(a), s = math.sin(a);
+    bins.fillRange(0, bins.length, 0);
+    for (var k = 0; k < xs.length; k++) {
+      bins[(ys[k] * c - xs[k] * s).round() + diag]++;
+    }
+    var score = 0.0;
+    for (final b in bins) {
+      score += b * b.toDouble();
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      angle = a;
+    }
+  }
+
+  // Profile coordinates at that angle: r across the lines, u along them.
+  final c = math.cos(angle), s = math.sin(angle);
+  final rs = Int32List(xs.length), us = Int32List(xs.length);
+  var rMin = 1 << 30, uMin = 1 << 30, rMax = -(1 << 30), uMax = -(1 << 30);
+  for (var k = 0; k < xs.length; k++) {
+    rs[k] = (ys[k] * c - xs[k] * s).round();
+    us[k] = (xs[k] * c + ys[k] * s).round();
+    rMin = math.min(rMin, rs[k]);
+    rMax = math.max(rMax, rs[k]);
+    uMin = math.min(uMin, us[k]);
+    uMax = math.max(uMax, us[k]);
+  }
+  final nR = rMax - rMin + 1, words = ((uMax - uMin) >> 5) + 1;
+  final bits = Uint32List(nR * words);
+  final mass = Int32List(nR);
+  for (var k = 0; k < xs.length; k++) {
+    final r = rs[k] - rMin, u = us[k] - uMin;
+    bits[r * words + (u >> 5)] |= 1 << (u & 31);
+    mass[r]++;
+  }
+  final cover = Int32List(nR);
+  final acc = Uint32List(words);
+  for (var r = 0; r < nR; r++) {
+    acc.fillRange(0, words, 0);
+    for (var q = math.max(0, r - 2); q <= math.min(nR - 1, r + 2); q++) {
+      for (var i = 0; i < words; i++) {
+        acc[i] |= bits[q * words + i];
+      }
+    }
+    var n = 0;
+    for (final v in acc) {
+      n += _popcount(v);
+    }
+    cover[r] = n;
+  }
+
+  // Strong lines: runs of bins covering half the page width; centre at the highest coverage.
+  final strong = <int>[];
+  for (var r = 0; r < nR;) {
+    if (cover[r] < 0.5 * page.w) {
+      r++;
+      continue;
+    }
+    var e = r, best = r;
+    while (e < nR && cover[e] >= 0.5 * page.w) {
+      if (cover[e] > cover[best]) best = e;
+      e++;
+    }
+    strong.add(best);
+    r = e;
+  }
+  if (strong.length < _ruledMinLines) return 0;
+  final gaps = [
+    for (var k = 1; k < strong.length; k++) strong[k] - strong[k - 1],
+  ]..sort();
+  final pitch = gaps[gaps.length ~/ 2].toDouble();
+  if (pitch < 8) return 0; // dense hatching or shading, not ruling
+  var regular = 0;
+  for (final g in gaps) {
+    final m = (g / pitch).round();
+    if (m >= 1 && m <= 3 && (g - m * pitch).abs() <= 0.2 * pitch) regular++;
+  }
+  if (regular < 0.7 * gaps.length) return 0;
+
+  // Grid through the strong lines (least squares on their index), then every grid position with at least
+  // 20% coverage: lines crossing the drawing are partly hidden but still ruling.
+  final ks = [for (final r in strong) ((r - strong.first) / pitch).round()];
+  final n = ks.length.toDouble();
+  final mk = ks.reduce((a, b) => a + b) / n;
+  final mr = strong.reduce((a, b) => a + b) / n;
+  var sxy = 0.0, sxx = 0.0;
+  for (var i = 0; i < ks.length; i++) {
+    sxy += (ks[i] - mk) * (strong[i] - mr);
+    sxx += (ks[i] - mk) * (ks[i] - mk);
+  }
+  final step = sxx > 0 ? sxy / sxx : pitch;
+  final origin = mr - step * mk;
+  final lines =
+      <int, (int, int)>{}; // grid index -> (centre bin, thickness in bins)
+  for (
+    var k = ((0 - origin) / step).floor();
+    k <= ((nR - origin) / step).ceil();
+    k++
+  ) {
+    final p = origin + step * k;
+    var best = -1;
+    for (
+      var r = math.max(0, (p - 0.2 * step).floor());
+      r <= math.min(nR - 1, (p + 0.2 * step).ceil());
+      r++
+    ) {
+      if (best < 0 || cover[r] > cover[best]) best = r;
+    }
+    if (best < 0 || cover[best] < 0.2 * page.w) continue;
+    var peak = 0;
+    for (var r = math.max(0, best - 3); r <= math.min(nR - 1, best + 3); r++) {
+      peak = math.max(peak, mass[r]);
+    }
+    var thick = 0;
+    for (var r = math.max(0, best - 3); r <= math.min(nR - 1, best + 3); r++) {
+      if (mass[r] >= 0.3 * peak) thick++;
+    }
+    lines[k] = (best, math.max(1, thick));
+  }
+
+  // Paper bends and perspective make lines slightly curved and not quite parallel: refine each line's
+  // centre separately in [_ruledSegments] stretches along its length.
+  final uSpan = uMax - uMin + 1;
+  int segOf(int u) =>
+      math.min(_ruledSegments - 1, (u - uMin) * _ruledSegments ~/ uSpan);
+  final segMass = Int32List(nR * _ruledSegments);
+  for (var k = 0; k < xs.length; k++) {
+    segMass[(rs[k] - rMin) * _ruledSegments + segOf(us[k])]++;
+  }
+  final local = <int, List<int>>{}; // grid index -> centre bin per segment
+  for (final MapEntry(key: k, value: (centre, _)) in lines.entries) {
+    local[k] = [
+      for (var j = 0; j < _ruledSegments; j++)
+        () {
+          var best = centre;
+          final reach = (0.25 * step).round();
+          for (
+            var r = math.max(0, centre - reach);
+            r <= math.min(nR - 1, centre + reach);
+            r++
+          ) {
+            if (segMass[r * _ruledSegments + j] >
+                segMass[best * _ruledSegments + j]) {
+              best = r;
+            }
+          }
+          // A stretch hidden by the drawing has no ink of its own: keep the global centre there.
+          return segMass[best * _ruledSegments + j] > 0 ? best : centre;
+        }(),
+    ];
+  }
+  (int, int)? lineAt(int r, int u) {
+    final k = ((r - origin) / step).round();
+    final line = lines[k];
+    return line == null ? null : (local[k]![segOf(u)], line.$2);
+  }
+
+  final remove = Uint8List(ink.length);
+  for (var k = 0; k < xs.length; k++) {
+    final r = rs[k] - rMin;
+    final line = lineAt(r, us[k]);
+    if (line == null) continue;
+    final (centre, thick) = line;
+    if ((r - centre).abs() > thick / 2 + 2) continue;
+    // Vertical extent of the ink here: a crossing pen stroke is taller than the ruled line.
+    final x = xs[k], y = ys[k];
+    var run = 1;
+    for (
+      var yy = y - 1;
+      yy >= 0 && ink[yy * w + x] == 1 && run <= thick + 3;
+      yy--
+    ) {
+      run++;
+    }
+    for (
+      var yy = y + 1;
+      yy < h && ink[yy * w + x] == 1 && run <= thick + 3;
+      yy++
+    ) {
+      run++;
+    }
+    if (run <= thick + 2) remove[y * w + x] = 1;
+  }
+  for (var i = 0; i < ink.length; i++) {
+    if (remove[i] == 1) ink[i] = 0;
+  }
+
+  // Leftover fragments (dashes where the line was thicker or curved more than the band) are thin pieces
+  // lying entirely on a ruled line: remove those too.
+  final seen = Uint8List(ink.length);
+  final comp = <int>[];
+  final stack = <int>[];
+  for (var k = 0; k < xs.length; k++) {
+    final start = ys[k] * w + xs[k];
+    if (ink[start] == 0 || seen[start] == 1) continue;
+    comp.clear();
+    stack
+      ..clear()
+      ..add(start);
+    seen[start] = 1;
+    var onLine = true;
+    while (stack.isNotEmpty && comp.length <= 4000) {
+      final p = stack.removeLast();
+      comp.add(p);
+      final px = p % w, py = p ~/ w;
+      if (onLine) {
+        final r = (py * c - px * s).round() - rMin;
+        final u = (px * c + py * s).round();
+        final line = r < 0 || r >= nR ? null : lineAt(r, u);
+        if (line == null || (r - line.$1).abs() > line.$2 / 2 + 3) {
+          onLine = false;
+        }
+      }
+      for (var dy = -1; dy <= 1; dy++) {
+        for (var dx = -1; dx <= 1; dx++) {
+          final nx = px + dx, ny = py + dy;
+          if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+          final q = ny * w + nx;
+          if (ink[q] == 1 && seen[q] == 0) {
+            seen[q] = 1;
+            stack.add(q);
+          }
+        }
+      }
+    }
+    if (onLine && stack.isEmpty) {
+      for (final p in comp) {
+        ink[p] = 0;
+      }
+    }
+  }
+  return lines.length;
+}
+
+int _popcount(int v) {
+  v = v - ((v >> 1) & 0x55555555);
+  v = (v & 0x33333333) + ((v >> 2) & 0x33333333);
+  return (((v + (v >> 4)) & 0x0F0F0F0F) * 0x01010101 & 0xFFFFFFFF) >> 24;
 }
 
 /// Paper = the largest bright region on a coarse grid (Otsu on cell means), holes filled, shrunk by one

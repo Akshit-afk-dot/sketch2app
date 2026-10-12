@@ -8,9 +8,11 @@ library;
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_onnxruntime/flutter_onnxruntime.dart';
 
+import '../diagnostics/run_log.dart';
 import '../ink/ink_model.dart';
 import '../pipeline/pipeline.dart';
 import 'decode.dart';
@@ -37,8 +39,10 @@ class OnnxStrokeRecognizer implements StrokeRecognizer {
   @override
   final String name;
 
-  Future<OrtSession> _open() =>
-      _session ??= OnnxRuntime().createSessionFromAsset(asset);
+  Future<OrtSession> _open() => _session ??= RunLog.instance.step(
+    'onnx session $asset',
+    () => OnnxRuntime().createSessionFromAsset(asset),
+  );
 
   /// Raw network outputs (flattened cls, type, affinity) for [doc].
   Future<(List<double>, List<double>, List<double>)> logits(
@@ -48,7 +52,10 @@ class OnnxStrokeRecognizer implements StrokeRecognizer {
     final session = await _open();
     final shape = await OrtValue.fromList(f.shape, [1, f.count, resampleN, 4]);
     final geom = await OrtValue.fromList(f.geom, [1, f.count, geomDim]);
-    final out = await session.run({'shape': shape, 'geom': geom});
+    final out = await RunLog.instance.step(
+      'onnx run $asset (${f.count} strokes)',
+      () => session.run({'shape': shape, 'geom': geom}),
+    );
     try {
       Future<List<double>> read(String k) async => [
         for (final v in await out[k]!.asFlattenedList()) (v as num).toDouble(),
@@ -69,7 +76,11 @@ class OnnxStrokeRecognizer implements StrokeRecognizer {
       return ElementList(frames: [...doc.frames], elements: [], arrows: []);
     }
     final (cls, type, aff) = await logits(doc);
-    return decodeRecognizer(doc, cls, type, aff, threshold: threshold);
+    // Clustering is cubic in the stroke count (a photo can have hundreds): off the UI thread.
+    return RunLog.instance.step(
+      'decode (${doc.strokes.length} strokes)',
+      () => compute(_decode, (doc, cls, type, aff, threshold)),
+    );
   }
 
   /// On-device parity check: runs the bundled fixture and returns the max |ORT - PyTorch| over all
@@ -103,3 +114,7 @@ class OnnxStrokeRecognizer implements StrokeRecognizer {
 
   Future<void> close() async => (await _session)?.close();
 }
+
+ElementList _decode(
+  (InkDocument, List<double>, List<double>, List<double>, double) a,
+) => decodeRecognizer(a.$1, a.$2, a.$3, a.$4, threshold: a.$5);

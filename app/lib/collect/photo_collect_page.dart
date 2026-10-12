@@ -18,7 +18,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../handwriting/handwriting.dart';
 import '../photo/photo_import.dart';
 import '../photo/photo_text.dart';
 import '../pipeline/pipeline.dart';
@@ -35,10 +34,7 @@ Future<Directory> photoStudyDir() async {
 }
 
 class PhotoCollectPage extends StatefulWidget {
-  const PhotoCollectPage({super.key, required this.handwriting});
-
-  /// Digital Ink, for labels OCR does not find (same fallback as the home screen).
-  final HandwritingReader handwriting;
+  const PhotoCollectPage({super.key});
 
   @override
   State<PhotoCollectPage> createState() => _PhotoCollectPageState();
@@ -125,7 +121,7 @@ class _PhotoCollectPageState extends State<PhotoCollectPage> {
       final photo = await importPhoto(bytes);
       final result = await Pipeline(
         recognizer: _recognizer,
-        handwriting: PhotoTextReader(photo.words, widget.handwriting),
+        handwriting: PhotoTextReader(photo.words),
       ).run(photo.result.ink);
       setState(() => _out = _Output(bytes, photo, result));
     } on Object catch (e) {

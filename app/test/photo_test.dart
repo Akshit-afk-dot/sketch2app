@@ -12,22 +12,6 @@ import 'package:sketch2app/recognize/elements.dart';
 import 'package:sketch2app/spec/spec.dart';
 import 'package:sketch2app/ui/canvas/sketch_controller.dart';
 
-class _FakeReader implements HandwritingReader {
-  int calls = 0;
-  @override
-  Future<bool> isReady() async => true;
-  @override
-  Future<bool> prepare({bool wifiOnly = false}) async => true;
-  @override
-  Future<String?> read(List<InkStroke> strokes, Box area) async {
-    calls++;
-    return 'ink';
-  }
-
-  @override
-  bool get readsImage => false;
-}
-
 class _Failing implements StrokeRecognizer {
   @override
   String get name => 'broken';
@@ -85,20 +69,17 @@ void main() {
     });
 
     test(
-      'reader uses OCR first and Digital Ink only when no word matches',
+      'reader labels from OCR words only; no match means no label',
       () async {
-        final ink = _FakeReader();
-        final reader = PhotoTextReader(words, ink);
+        const reader = PhotoTextReader(words);
         expect(
           await reader.read([_stroke(100, 50, 110, 22)], const Box(0, 0, 1, 1)),
           'Sign in',
         );
-        expect(ink.calls, 0);
         expect(
           await reader.read([_stroke(300, 300, 40, 20)], const Box(0, 0, 1, 1)),
-          'ink',
+          isNull,
         );
-        expect(ink.calls, 1);
       },
     );
   });
@@ -116,10 +97,10 @@ void main() {
       ],
       arrows: [],
     );
-    final reader = PhotoTextReader([
-      const OcrWord('Sign', Box(110, 50, 50, 22)),
-      const OcrWord('in', Box(165, 52, 30, 20)),
-    ], _FakeReader());
+    const reader = PhotoTextReader([
+      OcrWord('Sign', Box(110, 50, 50, 22)),
+      OcrWord('in', Box(165, 52, 30, 20)),
+    ]);
     await readElementTexts(reader, list, {0: _stroke(90, 40, 140, 45)});
     expect(list.elements.single.text, 'Sign in');
   });

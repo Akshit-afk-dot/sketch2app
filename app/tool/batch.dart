@@ -57,6 +57,7 @@ void main(List<String> args) {
           'page': r.page.toJson(),
           'stroke_width': r.strokeWidth,
           'ink_pixels': r.inkPixels,
+          'ruled_lines': r.ruledLines,
           'micros': r.micros,
         });
         timings[name] = sw.elapsedMicroseconds;

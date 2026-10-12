@@ -23,6 +23,7 @@ import 'app_settings.dart';
 import 'canvas/sketch_canvas.dart';
 import 'canvas/sketch_controller.dart';
 import 'code_view.dart';
+import 'diagnostics_page.dart';
 import 'settings_page.dart';
 
 /// Width from which canvas and preview sit side by side (tablets in landscape, classroom boards).
@@ -33,10 +34,14 @@ class HomePage extends StatefulWidget {
     super.key,
     required this.settings,
     required this.handwriting,
+    this.crashedIn,
   });
 
   final AppSettings settings;
   final HandwritingReader handwriting;
+
+  /// The step the previous run died in (crash breadcrumbs), if any.
+  final String? crashedIn;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -60,6 +65,7 @@ class _HomePageState extends State<HomePage> {
   bool _converting = false;
   bool _importing = false;
   bool _handwritingMissing = false;
+  late String? _crashedIn = widget.crashedIn;
   Timer? _idle;
   int _lastRevision = 0;
 
@@ -124,7 +130,7 @@ class _HomePageState extends State<HomePage> {
             ? _photoRecognizer
             : _onnx,
         handwriting: photo != null
-            ? PhotoTextReader(photo.words, widget.handwriting)
+            ? PhotoTextReader(photo.words)
             : widget.handwriting,
         layout: switch (settings.layoutMode) {
           'lan' => LlmLayoutEngine(LanTextGenerator(settings.lanUrl)),
@@ -191,7 +197,7 @@ class _HomePageState extends State<HomePage> {
               dense: true,
               leading: Icon(Icons.info_outline),
               title: Text(
-                'Plain white paper, dark pen, even light, photo from straight above. '
+                'Plain or ruled paper, dark pen, even light, photo from straight above. '
                 'Draw a phone outline around each screen when there are several.',
               ),
             ),
@@ -218,11 +224,16 @@ class _HomePageState extends State<HomePage> {
       final photo = await importPhoto(await file.readAsBytes());
       controller.loadPhoto(photo);
       final strokes = photo.result.ink.strokes.length;
+      final ruled = photo.result.ruledLines;
+      final found = [
+        '$strokes strokes found',
+        if (ruled > 0) '$ruled ruled lines removed',
+        if (photo.ocrError != null) 'text reading unavailable',
+      ].join(', ');
       _snack(
         strokes == 0
             ? 'No drawing found: try a darker pen or more light'
-            : '$strokes strokes found${photo.ocrError != null ? ' (text reading unavailable)' : ''}. '
-                  'Erase stray marks if needed.',
+            : '$found. Erase stray marks if needed.',
       );
       if (strokes > 0) unawaited(_convert());
     } on Object catch (e) {
@@ -277,6 +288,31 @@ class _HomePageState extends State<HomePage> {
             ),
             body: Column(
               children: [
+                if (_crashedIn case final step?)
+                  MaterialBanner(
+                    content: Text(
+                      'The app closed unexpectedly last time, during: $step',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => setState(() => _crashedIn = null),
+                        child: const Text('Dismiss'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() => _crashedIn = null);
+                          unawaited(
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => const DiagnosticsPage(),
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text('Details'),
+                      ),
+                    ],
+                  ),
                 if (_handwritingMissing)
                   MaterialBanner(
                     content: const Text(
@@ -331,8 +367,7 @@ class _HomePageState extends State<HomePage> {
             unawaited(
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) =>
-                      PhotoCollectPage(handwriting: widget.handwriting),
+                  builder: (_) => const PhotoCollectPage(),
                 ),
               ),
             );

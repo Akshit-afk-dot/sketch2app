@@ -8,6 +8,7 @@ import '../layout/on_device_llm.dart';
 import '../recognize/onnx_recognizer.dart';
 import 'app_settings.dart';
 import 'cheat_sheet_page.dart';
+import 'diagnostics_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
@@ -270,6 +271,18 @@ class _SettingsPageState extends State<SettingsPage> {
                 'Checks on-device ONNX output against the Python reference',
               ),
               onTap: _selfTest,
+            ),
+            ListTile(
+              leading: const Icon(Icons.bug_report_outlined),
+              title: const Text('Diagnostics'),
+              subtitle: const Text(
+                'Step log of recent conversions; share it to report a crash',
+              ),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const DiagnosticsPage(),
+                ),
+              ),
             ),
             ListTile(
               leading: const Icon(Icons.help_outline),

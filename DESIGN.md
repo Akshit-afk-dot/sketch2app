@@ -229,12 +229,13 @@ Users can photograph a sketch drawn on paper; the app converts it on the device 
 - **Photo model** = the ink model fine-tuned on the synthetic photos (`train --init`,
   `configs/recognizer_photo.yaml`), exported as `recognizer_photo.onnx`; same features and decoder, so the
   app runs it with the same code. Fallback chain for photos: photo model -> ink model -> rules.
-- **Labels on photos come from OCR**, not Digital Ink: pseudo-strokes have no real pen trajectory, and
-  ML Kit text recognition (bundled Latin model, offline from the first launch) reads the pixels. The
+- **Labels on photos come from OCR** only, never Digital Ink: pseudo-strokes have no real pen trajectory,
+  and ML Kit text recognition (bundled Latin model, offline from the first launch) reads the pixels. The
   photo is decoded once (EXIF applied); the vectorizer and OCR read the same pixels, so OCR word boxes
   and strokes share one coordinate space. Words are assigned to the element whose handwriting strokes
-  they overlap (at least half the word, area grown by a third of its height), in reading order; Digital
-  Ink on the pseudo-strokes is the fallback.
+  they overlap (at least half the word, area grown by a third of its height), in reading order. No
+  Digital Ink fallback: it read pseudo-strokes poorly and dozens of concurrent native calls on them were a
+  suspect in the first on-device crash.
 - **Orientation:** image_picker keeps the camera's EXIF orientation tag without rotating pixels. The JPEG
   header gives the stored size and the tag; if a quarter turn is due but the decoded image still has the
   stored size, the app rotates it before anything reads it (`lib/photo/jpeg_orientation.dart`).
@@ -245,8 +246,22 @@ Users can photograph a sketch drawn on paper; the app converts it on the device 
   participant draws it on paper and photographs it; the target spec is the label. Device outputs are
   scored against it (structure and labels), and the laptop re-runs the same photos for model comparisons
   (`s2a.data.real_photos`).
-- **Not supported (documented):** ruled or squared paper (the lines are ink to the threshold), coloured
-  paper, strong perspective (> ~10 degrees off top-down), drawings that touch the paper's edge.
+- **Ruled notebook paper** (found in the first real photo, 2026-10-12: 478 strokes, mostly ruling, and a crash):
+  before thinning, the paper's angle is found from the sharpest projection profile (+-10 degrees), each
+  profile bin's coverage (ink along its length, thickness-independent) finds lines covering half the page,
+  evenly spaced lines mean ruled paper, a grid fitted through them adds lines the drawing hides, each line
+  is refined in 8 stretches (paper curves, perspective), and its pixels are removed except where a pen
+  stroke crosses. On that photo: 11 lines removed, 333 -> 224 strokes, and the photo model then read the
+  login screen correctly (image, two inputs, text, button). Plain paper is untouched (tested: evenly spaced
+  dividers are not ruling). The photo model has not been trained on ruled-paper photos yet.
+- **Not supported (documented):** squared (grid) paper, coloured paper, strong perspective (> ~10 degrees
+  off top-down), drawings that touch the paper's edge.
+
+- **Crash breadcrumbs** (`lib/diagnostics/run_log.dart`): every risky step (photo decode, vectorize, OCR,
+  each pipeline stage, ONNX session and run, decoding) writes "start" to a log file, flushed, before it runs
+  and "end" after. A native crash (ONNX Runtime, ML Kit, out of memory) gives Dart no error, but the next
+  launch finds a step that never ended and says so; Settings > Diagnostics shares the log. Added after the
+  first real-photo crash, on a phone without USB debugging.
 
 ## 12. Rejected alternatives (running list)
 

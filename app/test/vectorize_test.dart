@@ -165,6 +165,44 @@ void main() {
     }
   });
 
+  test(
+    'ruled notebook lines are removed; the drawing across them survives',
+    () {
+      final p = _Photo(600, 450);
+      final tilt = math.tan(3 * math.pi / 180);
+      for (var y = 15.0; y < 450; y += 28) {
+        p.line(
+          0,
+          y,
+          600,
+          y + 600 * tilt,
+          width: 2,
+        ); // ruled lines, slightly tilted
+      }
+      p.rect(150, 100, 250, 200); // drawn across several lines
+      final r = p.run();
+      expect(r.ruledLines, greaterThanOrEqualTo(10));
+      final big = r.ink.strokes
+          .where((s) => s.box.w > 200 && s.box.h > 150)
+          .toList();
+      expect(big, hasLength(1));
+      expect(big.single.box.x, closeTo(150, 6));
+      expect(big.single.box.h, closeTo(200, 8));
+      // No page-wide line is left over.
+      expect(r.ink.strokes.where((s) => s.box.w > 450), isEmpty);
+    },
+  );
+
+  test('evenly spaced dividers on plain paper are not taken for ruling', () {
+    final p = _Photo(600, 450);
+    for (var y = 60.0; y < 420; y += 50) {
+      p.line(200, y, 420, y); // a list of dividers, a third of the page wide
+    }
+    final r = p.run();
+    expect(r.ruledLines, 0);
+    expect(r.ink.strokes, hasLength(8));
+  });
+
   test('vectorizing is deterministic', () {
     String once() => jsonEncode(
       (_Photo(400, 300)

@@ -3,8 +3,9 @@
 /// Why OCR here and Digital Ink for drawn sketches: Digital Ink reads pen trajectories, and a photo's
 /// pseudo-strokes have no real trajectory (letters merge, order and timing are made up). OCR reads the
 /// pixels instead, once per photo, with the bundled Latin model (offline from the first launch). Words
-/// are assigned to the element whose handwriting strokes they overlap; an element no word matches falls
-/// back to Digital Ink on its pseudo-strokes.
+/// are assigned to the element whose handwriting strokes they overlap; an element no word matches keeps
+/// no label (the layout stage writes a generic one). Digital Ink is not used as a fallback: it reads
+/// pseudo-strokes poorly, and dozens of native calls on them were a suspect in the first on-device crash.
 library;
 
 import 'dart:math' as math;
@@ -51,12 +52,9 @@ String? wordsIn(List<OcrWord> words, Box area) {
 }
 
 class PhotoTextReader implements HandwritingReader {
-  const PhotoTextReader(this.words, this.fallback);
+  const PhotoTextReader(this.words);
 
   final List<OcrWord> words;
-
-  /// Digital Ink on the pseudo-strokes, for elements no OCR word matched.
-  final HandwritingReader fallback;
 
   @override
   Future<bool> isReady() async => true;
@@ -74,14 +72,6 @@ class PhotoTextReader implements HandwritingReader {
     final box = strokes.isEmpty
         ? area
         : strokes.map((s) => s.box).reduce((a, b) => a.union(b));
-    final text = wordsIn(words, box);
-    if (text != null || strokes.isEmpty) return text;
-    try {
-      return await fallback.isReady()
-          ? await fallback.read(strokes, area)
-          : null;
-    } on Object {
-      return null; // no Digital Ink on this platform: the layout stage uses a generic label
-    }
+    return wordsIn(words, box);
   }
 }

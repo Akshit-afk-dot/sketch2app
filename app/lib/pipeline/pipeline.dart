@@ -7,6 +7,7 @@ library;
 
 import 'dart:async';
 
+import '../diagnostics/run_log.dart';
 import '../handwriting/handwriting.dart';
 import '../ink/ink_model.dart';
 import '../layout/heuristic_layout.dart';
@@ -115,7 +116,12 @@ class Pipeline {
   static const _recognizerFallback = HeuristicStrokeRecognizer();
   static const _layoutFallback = HeuristicLayoutEngine();
 
-  Future<PipelineResult> run(InkDocument doc) async {
+  Future<PipelineResult> run(InkDocument doc) => RunLog.instance.step(
+    'convert (${doc.strokes.length} strokes)',
+    () => _run(doc),
+  );
+
+  Future<PipelineResult> _run(InkDocument doc) async {
     final timings = <StageTiming>[];
 
     final elements = await _stage(
@@ -132,9 +138,12 @@ class Pipeline {
     final sw = Stopwatch()..start();
     String? hwError;
     try {
-      await readElementTexts(handwriting, elements, {
-        for (final s in doc.strokes) s.id: s,
-      });
+      await RunLog.instance.step(
+        'handwriting (${handwriting.runtimeType})',
+        () => readElementTexts(handwriting, elements, {
+          for (final s in doc.strokes) s.id: s,
+        }),
+      );
     } on Object catch (e) {
       hwError =
           '$e'; // unreadable labels fall back to generic ones in the layout stage
@@ -171,12 +180,15 @@ class Pipeline {
   }) async {
     final sw = Stopwatch()..start();
     try {
-      final out = await primary();
+      final out = await RunLog.instance.step('$stage ($engine)', primary);
       timings.add(StageTiming(stage, engine, sw.elapsed));
       return out;
     } on Object catch (e) {
       if (fallback == null) rethrow;
-      final out = await fallback();
+      final out = await RunLog.instance.step(
+        '$stage ($fallbackName, fallback)',
+        fallback,
+      );
       timings.add(
         StageTiming(
           stage,

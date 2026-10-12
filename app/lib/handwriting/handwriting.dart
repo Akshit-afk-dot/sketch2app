@@ -26,19 +26,20 @@ abstract interface class HandwritingReader {
   bool get readsImage => false;
 }
 
-/// Fills `text` of every element that carries handwriting.
+/// Fills `text` of every element that carries handwriting. One element at a time: the ML Kit recognizer
+/// is a single native instance, and firing dozens of reads at it at once gains little and is a crash risk.
 Future<void> readElementTexts(
   HandwritingReader reader,
   ElementList list,
   Map<int, InkStroke> strokes,
 ) async {
-  await Future.wait([
-    for (final e in list.elements)
-      if (e.type.hasText && (e.textStrokes.isNotEmpty || reader.readsImage))
-        reader
-            .read([for (final id in e.textStrokes) ?strokes[id]], e.box)
-            .then((t) => e.text = t),
-  ]);
+  for (final e in list.elements) {
+    if (e.type.hasText && (e.textStrokes.isNotEmpty || reader.readsImage)) {
+      e.text = await reader.read([
+        for (final id in e.textStrokes) ?strokes[id],
+      ], e.box);
+    }
+  }
 }
 
 final _listMark = RegExp(r'^\s*[xX×*]\s*\d{1,2}\s*$');
